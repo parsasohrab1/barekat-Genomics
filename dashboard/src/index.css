@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-slate-200;
+  }
+
+  body {
+    @apply text-slate-800;
+  }
+}
+
+@layer components {
+  .stat-card {
+    @apply rounded-xl bg-white p-5 shadow-card border border-slate-100 transition-shadow hover:shadow-md;
+  }
+
+  .data-table {
+    @apply w-full text-sm text-right;
+  }
+
+  .data-table thead {
+    @apply bg-slate-50 text-slate-500 uppercase text-xs tracking-wide;
+  }
+
+  .data-table th,
+  .data-table td {
+    @apply px-4 py-3 whitespace-nowrap;
+  }
+
+  .data-table tbody tr {
+    @apply border-t border-slate-100 hover:bg-slate-50/80 transition-colors;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply badge bg-emerald-50 text-emerald-700;
+  }
+
+  .badge-warning {
+    @apply badge bg-amber-50 text-amber-700;
+  }
+
+  .badge-info {
+    @apply badge bg-sky-50 text-sky-700;
+  }
+
+  .badge-danger {
+    @apply badge bg-rose-50 text-rose-700;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400;
+}

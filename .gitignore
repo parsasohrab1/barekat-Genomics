@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Data & models
+/data/raw/
+/data/processed/
+/data/reference/
+/data/models/
+*.bam
+*.fastq
+*.vcf
+*.vcf.gz
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+postgres_data/
+minio_data/
+redis_data/
+
+# Dashboard
+dashboard/node_modules/
+dashboard/dist/
