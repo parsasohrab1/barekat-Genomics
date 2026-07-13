@@ -2,9 +2,14 @@ import { Shield, Database, Cpu, Globe } from "lucide-react";
 
 const settings = [
   { icon: Shield, title: "امنیت و HIPAA", desc: "رمزنگاری PHI، لاگ ممیزی، نگهداری ۷ ساله", enabled: true },
-  { icon: Database, title: "پایگاه داده مرجع", desc: "GRCh38 — dbSNP، 1000 Genomes", enabled: true },
-  { icon: Cpu, title: "مدل ML", desc: "variant_classifier_v1 — RandomForest", enabled: true },
-  { icon: Globe, title: "اتصال EHR", desc: "FHIR R4 — خروجی JSON", enabled: false },
+  { icon: Database, title: "پایگاه داده مرجع", desc: "GRCh38 — dbSNP، ClinVar، PharmGKB", enabled: true },
+  { icon: Cpu, title: "مدل ML", desc: "XGBoost+RF ensemble — نسخه‌بندی و A/B test", enabled: true },
+  {
+    icon: Globe,
+    title: "اتصال EHR",
+    desc: "FHIR R4 (Observation, DiagnosticReport, MedicationRequest) · HL7 v2 ORU · تجهیز · سپاس",
+    enabled: true,
+  },
 ];
 
 export default function SettingsPage() {

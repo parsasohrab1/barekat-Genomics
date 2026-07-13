@@ -45,8 +45,16 @@ class VariantAnnotation(Base):
     clinical_significance: Mapped[str | None] = mapped_column(String(50), nullable=True)
     pharmacogenomic_effect: Mapped[str | None] = mapped_column(Text, nullable=True)
     priority_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ml_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     ml_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     interpretation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    requires_genetic_review: Mapped[bool] = mapped_column(default=False)
+    review_status: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    reviewed_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    review_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

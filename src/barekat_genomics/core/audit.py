@@ -18,17 +18,27 @@ def log_audit_event(
     details: str | None = None,
     ip_address: str | None = None,
 ) -> None:
-    """ثبت رویداد ممیزی در پایگاه داده."""
-    entry = AuditLog(
-        user_id=user_id,
-        action=action,
-        resource_type=resource_type,
-        resource_id=resource_id,
-        details=details,
-        ip_address=ip_address,
-    )
-    db.add(entry)
-    db.commit()
+    """ثبت رویداد ممیزی در پایگاه داده — خطا نباید جریان اصلی را متوقف کند."""
+    try:
+        entry = AuditLog(
+            user_id=user_id,
+            action=action,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            details=details,
+            ip_address=ip_address,
+        )
+        db.add(entry)
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        logger.warning(
+            "audit_event_failed",
+            action=action,
+            resource_type=resource_type,
+            error=str(exc),
+        )
+        return
 
     logger.info(
         "audit_event",

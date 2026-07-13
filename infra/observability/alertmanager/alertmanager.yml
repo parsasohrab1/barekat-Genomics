@@ -1,0 +1,37 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: default
+  group_by: ["alertname", "severity"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - match:
+        severity: critical
+      receiver: critical
+    - match:
+        team: lab
+      receiver: lab
+
+receivers:
+  - name: default
+    webhook_configs:
+      - url: "http://api:8000/api/v1/health/live"
+        send_resolved: true
+
+  - name: critical
+    webhook_configs:
+      - url: "http://api:8000/api/v1/health/live"
+        send_resolved: true
+
+  - name: lab
+    webhook_configs:
+      - url: "http://api:8000/api/v1/health/live"
+        send_resolved: true
+
+# برای production: جایگزین webhook با Slack/PagerDuty/email
+# slack_configs:
+#   - api_url: 'https://hooks.slack.com/services/...'
+#     channel: '#barekat-alerts'

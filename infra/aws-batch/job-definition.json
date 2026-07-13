@@ -1,0 +1,39 @@
+{
+  "jobDefinitionName": "barekat-genomics-pipeline",
+  "type": "container",
+  "platformCapabilities": ["EC2"],
+  "containerProperties": {
+    "image": "barekat-genomics-worker:latest",
+    "vcpus": 4,
+    "memory": 8192,
+    "jobRoleArn": "arn:aws:iam::ACCOUNT:role/barekat-batch-job-role",
+    "environment": [
+      { "name": "PIPELINE_MODE", "value": "production" },
+      { "name": "PIPELINE_WORK_DIR", "value": "/data/processed" }
+    ],
+    "mountPoints": [
+      { "sourceVolume": "data", "containerPath": "/data", "readOnly": false }
+    ],
+    "volumes": [
+      { "name": "data", "host": { "sourcePath": "/mnt/barekat-data" } }
+    ],
+    "command": [
+      "python", "-m", "barekat_genomics.pipeline.workflow_cli",
+      "Ref::job_id", "Ref::storage_path", "Ref::file_type", "Ref::genome_build"
+    ],
+    "parameters": {
+      "job_id": "",
+      "sample_id": "",
+      "storage_path": "",
+      "file_type": "BAM",
+      "genome_build": "GRCh38"
+    },
+    "resourceRequirements": [
+      { "type": "VCPU", "value": "4" },
+      { "type": "MEMORY", "value": "8192" }
+    ]
+  },
+  "retryStrategy": { "attempts": 2 },
+  "timeout": { "attemptDurationSeconds": 14400 },
+  "tags": { "project": "barekat-genomics" }
+}

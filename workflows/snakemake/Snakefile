@@ -1,0 +1,38 @@
+# barekat Genomics — Snakemake workflow (alternative to Nextflow)
+# Usage: snakemake -j 4 --config input=/path/to/sample.bam file_type=BAM job_id=abc123
+
+import json
+import os
+
+configfile: "config.yaml" if os.path.exists("config.yaml") else None
+
+INPUT = config.get("input", "")
+FILE_TYPE = config.get("file_type", "BAM")
+GENOME_BUILD = config.get("genome_build", "GRCh38")
+JOB_ID = config.get("job_id", "local")
+OUTDIR = config.get("outdir", "results")
+
+
+rule all:
+    input:
+        f"{OUTDIR}/{JOB_ID}/pipeline_result.json",
+
+
+rule run_pipeline:
+    input:
+        INPUT,
+    output:
+        f"{OUTDIR}/{JOB_ID}/pipeline_result.json",
+    params:
+        file_type=FILE_TYPE,
+        genome_build=GENOME_BUILD,
+        job_id=JOB_ID,
+    shell:
+        """
+        python -m barekat_genomics.pipeline.workflow_cli \
+            --job-id {params.job_id} \
+            --input {input} \
+            --file-type {params.file_type} \
+            --genome-build {params.genome_build} \
+            --output {output}
+        """

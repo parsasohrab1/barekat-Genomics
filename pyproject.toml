@@ -24,6 +24,11 @@ dependencies = [
     "pandas>=2.2.0",
     "scikit-learn>=1.5.0",
     "structlog>=24.4.0",
+    "prometheus-client>=0.21.0",
+    "sentry-sdk[fastapi,celery]>=2.19.0",
+    "fpdf2>=2.8.0",
+    "arabic-reshaper>=3.0.0",
+    "python-bidi>=0.6.0",
 ]
 
 [project.optional-dependencies]
@@ -37,6 +42,9 @@ dev = [
     "pytest-cov>=6.0.0",
     "httpx>=0.28.0",
     "ruff>=0.8.0",
+]
+ml = [
+    "xgboost>=2.1.0",
 ]
 
 [build-system]

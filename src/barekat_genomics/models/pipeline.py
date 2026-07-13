@@ -17,7 +17,15 @@ class PipelineJob(Base):
     sample_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("sequencing_samples.id"), nullable=False, index=True
     )
+    paired_sample_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("sequencing_samples.id"), nullable=True
+    )
+    module: Mapped[str] = mapped_column(String(50), default="pharmacogenomics", index=True)
     celery_task_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    priority: Mapped[str] = mapped_column(String(20), default="normal", index=True)
+    backend: Mapped[str] = mapped_column(String(30), default="celery")
+    external_job_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    celery_queue: Mapped[str | None] = mapped_column(String(50), nullable=True)
     stage: Mapped[str] = mapped_column(String(50), default="queued")
     status: Mapped[str] = mapped_column(String(50), default="pending")
     qc_metrics: Mapped[dict | None] = mapped_column(JSON, nullable=True)
@@ -28,7 +36,13 @@ class PipelineJob(Base):
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
 
-    sample: Mapped["SequencingSample"] = relationship(back_populates="pipeline_jobs")
+    sample: Mapped["SequencingSample"] = relationship(
+        back_populates="pipeline_jobs",
+        foreign_keys=[sample_id],
+    )
+    paired_sample: Mapped["SequencingSample | None"] = relationship(
+        foreign_keys=[paired_sample_id],
+    )
 
 
 from barekat_genomics.models.sample import SequencingSample  # noqa: E402

@@ -29,13 +29,19 @@ class StorageService:
         return f"s3://{self.bucket}/{object_key}"
 
     def upload_bytes(self, data: bytes, object_key: str, content_type: str = "application/octet-stream") -> str:
-        self.client.upload_fileobj(
-            io.BytesIO(data),
-            self.bucket,
-            object_key,
-            ExtraArgs={"ContentType": content_type},
-        )
-        return f"s3://{self.bucket}/{object_key}"
+        try:
+            self.client.upload_fileobj(
+                io.BytesIO(data),
+                self.bucket,
+                object_key,
+                ExtraArgs={"ContentType": content_type},
+            )
+            return f"s3://{self.bucket}/{object_key}"
+        except Exception:
+            local_path = Path("data/uploads") / object_key
+            local_path.parent.mkdir(parents=True, exist_ok=True)
+            local_path.write_bytes(data)
+            return str(local_path.resolve())
 
     def download_file(self, object_key: str, local_path: str | Path) -> Path:
         path = Path(local_path)

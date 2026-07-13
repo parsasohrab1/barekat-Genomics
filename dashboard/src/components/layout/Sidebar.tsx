@@ -9,16 +9,21 @@ import {
   Settings,
   ChevronLeft,
   Activity,
+  ScrollText,
+  ClipboardCheck,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
-  { to: "/", icon: LayoutDashboard, label: "داشبورد" },
-  { to: "/patients", icon: Users, label: "بیماران" },
-  { to: "/samples", icon: FlaskConical, label: "نمونه‌ها" },
-  { to: "/pipeline", icon: GitBranch, label: "پایپ‌لاین" },
-  { to: "/reports", icon: FileText, label: "گزارش‌ها" },
-  { to: "/variants", icon: Dna, label: "واریانت‌ها" },
-  { to: "/settings", icon: Settings, label: "تنظیمات" },
+  { to: "/", icon: LayoutDashboard, label: "داشبورد", roles: ["clinician", "geneticist", "lab_tech", "admin"] },
+  { to: "/patients", icon: Users, label: "بیماران", roles: ["clinician", "geneticist", "lab_tech", "admin"] },
+  { to: "/samples", icon: FlaskConical, label: "نمونه‌ها", roles: ["lab_tech", "admin"] },
+  { to: "/pipeline", icon: GitBranch, label: "پایپ‌لاین", roles: ["lab_tech", "admin"] },
+  { to: "/reports", icon: FileText, label: "گزارش‌ها", roles: ["clinician", "geneticist", "admin"] },
+  { to: "/review", icon: ClipboardCheck, label: "در انتظار تأیید", roles: ["geneticist", "admin"] },
+  { to: "/variants", icon: Dna, label: "واریانت‌ها", roles: ["clinician", "geneticist", "admin"] },
+  { to: "/audit", icon: ScrollText, label: "ممیزی", roles: ["admin"] },
+  { to: "/settings", icon: Settings, label: "تنظیمات", roles: ["admin"] },
 ];
 
 interface SidebarProps {
@@ -27,13 +32,15 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const { user } = useAuth();
+  const visibleItems = navItems.filter((item) => user && item.roles.includes(user.role));
+
   return (
     <aside
       className={`fixed top-0 right-0 z-40 flex h-screen flex-col bg-sidebar text-slate-300 transition-all duration-300 ${
         collapsed ? "w-[72px]" : "w-64"
       }`}
     >
-      {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-slate-700/50 px-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-600">
           <Activity className="h-5 w-5 text-white" />
@@ -46,9 +53,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {navItems.map(({ to, icon: Icon, label }) => (
+        {visibleItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -67,7 +73,6 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         ))}
       </nav>
 
-      {/* Collapse toggle */}
       <div className="border-t border-slate-700/50 p-3">
         <button
           onClick={onToggle}

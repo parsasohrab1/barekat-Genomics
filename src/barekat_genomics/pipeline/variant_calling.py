@@ -1,6 +1,14 @@
-"""شناسایی واریانت‌ها (SNP/Indel)."""
+"""شناسایی واریانت: GATK HaplotypeCaller + پارس VCF."""
+
+from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
+
+from barekat_genomics.pipeline.annotation import annotate_vcf
+from barekat_genomics.pipeline.exec import ensure_dir, run_command
+from barekat_genomics.pipeline.mode import is_production_pipeline
+from barekat_genomics.pipeline.reference import get_reference_bundle
 
 
 @dataclass
@@ -13,22 +21,27 @@ class CalledVariant:
     quality_score: float
     depth: int
     rs_id: str | None = None
+    gene: str | None = None
+    consequence: str | None = None
 
 
-# ژن‌های فارماکوژنومیک شناخته‌شده
-PHARMACOGENOMIC_GENES = {
-    "CYP2D6", "CYP2C19", "CYP2C9", "TPMT", "DPYD",
-    "SLCO1B1", "VKORC1", "UGT1A1", "HLA-B",
-}
+from barekat_genomics.pipeline.pgx_genes import PHARMACOGENOMIC_GENES
 
 
-def call_variants(file_path: str, file_type: str, genome_build: str = "GRCh38") -> list[CalledVariant]:
-    """
-    شناسایی واریانت‌ها از فایل هم‌ترازشده.
+def call_variants(
+    file_path: str,
+    file_type: str,
+    genome_build: str = "GRCh38",
+    work_dir: Path | None = None,
+    bam_path: Path | None = None,
+) -> list[CalledVariant]:
+    if is_production_pipeline():
+        return _run_production_calling(file_path, file_type, genome_build, work_dir, bam_path)
+    return _run_simulated_calling()
 
-    در محیط تولید با GATK HaplotypeCaller یا FreeBayes یکپارچه می‌شود.
-    """
-    simulated_variants = [
+
+def _run_simulated_calling() -> list[CalledVariant]:
+    return [
         CalledVariant("chr1", 11796321, "G", "A", "SNP", 99.5, 45, "rs1801133"),
         CalledVariant("chr10", 96521657, "C", "T", "SNP", 98.2, 38, "rs4244285"),
         CalledVariant("chr19", 40991272, "C", "T", "SNP", 97.8, 42, "rs1799853"),
@@ -37,7 +50,86 @@ def call_variants(file_path: str, file_type: str, genome_build: str = "GRCh38") 
         CalledVariant("chr12", 21178615, "G", "A", "SNP", 94.3, 28, None),
         CalledVariant("chr6", 31356726, "T", "TC", "INDEL", 88.7, 22, None),
     ]
-    return simulated_variants
+
+
+def _run_production_calling(
+    file_path: str,
+    file_type: str,
+    genome_build: str,
+    work_dir: Path | None,
+    bam_path: Path | None,
+) -> list[CalledVariant]:
+    refs = get_reference_bundle(genome_build)
+    if not refs.reference_ready:
+        raise FileNotFoundError(f"مرجع ژنوم آماده نیست: {refs.ref_fasta}")
+
+    base_dir = ensure_dir(work_dir or Path(file_path).parent / "variants")
+    vcf_raw = base_dir / "raw.vcf.gz"
+
+    bam = bam_path or Path(file_path)
+    if file_type == "BAM":
+        bam = Path(file_path)
+
+    run_command(
+        [
+            "gatk", "HaplotypeCaller",
+            "-R", str(refs.ref_fasta),
+            "-I", str(bam),
+            "-O", str(vcf_raw),
+            "--native-pair-hmm-threads", "2",
+        ],
+        timeout=7200,
+    )
+
+    annotated_vcf = annotate_vcf(vcf_raw, base_dir, genome_build)
+    return parse_vcf(annotated_vcf if annotated_vcf else vcf_raw)
+
+
+def parse_vcf(vcf_path: Path) -> list[CalledVariant]:
+    """پارس VCF با bcftools query."""
+    result = run_command(
+        [
+            "bcftools", "query",
+            "-f", r"%CHROM\t%POS\t%REF\t%ALT\t%QUAL\t%INFO/DP\t%ID\t%ANN\n",
+            str(vcf_path),
+        ],
+        timeout=600,
+    )
+
+    variants: list[CalledVariant] = []
+    for line in result.stdout.splitlines():
+        parts = line.split("\t")
+        if len(parts) < 5:
+            continue
+        chrom, pos, ref, alt = parts[0], int(parts[1]), parts[2], parts[3]
+        qual = float(parts[4]) if parts[4] != "." else 0.0
+        depth = int(parts[5]) if len(parts) > 5 and parts[5] not in (".", "") else 0
+        rs_id = parts[6] if len(parts) > 6 and parts[6] != "." else None
+
+        gene, consequence = None, None
+        if len(parts) > 7 and parts[7]:
+            ann = parts[7].split("|")
+            if len(ann) >= 4:
+                consequence = ann[1] if ann[1] else None
+                gene = ann[3] if ann[3] else None
+
+        for single_alt in alt.split(","):
+            vtype = "INDEL" if len(ref) != len(single_alt) else "SNP"
+            variants.append(
+                CalledVariant(
+                    chromosome=chrom,
+                    position=pos,
+                    ref_allele=ref,
+                    alt_allele=single_alt,
+                    variant_type=vtype,
+                    quality_score=qual,
+                    depth=depth,
+                    rs_id=rs_id,
+                    gene=gene,
+                    consequence=consequence,
+                )
+            )
+    return variants
 
 
 def filter_variants(

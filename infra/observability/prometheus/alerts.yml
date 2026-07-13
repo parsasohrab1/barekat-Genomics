@@ -1,0 +1,59 @@
+groups:
+  - name: barekat-pipeline
+    rules:
+      - alert: PipelineHighFailureRate
+        expr: |
+          (
+            sum(rate(barekat_pipeline_jobs_total{status="failed"}[10m]))
+            /
+            sum(rate(barekat_pipeline_jobs_total[10m]))
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          team: bioinformatics
+        annotations:
+          summary: "نرخ خطای پایپ‌لاین بالای ۱۰٪"
+          description: "بیش از ۱۰٪ jobهای پایپ‌لاین در ۱۰ دقیقه گذشته شکست خورده‌اند."
+
+      - alert: PipelineJobFailed
+        expr: increase(barekat_pipeline_jobs_total{status="failed"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          team: bioinformatics
+        annotations:
+          summary: "پایپ‌لاین شکست خورد"
+          description: "حداقل یک job پایپ‌لاین در ۵ دقیقه گذشته با status=failed ثبت شده."
+
+      - alert: QCSampleRejected
+        expr: increase(barekat_qc_checks_total{result="failed"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          team: lab
+        annotations:
+          summary: "نمونه در QC رد شد"
+          description: "حداقل یک نمونه در کنترل کیفیت رد شده — بررسی نمونه و پارامترهای QC."
+
+      - alert: APIUnhealthy
+        expr: up{job="barekat-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "API barekat در دسترس نیست"
+          description: "Prometheus نمی‌تواند متریک API را scrape کند."
+
+      - alert: PipelineSlowP95
+        expr: |
+          histogram_quantile(0.95, sum(rate(barekat_pipeline_duration_seconds_bucket[15m])) by (le))
+          > 3600
+        for: 10m
+        labels:
+          severity: warning
+          team: bioinformatics
+        annotations:
+          summary: "پایپ‌لاین کند — P95 بالای ۱ ساعت"
+          description: "زمان اجرای پایپ‌لاین (P95) از ۳۶۰۰ ثانیه بیشتر شده."

@@ -24,8 +24,13 @@ class GenomicReport(Base):
     status: Mapped[str] = mapped_column(String(50), default="draft")
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     drug_recommendations: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    clinical_content: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     variant_summary: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     clinician_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approved_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

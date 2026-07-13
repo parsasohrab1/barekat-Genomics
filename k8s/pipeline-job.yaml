@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{JOB_NAME}}
+  namespace: {{NAMESPACE}}
+  labels:
+    app: barekat-genomics
+    priority: {{PRIORITY}}
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app: barekat-pipeline-worker
+        priority: {{PRIORITY}}
+    spec:
+      restartPolicy: Never
+      priorityClassName: barekat-{{PRIORITY}}
+      containers:
+        - name: pipeline
+          image: {{IMAGE}}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PIPELINE_JOB_ID
+              value: "{{JOB_ID}}"
+            - name: PIPELINE_SAMPLE_ID
+              value: "{{SAMPLE_ID}}"
+            - name: PIPELINE_MODE
+              value: production
+            - name: PIPELINE_WORK_DIR
+              value: /data/processed
+          command:
+            - python
+            - -m
+            - barekat_genomics.pipeline.workflow_cli
+            - --job-id
+            - "{{JOB_ID}}"
+            - --input
+            - "{{STORAGE_PATH}}"
+            - --file-type
+            - "{{FILE_TYPE}}"
+            - --genome-build
+            - "{{GENOME_BUILD}}"
+            - --output
+            - /data/processed/{{JOB_ID}}/pipeline_result.json
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "2"
+            limits:
+              memory: "8Gi"
+              cpu: "4"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: barekat-data-pvc
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: barekat-urgent
+value: 1000000
+globalDefault: false
+description: "Emergency genomic samples"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: barekat-default
+value: 1000
+globalDefault: false
+description: "Standard genomic samples"

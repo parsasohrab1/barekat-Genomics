@@ -20,6 +20,9 @@ class Patient(Base):
     gender: Mapped[str | None] = mapped_column(String(20), nullable=True)
     clinical_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     ehr_patient_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    assigned_clinician_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
