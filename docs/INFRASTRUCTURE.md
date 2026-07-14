@@ -18,22 +18,21 @@
                          Pipeline: QC → Variant → Interpret
 ```
 
-## Quick Start
+## Staging
 
 ```bash
-cp .env.example .env
-docker compose up -d
-pip install -e ".[dev]"
-alembic upgrade head
-python data/generate_synthetic.py
-
-cd dashboard && npm install && npm run build && cd ..
-uvicorn barekat_genomics.api.main:app --reload
+docker compose -f docker-compose.staging.yml up -d --build
+# یا: bash scripts/bootstrap_staging.sh
 ```
 
-- Dashboard: http://localhost:8000
-- API Docs: http://localhost:8000/docs
-- Dev Dashboard: http://localhost:5173 (with `npm run dev`)
+| سرویس | پورت |
+|--------|------|
+| API/Dashboard | 8000 |
+| Postgres | 5433 |
+| Redis | 6380 |
+| MinIO | 9010 / 9011 |
+
+راهنمای اپراتور: [OPERATOR_GUIDE.md](OPERATOR_GUIDE.md)
 
 ## Dashboard
 
@@ -79,13 +78,28 @@ uvicorn barekat_genomics.api.main:app --reload
 ## Bioinformatics Pipeline
 
 ```
-FASTQ → FastQC/MultiQC → BWA-MEM2 → samtools → GATK HaplotypeCaller → SnpEff → Interpretation
-BAM   → samtools QC → GATK HaplotypeCaller → SnpEff → Interpretation
+FASTQ → FastQC/MultiQC → BWA-MEM2 → MarkDuplicates → GATK HaplotypeCaller → SnpEff → Interpretation
+BAM   → samtools QC → MarkDuplicates → GATK HaplotypeCaller → SnpEff → Interpretation
 ```
 
 | Mode | Env | Description |
 |------|-----|-------------|
 | `simulated` | `PIPELINE_MODE=simulated` | Default — no external tools |
 | `production` | `PIPELINE_MODE=production` | Real tools in `docker/bio` worker |
+
+### Reference / MinIO / Benchmark
+
+```bash
+python scripts/setup_reference.py validate
+python scripts/setup_reference.py upload-minio
+python scripts/validate_pipeline_benchmark.py --write docs/PIPELINE_VALIDATION.md
+```
+
+| Method | Endpoint |
+|--------|----------|
+| GET | `/api/v1/pipeline/reference/status` |
+| GET | `/api/v1/pipeline/benchmark/metrics` |
+| GET | `/api/v1/pipeline/jobs/{id}/qc` |
+| GET | `/api/v1/samples/{id}/qc` |
 
 Reference setup: [data/reference/README.md](../data/reference/README.md)

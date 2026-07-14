@@ -25,9 +25,10 @@ from barekat_genomics.pipeline.runners import get_runner
 
 STAGE_PROGRESS = {
     "queued": 5,
-    "quality_control": 25,
-    "variant_calling": 55,
-    "interpretation": 80,
+    "quality_control": 20,
+    "alignment": 40,
+    "variant_calling": 65,
+    "interpretation": 85,
     "done": 100,
 }
 
@@ -117,6 +118,12 @@ class PipelineService:
 
         log = structlog.get_logger(__name__)
 
+        def on_stage(stage: str) -> None:
+            job.stage = stage
+            job.status = "running"
+            self.db.commit()
+            self.db.refresh(job)
+
         with track_pipeline(job.priority, job.backend) as outcome:
             job.status = "running"
             job.stage = "quality_control"
@@ -138,6 +145,7 @@ class PipelineService:
                             normal_sample.genome_build,
                             sample_label=normal_sample.sample_id,
                             module_id="pharmacogenomics",
+                            assay_type=getattr(normal_sample, "assay_type", None) or "panel",
                         )
                         if normal_result.success:
                             normal_interpretations = normal_result.interpretations
@@ -148,7 +156,9 @@ class PipelineService:
                     sample.genome_build,
                     sample_label=sample.sample_id,
                     module_id=job.module,
+                    assay_type=getattr(sample, "assay_type", None) or "panel",
                     normal_interpretations=normal_interpretations,
+                    on_stage=on_stage,
                 )
             except Exception as exc:
                 log.exception("pipeline_execution_failed", job_id=str(job.id))
@@ -159,27 +169,32 @@ class PipelineService:
                 job.completed_at = datetime.now(timezone.utc)
                 self.db.commit()
                 outcome["status"] = "failed"
-                return
+                raise
 
+            qc = result.qc_metrics
             job.qc_metrics = {
-                "total_reads": result.qc_metrics.total_reads,
-                "mean_quality": result.qc_metrics.mean_quality,
-                "gc_content": result.qc_metrics.gc_content,
-                "duplication_rate": result.qc_metrics.duplication_rate,
-                "passed": result.qc_metrics.passed,
-                "warnings": result.qc_metrics.warnings,
+                "total_reads": qc.total_reads,
+                "mean_quality": qc.mean_quality,
+                "gc_content": qc.gc_content,
+                "duplication_rate": qc.duplication_rate,
+                "mean_depth": qc.mean_depth,
+                "coverage_pct_10x": qc.coverage_pct_10x,
+                "coverage_pct_20x": qc.coverage_pct_20x,
+                "passed": qc.passed,
+                "warnings": qc.warnings,
             }
-            record_qc_result(result.qc_metrics.passed)
+            record_qc_result(qc.passed)
+            self.db.commit()
 
             if not result.success:
-                error_type = "qc_failed" if not result.qc_metrics.passed else "pipeline_error"
+                error_type = "qc_failed" if not qc.passed else "pipeline_error"
                 record_pipeline_error(job.stage, error_type=error_type)
                 if result.error:
                     log.warning(
                         "pipeline_failed",
                         job_id=str(job.id),
                         error=result.error,
-                        qc_passed=result.qc_metrics.passed,
+                        qc_passed=qc.passed,
                     )
                 job.status = "failed"
                 job.error_message = result.error
@@ -187,9 +202,6 @@ class PipelineService:
                 self.db.commit()
                 outcome["status"] = "failed"
                 return
-
-            job.stage = "variant_calling"
-            self.db.commit()
 
             needs_genetic_review = False
             for called, interp in result.interpretations:

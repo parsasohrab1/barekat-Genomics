@@ -14,7 +14,8 @@ class AuthService:
         user = self.db.query(User).filter(User.email == email, User.is_active.is_(True)).first()
         if not user or not verify_password(password, user.hashed_password):
             return None
-        token = create_access_token(str(user.id), user.role, user.email)
+        org_id = str(user.organization_id) if user.organization_id else None
+        token = create_access_token(str(user.id), user.role, user.email, organization_id=org_id)
         return user, token
 
     def get_user_by_id(self, user_id: str) -> User | None:

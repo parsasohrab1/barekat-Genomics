@@ -2,7 +2,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
@@ -12,8 +12,9 @@ from barekat_genomics.api.deps import (
     get_current_user,
     require_permission,
 )
+from barekat_genomics.core.audit import client_ip, log_audit_event
 from barekat_genomics.core.database import get_db
-from barekat_genomics.core.rbac import Permission, Role, has_permission
+from barekat_genomics.core.rbac import Permission, Role, has_permission, is_physician_role
 from barekat_genomics.models.patient import Patient
 from barekat_genomics.models.variant import Variant
 from barekat_genomics.schemas import (
@@ -118,6 +119,7 @@ def review_variant(
     report_id: uuid.UUID,
     annotation_id: uuid.UUID,
     body: VariantReviewRequest,
+    request: Request,
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(require_permission(Permission.VARIANTS_INTERPRET)),
 ) -> PendingVariantItem:
@@ -128,6 +130,15 @@ def review_variant(
     variant = db.query(Variant).filter(Variant.id == ann.variant_id).first()
     if not variant:
         raise HTTPException(status_code=404, detail="واریانت یافت نشد")
+    log_audit_event(
+        db,
+        user_id=str(user.id),
+        action="review_variant",
+        resource_type="variant_annotation",
+        resource_id=str(annotation_id),
+        details=f"report_id={report_id};action={body.action}",
+        ip_address=client_ip(request),
+    )
     return PendingVariantItem(
         annotation_id=ann.id,
         variant=VariantResponse.model_validate(variant),
@@ -163,6 +174,7 @@ def get_patient_variants(
 def approve_report(
     report_id: uuid.UUID,
     body: ReportApproveRequest,
+    request: Request,
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(require_permission(Permission.REPORTS_APPROVE)),
 ) -> ReportResponse:
@@ -170,12 +182,21 @@ def approve_report(
     report = service.approve_report(report_id, user.id, body.clinician_notes)
     if not report:
         raise HTTPException(status_code=404, detail="گزارش یافت نشد یا قابل تأیید نیست")
+    log_audit_event(
+        db,
+        user_id=str(user.id),
+        action="approve_report",
+        resource_type="report",
+        resource_id=str(report.id),
+        ip_address=client_ip(request),
+    )
     return ReportResponse.model_validate(report)
 
 
 @router.get("/{report_id}/pdf")
 def download_report_pdf(
     report_id: uuid.UUID,
+    request: Request,
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(get_current_user),
 ) -> Response:
@@ -188,12 +209,20 @@ def download_report_pdf(
     patient = db.query(Patient).filter(Patient.id == report.patient_id).first()
     if patient:
         assert_patient_access(user, patient)
-    if user.role == Role.CLINICIAN.value and not ReviewService(db).clinician_may_view_report(report):
+    if is_physician_role(user.role) and not ReviewService(db).clinician_may_view_report(report):
         raise HTTPException(status_code=403, detail="گزارش هنوز تأیید نشده است")
     try:
         pdf_bytes = service.generate_pdf(report_id)
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
+    log_audit_event(
+        db,
+        user_id=str(user.id),
+        action="download_report_pdf",
+        resource_type="report",
+        resource_id=str(report_id),
+        ip_address=client_ip(request),
+    )
     filename = f"clinical-report-{str(report_id)[:8]}.pdf"
     return Response(
         content=pdf_bytes,
@@ -205,6 +234,7 @@ def download_report_pdf(
 @router.get("/{report_id}", response_model=ReportResponse)
 def get_report(
     report_id: uuid.UUID,
+    request: Request,
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(get_current_user),
 ) -> ReportResponse:
@@ -217,7 +247,15 @@ def get_report(
     patient = db.query(Patient).filter(Patient.id == report.patient_id).first()
     if patient:
         assert_patient_access(user, patient)
-    if user.role == Role.CLINICIAN.value and not ReviewService(db).clinician_may_view_report(report):
+    if is_physician_role(user.role) and not ReviewService(db).clinician_may_view_report(report):
         raise HTTPException(status_code=403, detail="گزارش هنوز تأیید نشده است")
     service.get_clinical_content(report)
+    log_audit_event(
+        db,
+        user_id=str(user.id),
+        action="view_report",
+        resource_type="report",
+        resource_id=str(report_id),
+        ip_address=client_ip(request),
+    )
     return ReportResponse.model_validate(report)

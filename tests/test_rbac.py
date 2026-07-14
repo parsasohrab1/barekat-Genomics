@@ -7,20 +7,25 @@ from barekat_genomics.core.rbac import Permission, Role, ROLE_PERMISSIONS, has_p
 
 class TestRolePermissions:
     @pytest.mark.parametrize(
-      "role,permission,expected",
-      [
-          ("clinician", Permission.REPORTS_READ_OWN, True),
-          ("clinician", Permission.REPORTS_APPROVE, False),
-          ("clinician", Permission.SAMPLES_WRITE, False),
-          ("geneticist", Permission.REPORTS_APPROVE, True),
-          ("geneticist", Permission.VARIANTS_INTERPRET, True),
-          ("geneticist", Permission.PIPELINE_RUN, False),
-          ("lab_tech", Permission.SAMPLES_WRITE, True),
-          ("lab_tech", Permission.PIPELINE_RUN, True),
-          ("lab_tech", Permission.REPORTS_READ, False),
-          ("admin", Permission.AUDIT_READ, True),
-          ("admin", Permission.ADMIN_SETTINGS, True),
-      ],
+        "role,permission,expected",
+        [
+            ("clinician", Permission.REPORTS_READ_OWN, True),
+            ("physician", Permission.REPORTS_READ_OWN, True),
+            ("physician", Permission.REPORTS_APPROVE, False),
+            ("clinician", Permission.REPORTS_APPROVE, False),
+            ("clinician", Permission.SAMPLES_WRITE, False),
+            ("geneticist", Permission.REPORTS_APPROVE, True),
+            ("analyst", Permission.REPORTS_APPROVE, True),
+            ("geneticist", Permission.VARIANTS_INTERPRET, True),
+            ("geneticist", Permission.PIPELINE_RUN, False),
+            ("lab_tech", Permission.SAMPLES_WRITE, True),
+            ("lab_tech", Permission.PIPELINE_RUN, True),
+            ("lab_tech", Permission.REPORTS_READ, False),
+            ("admin", Permission.AUDIT_READ, True),
+            ("admin", Permission.ADMIN_SETTINGS, True),
+            ("admin", Permission.BILLING_MANAGE, True),
+            ("admin", Permission.USERS_MANAGE, True),
+        ],
     )
     def test_has_permission(self, role, permission, expected):
         assert has_permission(role, permission) is expected
@@ -32,5 +37,7 @@ class TestRolePermissions:
     def test_privileged_roles(self):
         assert is_privileged_role("admin") is True
         assert is_privileged_role("geneticist") is True
+        assert is_privileged_role("analyst") is True
         assert is_privileged_role("lab_tech") is True
         assert is_privileged_role("clinician") is False
+        assert is_privileged_role("physician") is False

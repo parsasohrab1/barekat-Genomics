@@ -24,6 +24,8 @@ import VariantsPage from "./pages/VariantsPage";
 import SettingsPage from "./pages/SettingsPage";
 
 import AuditPage from "./pages/AuditPage";
+import BillingPage from "./pages/BillingPage";
+import CompliancePage from "./pages/CompliancePage";
 
 
 
@@ -54,6 +56,10 @@ export default function App() {
           <Route path="review" element={<ReviewQueuePage />} />
 
           <Route path="variants" element={<VariantsPage />} />
+
+          <Route path="billing" element={<BillingPage />} />
+
+          <Route path="compliance" element={<CompliancePage />} />
 
           <Route path="settings" element={<SettingsPage />} />
 

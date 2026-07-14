@@ -33,6 +33,15 @@ uvicorn barekat_genomics.api.main:app --reload
 | داشبورد (توسعه) | http://localhost:5173 |
 
 مستندات زیرساخت: [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md)
+راهنمای اپراتور: [docs/OPERATOR_GUIDE.md](docs/OPERATOR_GUIDE.md)
+
+### Staging یک‌کلیکی
+
+```bash
+cp .env.staging.example .env.staging
+bash scripts/bootstrap_staging.sh
+# Windows: powershell -File scripts/bootstrap_staging.ps1
+```
 
 ## داشبورد
 

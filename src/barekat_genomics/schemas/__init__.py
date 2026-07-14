@@ -31,7 +31,8 @@ class PatientResponse(BaseModel):
 class SampleCreate(BaseModel):
     patient_id: UUID
     sample_id: str
-    file_type: str = Field(..., pattern="^(FASTQ|BAM)$")
+    file_type: str = Field(..., pattern="^(FASTQ|BAM|VCF|CRAM)$")
+    assay_type: str = Field("panel", pattern="^(wgs|wes|panel)$")
     priority: str = Field("normal", pattern="^(normal|urgent)$")
 
 
@@ -42,6 +43,8 @@ class SampleResponse(BaseModel):
     patient_id: UUID
     sample_id: str
     file_type: str
+    assay_type: str | None = "panel"
+    target_bed: str | None = None
     status: str
     priority: str = "normal"
     genome_build: str
@@ -126,9 +129,61 @@ class PipelineJobResponse(BaseModel):
     started_at: datetime | None
     completed_at: datetime | None
     created_at: datetime
+    progress: int = 0
+    retry_count: int = 0
 
 
+class ReferenceValidationResponse(BaseModel):
+    genome_build: str
+    genome_version: str = ""
+    ready: bool
+    overall: str = "FAIL"
+    reference_dir: str = ""
+    minio_bucket: str = ""
+    minio_prefix: str = ""
+    manifest_path: str | None = None
+    checks: list[dict]
+    failed: list[str] = []
+    warnings: list[str] = []
+    production_mode: bool = False
+    missing_tools: list[str] = []
+
+
+class QcMetricsResponse(BaseModel):
+    sample_id: UUID
+    job_id: UUID | None = None
+    total_reads: int | None = None
+    mean_quality: float | None = None
+    gc_content: float | None = None
+    duplication_rate: float | None = None
+    mean_depth: float | None = None
+    coverage_pct_10x: float | None = None
+    coverage_pct_20x: float | None = None
+    passed: bool | None = None
+    warnings: list[str] = []
+    status: str | None = None
+
+
+class PipelineBenchmarkMetrics(BaseModel):
+    true_positives: int
+    false_positives: int
+    false_negatives: int
+    precision: float
+    recall: float
+    f1: float
+    sensitivity: float
+    specificity: float | None = None
+    matched_rs_ids: list[str] = []
+    missed_rs_ids: list[str] = []
+    extra_rs_ids: list[str] = []
+    mode: str = "simulated"
 # --- Report ---
+class FeatureContribution(BaseModel):
+    feature: str
+    contribution: float | None = None
+    importance: float | None = None
+
+
 class HighPriorityVariant(BaseModel):
     gene: str | None = None
     rs_id: str | None = None
@@ -140,6 +195,35 @@ class HighPriorityVariant(BaseModel):
     priority_score: float
     interpretation: str | None = None
     pharmacogenomic_effect: str | None = None
+    ml_score: float | None = None
+    ml_confidence: float | None = None
+    rank: int | None = None
+    model_version: str | None = None
+    explain_method: str | None = None
+    feature_contributions: list[FeatureContribution | dict] = []
+    guideline_drugs: list[str] = []
+    knowledge_sources: list[str] = []
+
+
+class BiomarkerMarker(BaseModel):
+    rank: int | None = None
+    gene: str | None = None
+    rs_id: str | None = None
+    clinical_significance: str | None = None
+    priority_score: float | None = None
+    ml_score: float | None = None
+    pharmacogenomic_effect: str | None = None
+    guideline_drugs: list[str] = []
+    knowledge_sources: list[str] = []
+    top_features: list[FeatureContribution | dict] = []
+    explain_method: str | None = None
+    high_priority: bool = False
+
+
+class BiomarkerPanel(BaseModel):
+    total_variants: int = 0
+    high_priority_count: int = 0
+    ranked_markers: list[BiomarkerMarker] = []
 
 
 class ClinicalDrugRecommendation(BaseModel):
@@ -153,6 +237,11 @@ class ClinicalDrugRecommendation(BaseModel):
     cpic_level_label: str | None = None
     cpic_guideline: str | None = None
     action_fa: str | None = None
+    sources: list[str] = []
+    pgx_level: str | None = None
+    clinvar_review_status: str | None = None
+    variant_rank: int | None = None
+    phenotype: str | None = None
 
 
 class DrugInteractionWarning(BaseModel):
@@ -170,12 +259,39 @@ class DigitalSignature(BaseModel):
     approver_id: str | None = None
 
 
+class ClinicalReportMetadata(BaseModel):
+    genome_build: str | None = None
+    patient_external_id: str | None = None
+    pipeline_version: str | None = None
+
+
 class ClinicalReportContent(BaseModel):
+    schema_version: str = "1.0"
     executive_summary: list[str] = []
     high_priority_variants: list[HighPriorityVariant] = []
+    biomarker_panel: BiomarkerPanel | dict | None = None
     drug_recommendations: list[ClinicalDrugRecommendation] = []
     drug_interactions: list[DrugInteractionWarning] = []
     digital_signature: DigitalSignature | dict | None = None
+    metadata: ClinicalReportMetadata | dict | None = None
+
+
+class PlatformSettingsResponse(BaseModel):
+    app_name: str
+    app_env: str
+    auth_enabled: bool
+    audit_log_enabled: bool
+    phi_retention_days: int
+    genome_build: str
+    pipeline_mode: str
+    pipeline_backend: str
+    ai_assist_enabled: bool
+    metrics_enabled: bool
+    ml_ab_test_enabled: bool
+    variant_classifier_model: str
+    ehr_fhir_organization_id: str
+    ehr_hl7_sending_facility: str
+    clinical_report_schema_version: str = "1.0"
 
 
 class ReportResponse(BaseModel):
@@ -240,6 +356,7 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     role: str
+    organization_id: UUID | None = None
     is_active: bool = True
     created_at: datetime | None = None
 
@@ -303,7 +420,6 @@ class SampleListItem(SampleResponse):
 
 class PipelineJobListItem(PipelineJobResponse):
     sample_label: str | None = None
-    progress: int = 0
 
 
 # --- AI Decision Support ---

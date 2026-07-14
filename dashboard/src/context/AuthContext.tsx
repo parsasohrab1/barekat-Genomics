@@ -25,10 +25,24 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const ROLE_PATHS: Record<string, string[]> = {
+  physician: ["/", "/patients", "/reports", "/variants"],
   clinician: ["/", "/patients", "/reports", "/variants"],
+  analyst: ["/", "/patients", "/reports", "/review", "/variants"],
   geneticist: ["/", "/patients", "/reports", "/review", "/variants"],
   lab_tech: ["/", "/patients", "/samples", "/pipeline"],
-  admin: ["/", "/patients", "/samples", "/pipeline", "/reports", "/review", "/variants", "/settings", "/audit"],
+  admin: [
+    "/",
+    "/patients",
+    "/samples",
+    "/pipeline",
+    "/reports",
+    "/review",
+    "/variants",
+    "/settings",
+    "/audit",
+    "/billing",
+    "/compliance",
+  ],
 };
 
 function pathAllowed(role: string, path: string): boolean {

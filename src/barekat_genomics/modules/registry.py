@@ -79,9 +79,12 @@ MODULES: dict[str, GenomicsModule] = {
 
 DEFAULT_MODULE = "pharmacogenomics"
 
+_MODULE_ALIASES = {"pgx": "pharmacogenomics", "pgx_default": "pharmacogenomics"}
+
 
 def get_module(module_id: str) -> GenomicsModule:
-    mod = MODULES.get(module_id)
+    resolved = _MODULE_ALIASES.get(module_id, module_id)
+    mod = MODULES.get(resolved)
     if not mod:
         raise ValueError(f"ماژول ناشناخته: {module_id}")
     return mod

@@ -1,4 +1,4 @@
-"""مدل نمونه توالی‌یابی (FASTQ/BAM)."""
+"""مدل نمونه توالی‌یابی (FASTQ/BAM/VCF/CRAM + assay WGS/WES/Panel)."""
 
 import uuid
 from datetime import datetime, timezone
@@ -18,7 +18,9 @@ class SequencingSample(Base):
         UUID(as_uuid=True), ForeignKey("patients.id"), nullable=False, index=True
     )
     sample_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
-    file_type: Mapped[str] = mapped_column(String(20), nullable=False)  # FASTQ, BAM
+    file_type: Mapped[str] = mapped_column(String(20), nullable=False)  # FASTQ, BAM, VCF, CRAM
+    assay_type: Mapped[str] = mapped_column(String(20), default="panel", index=True)  # wgs|wes|panel
+    target_bed: Mapped[str | None] = mapped_column(String(255), nullable=True)
     storage_path: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(String(50), default="uploaded")
     priority: Mapped[str] = mapped_column(String(20), default="normal", index=True)

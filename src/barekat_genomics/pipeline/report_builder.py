@@ -12,6 +12,16 @@ from barekat_genomics.pipeline.interpretation import VariantInterpretation
 from barekat_genomics.pipeline.variant_calling import CalledVariant
 
 HIGH_PRIORITY_THRESHOLD = ML_REVIEW_THRESHOLD
+CLINICAL_REPORT_SCHEMA_VERSION = "1.0"
+
+
+def validate_clinical_content(content: dict) -> dict:
+    """اعتبارسنجی و نرمال‌سازی محتوای گزارش طبق اسکمای v1."""
+    from barekat_genomics.schemas import ClinicalReportContent
+
+    payload = dict(content or {})
+    payload.setdefault("schema_version", CLINICAL_REPORT_SCHEMA_VERSION)
+    return ClinicalReportContent.model_validate(payload).model_dump(mode="json")
 
 
 def build_clinical_report(
@@ -26,6 +36,7 @@ def build_clinical_report(
         interpretations,
         review_status_by_key=review_status_by_key,
     )
+    biomarker_panel = _build_biomarker_panel(interpretations, high_priority)
     enriched_drugs = _build_drug_recommendations(drug_recommendations)
     interactions = detect_drug_interactions(list(drug_recommendations.keys()))
     executive_summary = _build_executive_summary(
@@ -37,13 +48,20 @@ def build_clinical_report(
         genome_build,
     )
 
-    return {
+    content = {
+        "schema_version": CLINICAL_REPORT_SCHEMA_VERSION,
         "executive_summary": executive_summary,
         "high_priority_variants": high_priority,
+        "biomarker_panel": biomarker_panel,
         "drug_recommendations": enriched_drugs,
         "drug_interactions": interactions,
         "digital_signature": None,
+        "metadata": {
+            "genome_build": genome_build,
+            "patient_external_id": patient_external_id,
+        },
     }
+    return validate_clinical_content(content)
 
 
 def _build_high_priority_variants(
@@ -70,9 +88,52 @@ def _build_high_priority_variants(
                 "priority_score": round(interp.priority_score, 3),
                 "interpretation": interp.interpretation,
                 "pharmacogenomic_effect": interp.pharmacogenomic_effect,
+                "ml_score": round(interp.ml_score, 4),
+                "ml_confidence": round(interp.ml_confidence, 4),
+                "rank": interp.rank,
+                "model_version": interp.model_version,
+                "explain_method": interp.explain_method,
+                "feature_contributions": list(interp.feature_contributions or [])[:5],
+                "guideline_drugs": list(interp.guideline_drugs or []),
+                "knowledge_sources": list(interp.knowledge_sources or []),
             }
         )
+    rows.sort(key=lambda r: (-(r.get("priority_score") or 0), r.get("rank") or 999))
+    for i, row in enumerate(rows, start=1):
+        if row.get("rank") is None:
+            row["rank"] = i
     return rows
+
+
+def _build_biomarker_panel(
+    interpretations: list[tuple[CalledVariant, VariantInterpretation]],
+    high_priority: list[dict],
+) -> dict:
+    """پنل نشانگر زیستی با ranking بالینی قابل تفسیر."""
+    markers = []
+    for variant, interp in interpretations:
+        markers.append(
+            {
+                "rank": interp.rank,
+                "gene": interp.gene,
+                "rs_id": variant.rs_id,
+                "clinical_significance": interp.clinical_significance,
+                "priority_score": round(interp.priority_score, 3),
+                "ml_score": round(interp.ml_score, 4),
+                "pharmacogenomic_effect": interp.pharmacogenomic_effect,
+                "guideline_drugs": list(interp.guideline_drugs or []),
+                "knowledge_sources": list(interp.knowledge_sources or []),
+                "top_features": list(interp.feature_contributions or [])[:3],
+                "explain_method": interp.explain_method,
+                "high_priority": interp.ml_score > HIGH_PRIORITY_THRESHOLD,
+            }
+        )
+    markers.sort(key=lambda m: (m.get("rank") is None, m.get("rank") or 999))
+    return {
+        "total_variants": len(interpretations),
+        "high_priority_count": len(high_priority),
+        "ranked_markers": markers,
+    }
 
 
 def _build_drug_recommendations(drug_recommendations: dict) -> list[dict]:
@@ -82,15 +143,22 @@ def _build_drug_recommendations(drug_recommendations: dict) -> list[dict]:
         enriched.append(
             {
                 "drug": drug,
-                "drug_fa": cpic.get("drug_fa", drug),
+                "drug_fa": rec.get("drug_fa") or cpic.get("drug_fa", drug),
                 "gene": rec.get("gene") or cpic.get("gene"),
                 "significance": rec.get("significance"),
                 "recommendation": rec.get("recommendation"),
                 "confidence": rec.get("confidence"),
-                "cpic_level": cpic.get("cpic_level", "C"),
-                "cpic_level_label": CPIC_LEVEL_LABELS.get(cpic.get("cpic_level", "C"), ""),
-                "cpic_guideline": cpic.get("guideline"),
-                "action_fa": cpic.get("action_fa"),
+                "cpic_level": rec.get("cpic_level") or cpic.get("cpic_level", "C"),
+                "cpic_level_label": CPIC_LEVEL_LABELS.get(
+                    rec.get("cpic_level") or cpic.get("cpic_level", "C"), ""
+                ),
+                "cpic_guideline": rec.get("cpic_guideline") or cpic.get("guideline"),
+                "action_fa": rec.get("action_fa") or cpic.get("action_fa"),
+                "sources": list(rec.get("sources") or []),
+                "pgx_level": rec.get("pgx_level"),
+                "clinvar_review_status": rec.get("clinvar_review_status"),
+                "variant_rank": rec.get("variant_rank"),
+                "phenotype": rec.get("phenotype"),
             }
         )
     enriched.sort(key=lambda x: x.get("cpic_level", "Z"))
@@ -199,6 +267,7 @@ def rebuild_clinical_content_from_db(
             ml_confidence=ann.get("ml_confidence") or 0.0,
             ml_score=ann.get("ml_score") or ann.get("priority_score") or 0.0,
             interpretation=ann.get("interpretation") or "",
+            knowledge_sources=ann.get("knowledge_sources") or [],
         )
         interpretations.append((variant, interp))
 

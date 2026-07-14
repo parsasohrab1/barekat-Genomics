@@ -129,3 +129,75 @@ def augment_dataset(
         xs.append(noisy.astype(np.float32))
         ys.append(y.copy())
     return np.vstack(xs), np.concatenate(ys)
+
+
+# سطح شواهد PharmGKB تقریبی برای SNPهای شناخته‌شده در داده سنتتیک
+_PGX_LEVEL_HINTS: dict[str, float] = {
+    "rs1801133": 0.7,
+    "rs4244285": 1.0,
+    "rs1799853": 0.9,
+    "rs1142345": 1.0,
+    "rs1800460": 1.0,
+}
+
+_ANON_RSID_ORDER: list[str] = [
+    "rs1801133",
+    "rs1800460",
+    "rs4244285",
+    "rs1799853",
+    "rs1142345",
+]
+
+
+def load_anonymized_training(csv_path: Path) -> tuple[np.ndarray, np.ndarray, list[str]]:
+    """
+    نگاشت anonymized_training.csv به بردار ویژگی ۱۲بعدی مدل.
+
+    هر ردیف نمونه جمعیتی → یک نمونه آموزشی با فیچرهای تقریبی از دوز الل PGx.
+    """
+    import pandas as pd
+
+    df = pd.read_csv(csv_path)
+    if "label" not in df.columns:
+        raise ValueError(f"ستون label در {csv_path} نیست")
+
+    rsid_cols = [rs for rs in _ANON_RSID_ORDER if rs in df.columns]
+    if not rsid_cols:
+        rsid_cols = [c for c in df.columns if str(c).startswith("rs")]
+    X_rows: list[list[float]] = []
+    y_rows: list[int] = []
+    ids: list[str] = []
+
+    for idx, row in df.iterrows():
+        label = int(row["label"])
+        dosages = {rs: int(row[rs]) for rs in rsid_cols}
+        carrier = sum(1 for v in dosages.values() if v > 0)
+        max_dose = max(dosages.values()) if dosages else 0
+        strength = 0.0
+        for rs, dose in dosages.items():
+            if dose > 0:
+                strength = max(strength, _PGX_LEVEL_HINTS.get(rs, 0.5) * (dose / 2.0))
+
+        resp = float(row["Response_Probability"]) if "Response_Probability" in df.columns else 0.5
+        values = [
+            0.90,  # quality_norm
+            min(0.3 + 0.2 * max_dose, 1.0),  # depth_norm
+            1.0,  # is_snp
+            1.0 if carrier else 0.0,  # is_pgx_gene
+            1.0 if carrier else 0.0,  # has_rsid
+            max(0.001, 0.2 - 0.05 * max_dose),  # gnomad_af proxy
+            min(0.3 + 0.4 * resp, 1.0),  # cadd_norm proxy
+            min(0.2 + 0.5 * strength, 1.0),  # sift_deleterious proxy
+            min(0.2 + 0.5 * strength, 1.0),  # polyphen
+            min(0.2 + 0.3 * carrier / max(len(rsid_cols), 1), 1.0),  # phylop
+            float(strength),  # pharmgkb_strength
+            0.85 if label == 1 else 0.2,  # clinvar_pathogenicity proxy
+        ]
+        assert len(values) == len(FEATURE_NAMES)
+        X_rows.append(values)
+        y_rows.append(label)
+        ids.append(str(row["sample_hash"]) if "sample_hash" in df.columns else f"anon-{idx}")
+
+    if not X_rows:
+        raise ValueError(f"هیچ ردیفی در {csv_path} نیست")
+    return np.array(X_rows, dtype=np.float32), np.array(y_rows, dtype=np.int32), ids

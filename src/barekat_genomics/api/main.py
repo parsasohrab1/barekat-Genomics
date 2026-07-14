@@ -11,7 +11,28 @@ from fastapi.staticfiles import StaticFiles
 
 from barekat_genomics import __version__
 from barekat_genomics.api.middleware.metrics import PrometheusMiddleware
-from barekat_genomics.api.routes import patients, samples, pipeline, reports, ehr, health, dashboard, variants, auth, audit, ai
+from barekat_genomics.api.routes import (
+    patients,
+    samples,
+    pipeline,
+    reports,
+    ehr,
+    health,
+    dashboard,
+    variants,
+    auth,
+    audit,
+    ai,
+    settings as settings_routes,
+    users,
+    organizations,
+    billing,
+    compliance,
+    cohorts,
+    partner,
+    knowledge_assets,
+    integrations,
+)
 from barekat_genomics.core.config import get_settings
 from barekat_genomics.core.observability import setup_observability
 from barekat_genomics.core.observability.metrics import init_app_info
@@ -56,6 +77,14 @@ def create_app() -> FastAPI:
     prefix = settings.api_prefix
     app.include_router(health.router, prefix=prefix, tags=["Health"])
     app.include_router(auth.router, prefix=prefix, tags=["Auth"])
+    app.include_router(users.router, prefix=prefix, tags=["Users"])
+    app.include_router(organizations.router, prefix=prefix, tags=["Organizations"])
+    app.include_router(billing.router, prefix=prefix, tags=["Billing"])
+    app.include_router(compliance.router, prefix=prefix, tags=["Compliance"])
+    app.include_router(cohorts.router, prefix=prefix, tags=["Cohorts"])
+    app.include_router(partner.router, prefix=prefix, tags=["Partner API"])
+    app.include_router(knowledge_assets.router, prefix=prefix, tags=["Knowledge Assets"])
+    app.include_router(integrations.router, prefix=prefix, tags=["Integrations"])
     app.include_router(patients.router, prefix=prefix, tags=["Patients"])
     app.include_router(samples.router, prefix=prefix, tags=["Samples"])
     app.include_router(pipeline.router, prefix=prefix, tags=["Pipeline"])
@@ -64,6 +93,7 @@ def create_app() -> FastAPI:
     app.include_router(dashboard.router, prefix=prefix, tags=["Dashboard"])
     app.include_router(variants.router, prefix=prefix, tags=["Variants"])
     app.include_router(audit.router, prefix=prefix, tags=["Audit"])
+    app.include_router(settings_routes.router, prefix=prefix, tags=["Settings"])
     app.include_router(ai.router, prefix=prefix, tags=["AI Decision Support"])
 
     if settings.metrics_enabled:

@@ -43,14 +43,30 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token_payload(user_id: str, role: str, email: str) -> dict:
-    return {"sub": user_id, "role": role, "email": email}
+def create_access_token_payload(
+    user_id: str,
+    role: str,
+    email: str,
+    organization_id: str | None = None,
+) -> dict:
+    payload = {"sub": user_id, "role": role, "email": email}
+    if organization_id:
+        payload["org"] = organization_id
+    return payload
 
 
-def create_access_token(user_id: str, role: str, email: str) -> str:
+def create_access_token(
+    user_id: str,
+    role: str,
+    email: str,
+    organization_id: str | None = None,
+) -> str:
     settings = get_settings()
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
-    payload = {**create_access_token_payload(user_id, role, email), "exp": expire}
+    payload = {
+        **create_access_token_payload(user_id, role, email, organization_id),
+        "exp": expire,
+    }
     return jwt.encode(payload, settings.secret_key, algorithm=ALGORITHM)
 
 

@@ -18,6 +18,8 @@ class TestClinicalReport:
         assert isinstance(content["drug_recommendations"], list)
         assert isinstance(content["drug_interactions"], list)
         assert content["digital_signature"] is None
+        assert content["schema_version"] == "1.0"
+        assert content["metadata"]["genome_build"] == "GRCh38"
 
         summary_text = executive_summary_text(content)
         assert "P-001" in summary_text

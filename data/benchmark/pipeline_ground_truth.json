@@ -1,0 +1,54 @@
+{
+  "version": "1.0",
+  "pipeline_mode": "simulated",
+  "n_samples": 50,
+  "expected_variant_count": 5,
+  "variants": [
+    {
+      "rs_id": "rs1801133",
+      "chromosome": "chr1",
+      "position": 11796321,
+      "ref_allele": "G",
+      "alt_allele": "A",
+      "gene": "MTHFR",
+      "expected_in_simulated": true
+    },
+    {
+      "rs_id": "rs4244285",
+      "chromosome": "chr10",
+      "position": 96521657,
+      "ref_allele": "C",
+      "alt_allele": "T",
+      "gene": "CYP2C19",
+      "expected_in_simulated": true
+    },
+    {
+      "rs_id": "rs1799853",
+      "chromosome": "chr10",
+      "position": 96741053,
+      "ref_allele": "C",
+      "alt_allele": "T",
+      "gene": "CYP2C9",
+      "expected_in_simulated": true
+    },
+    {
+      "rs_id": "rs1142345",
+      "chromosome": "chr22",
+      "position": 42522613,
+      "ref_allele": "G",
+      "alt_allele": "A",
+      "gene": "TPMT",
+      "expected_in_simulated": true
+    },
+    {
+      "rs_id": "rs1800460",
+      "chromosome": "chr1",
+      "position": 97915614,
+      "ref_allele": "C",
+      "alt_allele": "T",
+      "gene": "DPYD",
+      "expected_in_simulated": true
+    }
+  ],
+  "notes_fa": "در حالت simulated، پایپ‌لاین باید حداقل این rsIDها را برگرداند. ژنوتیپ‌های نمونه برای اعتبارسنجی cross-check هستند."
+}

@@ -15,6 +15,69 @@ const MODULE_LABELS: Record<string, string> = {
   prs: "PRS",
 };
 
+function pct(value: unknown): string {
+  if (typeof value !== "number" || Number.isNaN(value)) return "—";
+  return `${(value * 100).toFixed(1)}٪`;
+}
+
+function num(value: unknown, digits = 1): string {
+  if (typeof value !== "number" || Number.isNaN(value)) return "—";
+  return value.toFixed(digits);
+}
+
+function QcPanel({ job }: { job: PipelineJob }) {
+  const qc = job.qc_metrics;
+  if (!qc) return null;
+  const passed = qc.passed === true;
+  return (
+    <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-xs font-medium text-slate-600">متریک‌های QC</p>
+        <span className={passed ? "badge-success" : "badge-warning"}>
+          {passed ? "Pass" : "Warn/Fail"}
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 md:grid-cols-4">
+        <div>
+          <p className="text-slate-400">reads</p>
+          <p className="font-medium">{String(qc.total_reads ?? "—")}</p>
+        </div>
+        <div>
+          <p className="text-slate-400">mean Q</p>
+          <p className="font-medium">{num(qc.mean_quality)}</p>
+        </div>
+        <div>
+          <p className="text-slate-400">GC</p>
+          <p className="font-medium">{pct(qc.gc_content as number)}</p>
+        </div>
+        <div>
+          <p className="text-slate-400">duplication</p>
+          <p className="font-medium">{pct(qc.duplication_rate as number)}</p>
+        </div>
+        <div>
+          <p className="text-slate-400">mean depth</p>
+          <p className="font-medium">{num(qc.mean_depth)}×</p>
+        </div>
+        <div>
+          <p className="text-slate-400">≥10×</p>
+          <p className="font-medium">{pct(qc.coverage_pct_10x as number)}</p>
+        </div>
+        <div>
+          <p className="text-slate-400">≥20×</p>
+          <p className="font-medium">{pct(qc.coverage_pct_20x as number)}</p>
+        </div>
+      </div>
+      {Array.isArray(qc.warnings) && qc.warnings.length > 0 && (
+        <ul className="mt-2 list-disc pr-4 text-xs text-amber-700">
+          {(qc.warnings as string[]).slice(0, 4).map((w) => (
+            <li key={w}>{w}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function PipelinePage() {
   const [jobs, setJobs] = useState<PipelineJob[]>([]);
   const [error, setError] = useState("");
@@ -24,6 +87,7 @@ export default function PipelinePage() {
   const [selectedSample, setSelectedSample] = useState("");
   const [selectedModule, setSelectedModule] = useState("pharmacogenomics");
   const [pairedSample, setPairedSample] = useState("");
+  const [asyncMode, setAsyncMode] = useState(true);
   const [running, setRunning] = useState(false);
 
   const load = () =>
@@ -56,7 +120,8 @@ export default function PipelinePage() {
     setRunning(true);
     setError("");
     try {
-      await startPipeline(selectedSample, true, {
+      // asyncMode=true → Celery (sync=false)؛ برای مانیتورینگ واقعی Job
+      await startPipeline(selectedSample, !asyncMode, {
         module: selectedModule,
         paired_sample_id: pairedSample || undefined,
       });
@@ -76,7 +141,7 @@ export default function PipelinePage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-slate-400">
           <span className={`h-2 w-2 rounded-full ${hasActive ? "animate-pulse bg-brand-500" : "bg-slate-300"}`} />
-          {hasActive ? "بروزرسانی خودکار هر ۴ ثانیه" : "بدون وظیفه فعال"}
+          {hasActive ? "بروزرسانی خودکار هر ۴ ثانیه — وضعیت واقعی Job" : "بدون وظیفه فعال"}
         </div>
         <div className="flex gap-2">
           <button onClick={load} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-50">
@@ -128,6 +193,7 @@ export default function PipelinePage() {
                   />
                 </div>
               </div>
+              <QcPanel job={job} />
               {job.error_message && (
                 <p className="mt-2 text-xs text-rose-600">{job.error_message}</p>
               )}
@@ -192,6 +258,14 @@ export default function PipelinePage() {
               </select>
             </div>
           )}
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            <input
+              type="checkbox"
+              checked={asyncMode}
+              onChange={(e) => setAsyncMode(e.target.checked)}
+            />
+            اجرا از طریق صف Celery (مانیتورینگ زنده + retry)
+          </label>
           {samples.length === 0 && (
             <p className="text-sm text-amber-600">نمونه آپلود‌شده‌ای وجود ندارد</p>
           )}

@@ -142,6 +142,11 @@ def generate_clinical_pdf(
     )
     status_fa = "نهایی" if report_status == "completed" else "در انتظار تأیید"
     pdf.cell(0, 7, _shape_persian(f"وضعیت: {status_fa}"), ln=True, align="R")
+    schema_ver = clinical_content.get("schema_version", "1.0")
+    pdf.cell(0, 7, _shape_persian(f"نسخه اسکمای گزارش: {schema_ver}"), ln=True, align="R")
+    meta = clinical_content.get("metadata") or {}
+    if isinstance(meta, dict) and meta.get("genome_build"):
+        pdf.cell(0, 7, _shape_persian(f"ژنوم مرجع: {meta['genome_build']}"), ln=True, align="R")
     pdf.ln(6)
 
     # خلاصه اجرایی
@@ -195,6 +200,54 @@ def generate_clinical_pdf(
                 pdf.cell(col_w[i], 7, _truncate(str(cell), 20), border=1, align="L")
         pdf.ln()
     pdf.ln(4)
+
+    # Explainability برای واریانت‌های با اولویت بالا
+    explained = [v for v in hp_variants if v.get("feature_contributions")]
+    if explained:
+        pdf.set_font("Clinical", size=12)
+        pdf.set_fill_color(241, 245, 249)
+        pdf.cell(0, 9, _shape_persian("شفافیت تصمیم مدل (Explainability)"), ln=True, align="R", fill=True)
+        pdf.ln(2)
+        pdf.set_font("Clinical", size=9)
+        for v in explained[:5]:
+            gene = v.get("gene") or "-"
+            method = v.get("explain_method") or "feature_importance"
+            pdf.cell(0, 6, _shape_persian(f"{gene} ({v.get('rs_id') or '-'}) — روش: {method}"), ln=True, align="R")
+            feats = ", ".join(
+                f"{f.get('feature')}:{(f.get('contribution') or 0) * 100:.0f}%"
+                for f in (v.get("feature_contributions") or [])[:4]
+                if isinstance(f, dict)
+            )
+            if feats:
+                pdf.cell(0, 6, feats, ln=True, align="L")
+            pdf.ln(1)
+        pdf.ln(2)
+
+    # پنل نشانگر زیستی
+    panel = clinical_content.get("biomarker_panel") or {}
+    markers = panel.get("ranked_markers") or []
+    if markers:
+        pdf.set_font("Clinical", size=12)
+        pdf.set_fill_color(241, 245, 249)
+        pdf.cell(
+            0,
+            9,
+            _shape_persian(
+                f"پنل نشانگر زیستی (رتبه‌بندی‌شده — {panel.get('high_priority_count', 0)} اولویت بالا)"
+            ),
+            ln=True,
+            align="R",
+            fill=True,
+        )
+        pdf.ln(2)
+        pdf.set_font("Clinical", size=8)
+        for m in markers[:8]:
+            line = (
+                f"#{m.get('rank') or '-'} {m.get('gene') or '-'} / {m.get('rs_id') or '-'} "
+                f"— ML={(m.get('ml_score') or 0) * 100:.0f}%"
+            )
+            pdf.cell(0, 6, _shape_persian(line), ln=True, align="R")
+        pdf.ln(3)
 
     # توصیه‌های دارویی CPIC
     drugs = clinical_content.get("drug_recommendations", [])

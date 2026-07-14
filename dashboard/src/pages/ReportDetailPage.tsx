@@ -215,6 +215,8 @@ export default function ReportDetailPage() {
   const executiveSummary = clinical?.executive_summary ?? (report.summary ? [report.summary] : []);
 
   const hpVariants = clinical?.high_priority_variants ?? [];
+  const biomarkerPanel = clinical?.biomarker_panel ?? null;
+  const rankedMarkers = biomarkerPanel?.ranked_markers ?? [];
 
   const drugRecs = clinical?.drug_recommendations ?? [];
 
@@ -537,6 +539,8 @@ export default function ReportDetailPage() {
 
                 <tr>
 
+                  <th>رتبه</th>
+
                   <th>ژن</th>
 
                   <th>rsID</th>
@@ -546,6 +550,8 @@ export default function ReportDetailPage() {
                   <th>اهمیت</th>
 
                   <th>اولویت</th>
+
+                  <th>توضیح مدل</th>
 
                   <th>تفسیر</th>
 
@@ -558,6 +564,8 @@ export default function ReportDetailPage() {
                 {hpVariants.map((v, idx) => (
 
                   <tr key={`${v.rs_id}-${idx}`}>
+
+                    <td className="font-mono text-xs">{v.rank ?? idx + 1}</td>
 
                     <td className="font-medium text-brand-700">{v.gene ?? "—"}</td>
 
@@ -577,6 +585,13 @@ export default function ReportDetailPage() {
 
                     <td>{(v.priority_score * 100).toFixed(0)}%</td>
 
+                    <td className="max-w-[10rem] text-xs text-slate-500">
+                      {(v.feature_contributions ?? [])
+                        .slice(0, 3)
+                        .map((f) => `${f.feature}${f.contribution != null ? `:${(f.contribution * 100).toFixed(0)}%` : ""}`)
+                        .join(" · ") || (v.explain_method ?? "—")}
+                    </td>
+
                     <td className="max-w-xs text-xs text-slate-600">{v.interpretation ?? "—"}</td>
 
                   </tr>
@@ -591,6 +606,51 @@ export default function ReportDetailPage() {
 
         )}
 
+      </div>
+
+      {/* پنل نشانگر زیستی و ranking */}
+      <div className="stat-card">
+        <h3 className="mb-4 text-sm font-semibold text-slate-700">
+          پنل نشانگر زیستی ({biomarkerPanel?.total_variants ?? rankedMarkers.length})
+        </h3>
+        {rankedMarkers.length === 0 ? (
+          <p className="text-sm text-slate-400">نشانگر زیستی رتبه‌بندی‌شده‌ای موجود نیست.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>رتبه</th>
+                  <th>ژن / rsID</th>
+                  <th>امتیاز ML</th>
+                  <th>داروهای راهنما</th>
+                  <th>منابع</th>
+                  <th>ویژگی‌های مؤثر</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rankedMarkers.slice(0, 20).map((m, idx) => (
+                  <tr key={`${m.rs_id}-${idx}`} className={m.high_priority ? "bg-amber-50/40" : undefined}>
+                    <td className="font-mono text-xs">{m.rank ?? idx + 1}</td>
+                    <td>
+                      <div className="font-medium text-brand-700">{m.gene ?? "—"}</div>
+                      <div className="font-mono text-xs text-slate-500">{m.rs_id ?? "—"}</div>
+                    </td>
+                    <td>{m.ml_score != null ? (m.ml_score * 100).toFixed(0) + "%" : "—"}</td>
+                    <td className="text-xs text-slate-600">{(m.guideline_drugs ?? []).join("، ") || "—"}</td>
+                    <td className="text-xs text-slate-500">{(m.knowledge_sources ?? []).join("، ") || "—"}</td>
+                    <td className="text-xs text-slate-500">
+                      {(m.top_features ?? [])
+                        .map((f) => f.feature)
+                        .slice(0, 3)
+                        .join(" · ") || "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
 

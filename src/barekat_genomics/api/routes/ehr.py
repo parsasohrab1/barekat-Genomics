@@ -2,14 +2,17 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from fastapi.responses import PlainTextResponse, Response
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from barekat_genomics.api.deps import CurrentUser, assert_patient_access, get_current_user
 from barekat_genomics.core.audit import log_audit_event
 from barekat_genomics.core.database import get_db
 from barekat_genomics.core.rbac import Permission, has_permission
+from barekat_genomics.ehr.import_fhir import parse_fhir_patient_bundle
+from barekat_genomics.ehr.import_hl7 import parse_hl7_message
 from barekat_genomics.ehr.service import EHRIntegrationService
 from barekat_genomics.schemas import (
     EHRConnectorInfo,
@@ -21,6 +24,10 @@ from barekat_genomics.services.patient_service import PatientService
 from barekat_genomics.services.report_service import ReportService
 
 router = APIRouter(prefix="/ehr")
+
+
+class HL7ImportRequest(BaseModel):
+    message: str = Field(min_length=10)
 
 
 def _check_ehr_permission(user: CurrentUser) -> None:
@@ -160,3 +167,81 @@ def push_to_ehr(
         external_id=result.external_id,
         details=result.details or None,
     )
+
+
+@router.post("/import/fhir")
+def import_fhir(
+    bundle: dict = Body(...),
+    request: Request = None,
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    if not has_permission(user.role, Permission.EHR_IMPORT):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+    try:
+        parsed = parse_fhir_patient_bundle(bundle)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    patient, created = PatientService(db).upsert_from_ehr(
+        external_id=parsed["external_id"],
+        full_name=parsed.get("full_name"),
+        gender=parsed.get("gender"),
+        ehr_patient_id=parsed.get("ehr_patient_id"),
+        organization_id=user.organization_id,
+        assigned_clinician_id=user.id if user.role in ("physician", "clinician") else None,
+    )
+    log_audit_event(
+        db,
+        user_id=str(user.id),
+        action="ehr_import",
+        resource_type="patient",
+        resource_id=str(patient.id),
+        details=f"format=fhir,created={created}",
+        ip_address=request.client.host if request and request.client else None,
+    )
+    return {
+        "created": created,
+        "patient_id": str(patient.id),
+        "external_id": patient.external_id,
+        "resource_count": parsed.get("resource_count"),
+    }
+
+
+@router.post("/import/hl7")
+def import_hl7(
+    body: HL7ImportRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    if not has_permission(user.role, Permission.EHR_IMPORT):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+    try:
+        parsed = parse_hl7_message(body.message)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    patient, created = PatientService(db).upsert_from_ehr(
+        external_id=parsed["external_id"],
+        full_name=parsed.get("full_name"),
+        gender=parsed.get("gender"),
+        ehr_patient_id=parsed.get("ehr_patient_id"),
+        organization_id=user.organization_id,
+        assigned_clinician_id=user.id if user.role in ("physician", "clinician") else None,
+    )
+    log_audit_event(
+        db,
+        user_id=str(user.id),
+        action="ehr_import",
+        resource_type="patient",
+        resource_id=str(patient.id),
+        details=f"format=hl7,created={created},type={parsed.get('message_type')}",
+        ip_address=request.client.host if request.client else None,
+    )
+    return {
+        "created": created,
+        "patient_id": str(patient.id),
+        "external_id": patient.external_id,
+        "message_type": parsed.get("message_type"),
+    }

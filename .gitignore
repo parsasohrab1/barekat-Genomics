@@ -8,6 +8,8 @@ build/
 .venv/
 venv/
 .env
+.env.staging
+.env.*.local
 
 # IDE
 .idea/

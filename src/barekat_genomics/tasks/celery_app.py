@@ -33,6 +33,12 @@ celery_app.conf.update(
     task_routes={
         "barekat_genomics.run_pipeline": {"queue": CELERY_QUEUE_DEFAULT},
     },
+    task_annotations={
+        "barekat_genomics.run_pipeline": {
+            "max_retries": 3,
+            "acks_late": True,
+        },
+    },
 )
 
 celery_app.autodiscover_tasks(["barekat_genomics.tasks"])

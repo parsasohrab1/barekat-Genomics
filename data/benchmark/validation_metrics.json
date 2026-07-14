@@ -1,0 +1,23 @@
+{
+  "true_positives": 5,
+  "false_positives": 2,
+  "false_negatives": 0,
+  "precision": 0.7143,
+  "recall": 1.0,
+  "f1": 0.8333,
+  "sensitivity": 1.0,
+  "specificity": null,
+  "matched_rs_ids": [
+    "rs1142345",
+    "rs1799853",
+    "rs1800460",
+    "rs1801133",
+    "rs4244285"
+  ],
+  "missed_rs_ids": [],
+  "extra_rs_ids": [
+    "chr12:21178615:G>A",
+    "chr6:31356726:T>TC"
+  ],
+  "mode": "simulated"
+}

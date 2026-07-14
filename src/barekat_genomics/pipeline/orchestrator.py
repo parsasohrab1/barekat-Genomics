@@ -2,22 +2,29 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+from barekat_genomics.modules.analyzer import analyze_module, result_to_dict
+from barekat_genomics.modules.registry import DEFAULT_MODULE
 from barekat_genomics.pipeline.alignment import align_fastq, prepare_bam
-from barekat_genomics.pipeline.mode import is_production_pipeline
-from barekat_genomics.pipeline.preprocessing import QCMetrics, run_quality_control
-from barekat_genomics.pipeline.reference import sample_work_dir
-from barekat_genomics.pipeline.variant_calling import CalledVariant, call_variants, filter_variants
 from barekat_genomics.pipeline.interpretation import (
     VariantInterpretation,
     generate_drug_recommendations,
     interpret_variants,
 )
-from barekat_genomics.modules.analyzer import analyze_module, result_to_dict
-from barekat_genomics.modules.registry import DEFAULT_MODULE
+from barekat_genomics.pipeline.mode import assert_production_ready, is_production_pipeline
+from barekat_genomics.pipeline.preprocessing import (
+    QCMetrics,
+    enrich_qc_with_bam_coverage,
+    run_quality_control,
+)
+from barekat_genomics.pipeline.reference import sample_work_dir
 from barekat_genomics.pipeline.report_builder import build_clinical_report, executive_summary_text
+from barekat_genomics.pipeline.variant_calling import CalledVariant, call_variants, filter_variants
+
+StageCallback = Callable[[str], None]
 
 
 @dataclass
@@ -41,19 +48,35 @@ def run_full_pipeline(
     sample_label: str | None = None,
     *,
     module_id: str = DEFAULT_MODULE,
+    assay_type: str = "panel",
     normal_interpretations: list | None = None,
+    on_stage: StageCallback | None = None,
 ) -> PipelineResult:
     """
-    اجرای کامل پایپ‌لاین:
+    اجرای کامل پایپ‌لاین (WGS / WES / Panel):
 
-    FASTQ → FastQC/MultiQC → BWA-MEM2 → GATK HaplotypeCaller → SnpEff → Interpretation
-    BAM   → samtools QC → GATK HaplotypeCaller → SnpEff → Interpretation
+    FASTQ → QC → BWA → MarkDuplicates → GATK HC (-L برای WES/Panel) → SnpEff → Interpretation
+    BAM   → QC → MarkDuplicates → GATK HC → SnpEff → Interpretation
+    VCF   → QC سبک → annotate/parse → Interpretation  (بدون alignment)
+    CRAM  → مشابه BAM در production
     """
+    from barekat_genomics.pipeline.assay_config import get_assay_profile, normalize_file_type
+
+    ft = normalize_file_type(file_type)
+    profile = get_assay_profile(assay_type)
     label = sample_label or Path(file_path).stem
     work = sample_work_dir(label)
 
+    def _stage(name: str) -> None:
+        if on_stage:
+            on_stage(name)
+
     try:
-        qc = run_quality_control(file_path, file_type, work_dir=work)
+        if is_production_pipeline() and ft != "VCF":
+            assert_production_ready(genome_build)
+
+        _stage("quality_control")
+        qc = run_quality_control(file_path, ft, work_dir=work)
         if not qc.passed:
             return PipelineResult(
                 qc_metrics=qc,
@@ -68,19 +91,32 @@ def run_full_pipeline(
             )
 
         bam_path: Path | None = None
-        if file_type == "FASTQ" and is_production_pipeline():
+        if ft == "VCF":
+            _stage("alignment")  # skip — stage bookmark for UI parity
+        elif ft == "FASTQ" and is_production_pipeline():
+            _stage("alignment")
             bam_path = align_fastq(file_path, work, genome_build)
-        elif file_type == "BAM" and is_production_pipeline():
+            qc = enrich_qc_with_bam_coverage(qc, bam_path)
+        elif ft in ("BAM", "CRAM") and is_production_pipeline():
+            _stage("alignment")
             bam_path = prepare_bam(file_path, work)
+            qc = enrich_qc_with_bam_coverage(qc, bam_path)
+        else:
+            _stage("alignment")
 
+        _stage("variant_calling")
         raw_variants = call_variants(
             file_path,
-            file_type,
+            ft,
             genome_build,
             work_dir=work / "variants",
             bam_path=bam_path,
+            assay_type=profile.assay_type,
         )
-        filtered = filter_variants(raw_variants)
+        min_depth = 0 if ft == "VCF" else 10
+        filtered = filter_variants(raw_variants, min_depth=min_depth)
+
+        _stage("interpretation")
         interpretations = interpret_variants(filtered, genome_build=genome_build)
         drug_recs = generate_drug_recommendations(interpretations)
 
@@ -88,6 +124,7 @@ def run_full_pipeline(
             interpretations,
             drug_recs,
             patient_external_id=label,
+            genome_build=genome_build,
         )
         module_result = analyze_module(
             module_id,
@@ -97,6 +134,12 @@ def run_full_pipeline(
         )
         module_dict = result_to_dict(module_result)
         clinical["module_analysis"] = module_dict
+        clinical["assay"] = {
+            "assay_type": profile.assay_type,
+            "display_name": profile.display_name,
+            "file_type": ft,
+            "min_mean_depth": profile.min_mean_depth,
+        }
 
         summary = executive_summary_text(clinical)
         if module_result.summary_fa:

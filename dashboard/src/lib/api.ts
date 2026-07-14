@@ -21,6 +21,8 @@ import type {
 
   AuditLog,
 
+  PlatformSettings,
+
   TokenResponse,
 
 } from "./types";
@@ -414,7 +416,9 @@ export async function getAuditLogs(): Promise<AuditLog[]> {
 
 }
 
-
+export async function getPlatformSettings(): Promise<PlatformSettings> {
+  return request<PlatformSettings>(`${API_BASE}/settings/`);
+}
 
 export { ApiClientError };
 

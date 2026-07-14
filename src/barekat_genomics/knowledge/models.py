@@ -16,6 +16,7 @@ class VariantKnowledge:
     consequence: str | None = None
     # PharmGKB
     drug: str | None = None
+    drugs: list[str] = field(default_factory=list)
     phenotype: str | None = None
     pgx_level: str | None = None
     # CPIC
@@ -41,9 +42,18 @@ class VariantKnowledge:
         for src in other.sources:
             if src not in self.sources:
                 self.sources.append(src)
+        for drug in other.drugs:
+            if drug and drug not in self.drugs:
+                self.drugs.append(drug)
+        if other.drug and other.drug not in self.drugs:
+            self.drugs.append(other.drug)
+        if self.drug is None and other.drug is not None:
+            self.drug = other.drug
+        if not self.drugs and self.drug:
+            self.drugs = [self.drug]
         for attr in (
             "rs_id", "chromosome", "position", "ref_allele", "alt_allele",
-            "gene", "consequence", "drug", "phenotype", "pgx_level",
+            "gene", "consequence", "phenotype", "pgx_level",
             "cpic_level", "cpic_guideline", "cpic_action_fa", "drug_fa",
             "clinical_significance", "clinvar_review_status", "gnomad_af",
             "cadd_phred", "sift_score", "polyphen_score", "phylop_score",

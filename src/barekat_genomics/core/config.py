@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     s3_access_key: str = "barekat"
     s3_secret_key: str = "barekatsecret"
     s3_bucket: str = "barekat-genomics"
+    s3_reference_bucket: str = "barekat-genomics-reference"
     s3_region: str = "us-east-1"
 
     # HIPAA / Security
@@ -43,16 +44,20 @@ class Settings(BaseSettings):
     phi_retention_days: int = 2555  # ~7 years per HIPAA
 
     # Reference Databases
-    dbsnp_path: str = "/data/reference/dbsnp"
+    dbsnp_path: str = "/data/reference/GRCh38/known-sites/dbsnp.vcf.gz"
+    known_sites_vcf: str = ""
     genome_build: str = "GRCh38"
+    genome_version: str = "GRCh38.p14"
     reference_dir: str = "/data/reference/GRCh38"
     ref_fasta: str = ""
     bwa_index_prefix: str = ""
     snpeff_db: str = "GRCh38.99"
-    clinvar_path: str = "/data/reference/clinvar/clinvar.vcf.gz"
-    pharmgkb_path: str = "/data/reference/pharmgkb"
+    clinvar_path: str = "/data/reference/GRCh38/clinvar/clinvar.vcf.gz"
+    pharmgkb_path: str = "/data/reference/GRCh38/pharmgkb"
     knowledge_dir: str = ""
     gnomad_path: str = ""
+    reference_require_dict: bool = True
+    reference_require_known_sites: bool = False
     ml_ab_test_enabled: bool = False
     ml_ab_test_challenger: str = "v2"
     ml_ab_test_traffic_pct: float = 0.1
@@ -96,6 +101,10 @@ class Settings(BaseSettings):
     tajhiz_api_key: str = ""
     sepas_api_url: str = ""
     sepas_api_key: str = ""
+
+    # SaaS / deployment
+    deployment_mode: Literal["saas", "on_prem"] = "saas"
+    multi_tenant_enabled: bool = True
 
     # AI decision support (no direct diagnosis)
     ai_assist_enabled: bool = True

@@ -66,6 +66,7 @@ def load_pharmgkb_tsv(path: Path) -> dict[str, VariantKnowledge]:
     """
     PharmGKB clinical annotations export:
     rsid, gene, drug, phenotype, pgx_level
+    (چند دارو برای یک rsid پشتیبانی می‌شود)
     """
     by_rsid: dict[str, VariantKnowledge] = {}
     if not path.is_file():
@@ -79,10 +80,14 @@ def load_pharmgkb_tsv(path: Path) -> dict[str, VariantKnowledge]:
             )
             if not rsid:
                 continue
+            raw_drug = (row.get("drug") or row.get("Drug(s)") or row.get("Drug") or "").strip()
+            drugs = [d.strip().lower() for d in raw_drug.replace(";", ",").split(",") if d.strip()]
+            primary = drugs[0] if drugs else None
             rec = VariantKnowledge(
                 rs_id=rsid,
                 gene=row.get("gene") or row.get("Gene"),
-                drug=(row.get("drug") or row.get("Drug(s)") or row.get("Drug") or "").lower() or None,
+                drug=primary,
+                drugs=drugs,
                 phenotype=row.get("phenotype") or row.get("Phenotype(s)") or row.get("Phenotype"),
                 pgx_level=row.get("pgx_level") or row.get("PGx Level"),
                 sources=["PharmGKB"],

@@ -1,0 +1,11 @@
+rsid	gene	af	n_chrom	source
+rs1801133	MTHFR	0.32	2000	iranome_proxy
+rs1800460	DPYD	0.015	2000	iranome_proxy
+rs4244285	CYP2C19	0.12	2000	iranome_proxy
+rs1799853	CYP2C9	0.09	2000	iranome_proxy
+rs1142345	TPMT	0.018	2000	iranome_proxy
+rs1057910	CYP2C9	0.06	1800	iranome_proxy
+rs776746	CYP3A5	0.21	1800	iranome_proxy
+rs9923231	VKORC1	0.41	2000	iranome_proxy
+rs4149056	SLCO1B1	0.14	2000	iranome_proxy
+rs4673	CYBA	0.28	1500	iranome_proxy

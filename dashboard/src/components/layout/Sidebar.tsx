@@ -15,13 +15,15 @@ import {
 import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
-  { to: "/", icon: LayoutDashboard, label: "داشبورد", roles: ["clinician", "geneticist", "lab_tech", "admin"] },
-  { to: "/patients", icon: Users, label: "بیماران", roles: ["clinician", "geneticist", "lab_tech", "admin"] },
+  { to: "/", icon: LayoutDashboard, label: "داشبورد", roles: ["physician", "clinician", "analyst", "geneticist", "lab_tech", "admin"] },
+  { to: "/patients", icon: Users, label: "بیماران", roles: ["physician", "clinician", "analyst", "geneticist", "lab_tech", "admin"] },
   { to: "/samples", icon: FlaskConical, label: "نمونه‌ها", roles: ["lab_tech", "admin"] },
   { to: "/pipeline", icon: GitBranch, label: "پایپ‌لاین", roles: ["lab_tech", "admin"] },
-  { to: "/reports", icon: FileText, label: "گزارش‌ها", roles: ["clinician", "geneticist", "admin"] },
-  { to: "/review", icon: ClipboardCheck, label: "در انتظار تأیید", roles: ["geneticist", "admin"] },
-  { to: "/variants", icon: Dna, label: "واریانت‌ها", roles: ["clinician", "geneticist", "admin"] },
+  { to: "/reports", icon: FileText, label: "گزارش‌ها", roles: ["physician", "clinician", "analyst", "geneticist", "admin"] },
+  { to: "/review", icon: ClipboardCheck, label: "در انتظار تأیید", roles: ["analyst", "geneticist", "admin"] },
+  { to: "/variants", icon: Dna, label: "واریانت‌ها", roles: ["physician", "clinician", "analyst", "geneticist", "admin"] },
+  { to: "/billing", icon: Activity, label: "اشتراک", roles: ["admin"] },
+  { to: "/compliance", icon: ScrollText, label: "انطباق", roles: ["admin", "analyst", "geneticist"] },
   { to: "/audit", icon: ScrollText, label: "ممیزی", roles: ["admin"] },
   { to: "/settings", icon: Settings, label: "تنظیمات", roles: ["admin"] },
 ];

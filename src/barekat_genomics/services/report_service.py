@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from barekat_genomics.core.rbac import Role, is_privileged_role
+from barekat_genomics.core.rbac import Role, is_physician_role, is_privileged_role
 from barekat_genomics.core.review import REPORT_STATUS_COMPLETED, REPORT_STATUS_PENDING_FINAL
 from barekat_genomics.models.patient import Patient
 from barekat_genomics.models.pipeline import PipelineJob
@@ -13,7 +13,7 @@ from barekat_genomics.models.report import GenomicReport
 from barekat_genomics.models.sample import SequencingSample
 from barekat_genomics.models.user import User
 from barekat_genomics.models.variant import Variant, VariantAnnotation
-from barekat_genomics.pipeline.report_builder import rebuild_clinical_content_from_db
+from barekat_genomics.pipeline.report_builder import rebuild_clinical_content_from_db, validate_clinical_content
 from barekat_genomics.schemas import EHRVariantExport, VariantAnnotationResponse, VariantWithAnnotation
 from barekat_genomics.services.pdf_service import compute_report_signature, generate_clinical_pdf
 from barekat_genomics.services.review_service import ReviewService
@@ -28,8 +28,8 @@ class ReportService:
         return self.db.query(GenomicReport).filter(GenomicReport.id == report_id).first()
 
     def get_clinical_content(self, report: GenomicReport, *, refresh: bool = False) -> dict:
-        if report.clinical_content and not refresh and report.status == REPORT_STATUS_COMPLETED:
-            return report.clinical_content
+        if report.clinical_content and not refresh:
+            return validate_clinical_content(report.clinical_content)
 
         patient = self.db.query(Patient).filter(Patient.id == report.patient_id).first()
         variants_data = self._variants_for_report(report, for_clinician=report.status == REPORT_STATUS_COMPLETED)
@@ -38,6 +38,7 @@ class ReportService:
             report.drug_recommendations,
             patient_external_id=patient.external_id if patient else None,
         )
+        content = validate_clinical_content(content)
         if report.status != REPORT_STATUS_COMPLETED:
             return content
 
@@ -113,7 +114,7 @@ class ReportService:
         limit: int = 50,
     ) -> list[GenomicReport]:
         query = self.db.query(GenomicReport)
-        if role == Role.CLINICIAN.value:
+        if is_physician_role(role):
             query = query.join(Patient).filter(
                 Patient.assigned_clinician_id == user_id,
                 GenomicReport.status == REPORT_STATUS_COMPLETED,
@@ -182,7 +183,7 @@ class ReportService:
 
     def list_by_patient(self, patient_id: uuid.UUID, role: str | None = None) -> list[GenomicReport]:
         query = self.db.query(GenomicReport).filter(GenomicReport.patient_id == patient_id)
-        if role == Role.CLINICIAN.value:
+        if is_physician_role(role):
             query = query.filter(GenomicReport.status == REPORT_STATUS_COMPLETED)
         return query.order_by(GenomicReport.created_at.desc()).all()
 
@@ -201,7 +202,7 @@ class ReportService:
             annotations = (
                 self.db.query(VariantAnnotation).filter(VariantAnnotation.variant_id == v.id).all()
             )
-            if role == Role.CLINICIAN.value:
+            if is_physician_role(role):
                 annotations = [
                     a for a in annotations if self.review.clinician_may_view_variant(a, patient_id)
                 ]

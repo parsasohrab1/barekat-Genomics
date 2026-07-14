@@ -24,6 +24,7 @@ export const sampleStatusMap: Record<string, { label: string; class: string }> =
 export const stageLabel: Record<string, string> = {
   queued: "در صف",
   quality_control: "کنترل کیفیت",
+  alignment: "هم‌ترازسازی",
   variant_calling: "شناسایی واریانت",
   interpretation: "تفسیر",
   done: "تکمیل",

@@ -34,9 +34,21 @@ def call_variants(
     genome_build: str = "GRCh38",
     work_dir: Path | None = None,
     bam_path: Path | None = None,
+    assay_type: str = "panel",
 ) -> list[CalledVariant]:
+    ft = file_type.upper()
+    if ft == "VCF":
+        # میان‌بر: فایل VCF آماده — فقط annotate/parse
+        if is_production_pipeline():
+            base_dir = ensure_dir(work_dir or Path(file_path).parent / "variants")
+            annotated = annotate_vcf(Path(file_path), base_dir, genome_build)
+            return parse_vcf(annotated if annotated else Path(file_path))
+        return _run_simulated_calling()
+
     if is_production_pipeline():
-        return _run_production_calling(file_path, file_type, genome_build, work_dir, bam_path)
+        return _run_production_calling(
+            file_path, ft, genome_build, work_dir, bam_path, assay_type=assay_type
+        )
     return _run_simulated_calling()
 
 
@@ -58,7 +70,10 @@ def _run_production_calling(
     genome_build: str,
     work_dir: Path | None,
     bam_path: Path | None,
+    assay_type: str = "panel",
 ) -> list[CalledVariant]:
+    from barekat_genomics.pipeline.assay_config import get_assay_profile, resolve_target_bed
+
     refs = get_reference_bundle(genome_build)
     if not refs.reference_ready:
         raise FileNotFoundError(f"مرجع ژنوم آماده نیست: {refs.ref_fasta}")
@@ -70,16 +85,19 @@ def _run_production_calling(
     if file_type == "BAM":
         bam = Path(file_path)
 
-    run_command(
-        [
-            "gatk", "HaplotypeCaller",
-            "-R", str(refs.ref_fasta),
-            "-I", str(bam),
-            "-O", str(vcf_raw),
-            "--native-pair-hmm-threads", "2",
-        ],
-        timeout=7200,
-    )
+    cmd = [
+        "gatk", "HaplotypeCaller",
+        "-R", str(refs.ref_fasta),
+        "-I", str(bam),
+        "-O", str(vcf_raw),
+        "--native-pair-hmm-threads", "2",
+    ]
+    profile = get_assay_profile(assay_type)
+    bed = resolve_target_bed(assay_type)
+    if profile.haplotyper_intervals and bed is not None:
+        cmd.extend(["-L", str(bed)])
+
+    run_command(cmd, timeout=7200)
 
     annotated_vcf = annotate_vcf(vcf_raw, base_dir, genome_build)
     return parse_vcf(annotated_vcf if annotated_vcf else vcf_raw)

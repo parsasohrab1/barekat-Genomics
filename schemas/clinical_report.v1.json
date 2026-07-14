@@ -1,0 +1,46 @@
+# Clinical Report JSON Schema v1 — barekat Genomics
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://barekat.local/schemas/clinical_report.v1.json",
+  "title": "ClinicalPharmacogenomicReport",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "executive_summary",
+    "high_priority_variants",
+    "drug_recommendations",
+    "drug_interactions"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "executive_summary": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 0,
+      "maxItems": 5
+    },
+    "high_priority_variants": { "type": "array", "items": { "type": "object" } },
+    "biomarker_panel": {
+      "type": ["object", "null"],
+      "properties": {
+        "total_variants": { "type": "integer" },
+        "high_priority_count": { "type": "integer" },
+        "ranked_markers": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "drug_recommendations": { "type": "array", "items": { "type": "object" } },
+    "drug_interactions": { "type": "array", "items": { "type": "object" } },
+    "digital_signature": {
+      "type": ["object", "null"]
+    },
+    "metadata": {
+      "type": ["object", "null"],
+      "properties": {
+        "genome_build": { "type": ["string", "null"] },
+        "patient_external_id": { "type": ["string", "null"] },
+        "pipeline_version": { "type": ["string", "null"] }
+      }
+    }
+  },
+  "additionalProperties": true
+}

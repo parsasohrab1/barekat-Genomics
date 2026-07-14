@@ -101,6 +101,12 @@ export interface ClinicalDrugRecommendation extends DrugRecommendation {
   drug: string;
 }
 
+export interface FeatureContribution {
+  feature: string;
+  contribution?: number;
+  importance?: number;
+}
+
 export interface HighPriorityVariant {
   gene: string | null;
   rs_id: string | null;
@@ -112,6 +118,35 @@ export interface HighPriorityVariant {
   priority_score: number;
   interpretation: string | null;
   pharmacogenomic_effect?: string | null;
+  ml_score?: number | null;
+  ml_confidence?: number | null;
+  rank?: number | null;
+  model_version?: string | null;
+  explain_method?: string | null;
+  feature_contributions?: FeatureContribution[];
+  guideline_drugs?: string[];
+  knowledge_sources?: string[];
+}
+
+export interface BiomarkerMarker {
+  rank?: number | null;
+  gene?: string | null;
+  rs_id?: string | null;
+  clinical_significance?: string | null;
+  priority_score?: number | null;
+  ml_score?: number | null;
+  pharmacogenomic_effect?: string | null;
+  guideline_drugs?: string[];
+  knowledge_sources?: string[];
+  top_features?: FeatureContribution[];
+  explain_method?: string | null;
+  high_priority?: boolean;
+}
+
+export interface BiomarkerPanel {
+  total_variants: number;
+  high_priority_count: number;
+  ranked_markers: BiomarkerMarker[];
 }
 
 export interface DrugInteraction {
@@ -124,8 +159,10 @@ export interface DrugInteraction {
 }
 
 export interface ClinicalReportContent {
+  schema_version?: string;
   executive_summary: string[];
   high_priority_variants: HighPriorityVariant[];
+  biomarker_panel?: BiomarkerPanel | null;
   drug_recommendations: ClinicalDrugRecommendation[];
   drug_interactions: DrugInteraction[];
   digital_signature?: { signature: string; signed_at?: string; approver_id?: string } | null;
@@ -213,6 +250,24 @@ export interface AuditLog {
   details: string | null;
   ip_address: string | null;
   created_at: string;
+}
+
+export interface PlatformSettings {
+  app_name: string;
+  app_env: string;
+  auth_enabled: boolean;
+  audit_log_enabled: boolean;
+  phi_retention_days: number;
+  genome_build: string;
+  pipeline_mode: string;
+  pipeline_backend: string;
+  ai_assist_enabled: boolean;
+  metrics_enabled: boolean;
+  ml_ab_test_enabled: boolean;
+  variant_classifier_model: string;
+  ehr_fhir_organization_id: string;
+  ehr_hl7_sending_facility: string;
+  clinical_report_schema_version: string;
 }
 
 export interface ApiError {
