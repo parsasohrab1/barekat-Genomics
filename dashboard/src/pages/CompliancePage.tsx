@@ -40,21 +40,21 @@ export default function CompliancePage() {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-5 w-5 text-brand-600" />
-        <h1 className="text-lg font-semibold text-slate-800">چک‌لیست انطباق رگولاتوری</h1>
+        <h1 className="text-lg font-semibold text-slate-800">Regulatory compliance checklist</h1>
       </div>
       <p className="text-sm text-slate-600">
-        پیاده‌سازی‌شده: {summary.implemented ?? 0} · جزئی: {summary.partial ?? 0} · برنامه‌ریزی:{" "}
-        {summary.planned ?? 0} · کل: {summary.total ?? 0}
+        Implemented: {summary.implemented ?? 0} · Partial: {summary.partial ?? 0} · Planned:{" "}
+        {summary.planned ?? 0} · Total: {summary.total ?? 0}
       </p>
       <div className="overflow-x-auto stat-card">
         <table className="data-table">
           <thead>
             <tr>
-              <th>عنوان</th>
-              <th>دسته</th>
-              <th>وضعیت</th>
-              <th>مرجع</th>
-              <th>شواهد</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Reference</th>
+              <th>Evidence</th>
             </tr>
           </thead>
           <tbody>

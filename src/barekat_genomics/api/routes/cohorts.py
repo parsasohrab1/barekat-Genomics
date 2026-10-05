@@ -1,4 +1,4 @@
-"""API کوهورت و discovery نشانگر."""
+"""Cohort API and biomarker discovery."""
 
 from __future__ import annotations
 

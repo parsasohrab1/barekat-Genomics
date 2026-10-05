@@ -1,4 +1,4 @@
-"""کنترل‌های ایمنی — جلوگیری از پاسخ‌های تشخیصی مستقیم."""
+"""Safety controls — preventing direct diagnostic answers."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import re
 
 from barekat_genomics.ai.disclaimer import FULL_DISCLAIMER_FA
 
-# الگوهای پرسش که نیاز به هدایت به پشتیبان تصمیم دارند
+# Question patterns that need to be redirected to decision support
 DIAGNOSIS_PATTERNS = [
     r"تشخیص",
     r"مبتلا\s*به",
@@ -29,10 +29,10 @@ def is_diagnosis_request(question: str) -> bool:
 def diagnosis_redirect_response() -> dict:
     return {
         "answer_fa": (
-            "این سامانه مجاز به ارائه تشخیص مستقیم بیماری نیست. "
-            "می‌توانم اطلاعات فارماکوژنومیک واریانت را از PharmGKB/CPIC "
-            "برای کمک به تصمیم‌گیری شما ارائه دهم — مثلاً اثر بر دارو، سطح شواهد، "
-            "یا توصیه‌های CPIC. لطفاً سؤال خود را در این چارچوب بپرسید."
+            "This system is not permitted to provide a direct disease diagnosis. "
+            "I can provide the pharmacogenomic information of the variant from PharmGKB/CPIC "
+            "to help your decision-making — for example effect on drug, evidence level, "
+            "or CPIC recommendations. Please ask your question within this framework."
         ),
         "blocked": True,
         "disclaimer": FULL_DISCLAIMER_FA,

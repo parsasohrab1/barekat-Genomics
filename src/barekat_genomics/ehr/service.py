@@ -1,4 +1,4 @@
-"""سرویس یکپارچه‌سازی EHR."""
+"""EHR integration service."""
 
 from __future__ import annotations
 
@@ -63,7 +63,7 @@ class EHRIntegrationService:
                 success=False,
                 connector=connector_name,
                 format=fmt,
-                message=f"کانکتور ناشناخته: {connector_name}",
+                message=f"Unknown connector: {connector_name}",
             )
 
         if fmt not in connector.supported_formats:
@@ -71,7 +71,7 @@ class EHRIntegrationService:
                 success=False,
                 connector=connector_name,
                 format=fmt,
-                message=f"فرمت {fmt} برای {connector_name} پشتیبانی نمی‌شود",
+                message=f"Format {fmt} is not supported for {connector_name}",
             )
 
         if fmt == "fhir":

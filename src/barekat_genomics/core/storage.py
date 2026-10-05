@@ -1,4 +1,4 @@
-"""سرویس ذخیره‌سازی فایل‌های ژنومی و دارایی‌های مرجع."""
+"""Storage service for genomic files and reference assets."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from barekat_genomics.core.config import get_settings
 
 
 class StorageService:
-    """مدیریت فایل‌های خام توالی‌یابی و (اختیاری) bucket مرجع."""
+    """Management of raw sequencing files and (optionally) the reference bucket."""
 
     def __init__(self, *, bucket: str | None = None) -> None:
         settings = get_settings()
@@ -90,7 +90,7 @@ class StorageService:
             try:
                 self.client.create_bucket(Bucket=self.bucket)
             except Exception:
-                # ممکن است bucket از قبل وجود داشته باشد یا ACL محدود باشد
+                # The bucket may already exist or the ACL may be restricted
                 pass
 
 
@@ -99,6 +99,6 @@ def get_storage() -> StorageService:
 
 
 def get_reference_storage() -> StorageService:
-    """Bucket جداگانه برای دارایی‌های مرجع ژنوم (اشتراک بین workerها)."""
+    """Separate bucket for genome reference assets (shared between workers)."""
     settings = get_settings()
     return StorageService(bucket=settings.s3_reference_bucket)

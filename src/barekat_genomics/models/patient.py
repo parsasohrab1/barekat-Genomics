@@ -1,4 +1,4 @@
-"""مدل بیمار و داده‌های فنوتیپی."""
+"""Patient model and phenotypic data."""
 
 import uuid
 from datetime import datetime, timezone

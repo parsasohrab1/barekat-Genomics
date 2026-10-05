@@ -1,4 +1,4 @@
-"""پیکربندی Celery برای پردازش ناهمزمان."""
+"""Celery configuration for asynchronous processing."""
 
 from celery import Celery
 from kombu import Exchange, Queue

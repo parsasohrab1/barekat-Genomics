@@ -1,4 +1,4 @@
-"""بارگذاری فایل‌های TSV/VCF صادرشده از منابع رسمی."""
+"""Loading TSV/VCF files exported from official sources."""
 
 from __future__ import annotations
 
@@ -66,7 +66,7 @@ def load_pharmgkb_tsv(path: Path) -> dict[str, VariantKnowledge]:
     """
     PharmGKB clinical annotations export:
     rsid, gene, drug, phenotype, pgx_level
-    (چند دارو برای یک rsid پشتیبانی می‌شود)
+    (multiple drugs per rsid are supported)
     """
     by_rsid: dict[str, VariantKnowledge] = {}
     if not path.is_file():

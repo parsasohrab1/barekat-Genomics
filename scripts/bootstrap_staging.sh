@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# یک‌کلیکی بالا آوردن محیط Staging
+# One-click bring-up of the Staging environment
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

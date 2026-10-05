@@ -1,4 +1,4 @@
-"""ژن‌های فارماکوژنومیک — بدون وابستگی سنگین."""
+"""Pharmacogenomic genes — without heavy dependencies."""
 
 from barekat_genomics.modules.panels import CPIC_PANEL_GENES, PHARMACOGENOMIC_GENES
 

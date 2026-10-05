@@ -1,4 +1,4 @@
-"""ثبت runnerهای پایپ‌لاین."""
+"""Pipeline runner registry."""
 
 from barekat_genomics.pipeline.runners.base import PipelineRunner
 
@@ -17,5 +17,5 @@ def get_runner(backend: str) -> PipelineRunner:
     }
     runner = runners.get(backend)
     if not runner:
-        raise ValueError(f"بک‌اند پایپ‌لاین ناشناخته: {backend}")
+        raise ValueError(f"Unknown pipeline backend: {backend}")
     return runner

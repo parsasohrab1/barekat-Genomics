@@ -1,4 +1,4 @@
-"""دریافت HL7 v2 (ADT/ORU) و استخراج PID."""
+"""Receive HL7 v2 (ADT/ORU) and extract PID."""
 
 from __future__ import annotations
 
@@ -6,16 +6,16 @@ import re
 
 
 def parse_hl7_message(message: str) -> dict:
-    """پارس ساده HL7 v2 با جداکننده | و ^."""
+    """Simple HL7 v2 parse with | and ^ separators."""
     text = message.replace("\r\n", "\n").replace("\r", "\n").strip()
     if not text:
-        raise ValueError("پیام HL7 خالی است")
+        raise ValueError("HL7 message is empty")
 
     segments = [line for line in text.split("\n") if line.strip()]
     msh = next((s for s in segments if s.startswith("MSH")), None)
     pid = next((s for s in segments if s.startswith("PID")), None)
     if not pid:
-        raise ValueError("سگمنت PID یافت نشد")
+        raise ValueError("PID segment not found")
 
     fields = pid.split("|")
     # PID-3 patient identifier list, PID-5 name, PID-8 sex
@@ -41,7 +41,7 @@ def parse_hl7_message(message: str) -> dict:
             msg_type = msh_fields[8].split("^")[0]
 
     if not external_id:
-        raise ValueError("شناسه بیمار در PID-3 یافت نشد")
+        raise ValueError("Patient ID not found in PID-3")
 
     return {
         "external_id": external_id,

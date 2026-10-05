@@ -1,4 +1,4 @@
-"""مدیریت کلید API شرکا + آمار هزینه/کش."""
+"""Partner API key management + cost/cache statistics."""
 
 from __future__ import annotations
 
@@ -81,7 +81,7 @@ def revoke_key(
     org_id = user.organization_id or OrganizationService(db).ensure_default().id
     ok = ApiKeyService(db).revoke(key_id, org_id)
     if not ok:
-        raise HTTPException(status_code=404, detail="کلید یافت نشد")
+        raise HTTPException(status_code=404, detail="Key not found")
     return {"revoked": True}
 
 

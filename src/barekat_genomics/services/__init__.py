@@ -1,4 +1,4 @@
-"""سرویس‌های کسب‌وکار."""
+"""Business services."""
 
 from barekat_genomics.services.patient_service import PatientService
 from barekat_genomics.services.pipeline_service import PipelineService

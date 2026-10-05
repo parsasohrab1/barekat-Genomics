@@ -45,14 +45,14 @@ export default function DashboardPage() {
       .then(([jobs, reports]) => {
         const jobActs = jobs.slice(0, 3).map((j) => ({
           id: j.id,
-          title: `پایپ‌لاین ${j.sample_label ?? j.id.slice(0, 8)}`,
+          title: `Pipeline ${j.sample_label ?? j.id.slice(0, 8)}`,
           description: `${stageLabel[j.stage] ?? j.stage} — ${jobStatusLabel[j.status] ?? j.status}`,
           time: formatDateTime(j.created_at),
           status: j.status === "completed" ? "success" : j.status === "failed" ? "failed" : "running",
         }));
         const reportActs = reports.slice(0, 2).map((r) => ({
           id: r.id,
-          title: `گزارش ${r.report_type}`,
+          title: `Report ${r.report_type}`,
           description: r.summary ?? "—",
           time: formatDateTime(r.created_at),
           status: r.status === "completed" ? "success" : "pending",
@@ -76,35 +76,35 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {!apiOnline && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700">
-          API در دسترس نیست — آمار صفر نمایش داده می‌شود
+          API unavailable — showing zero statistics
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-        <StatCard title="بیماران" value={s.total_patients} icon={Users} color="bg-brand-600" />
-        <StatCard title="نمونه‌ها" value={s.total_samples} icon={FlaskConical} color="bg-indigo-500" />
-        <StatCard title="پایپ‌لاین فعال" value={s.active_pipelines} icon={GitBranch} color="bg-violet-500" />
-        <StatCard title="گزارش‌ها" value={s.completed_reports} icon={FileText} color="bg-emerald-500" />
-        <StatCard title="واریانت‌ها" value={s.variants_detected.toLocaleString("fa-IR")} icon={Dna} color="bg-rose-500" />
-        <StatCard title="توصیه دارویی" value={s.drug_recommendations} icon={Pill} color="bg-amber-500" />
+        <StatCard title="Patients" value={s.total_patients} icon={Users} color="bg-brand-600" />
+        <StatCard title="Samples" value={s.total_samples} icon={FlaskConical} color="bg-indigo-500" />
+        <StatCard title="Active pipelines" value={s.active_pipelines} icon={GitBranch} color="bg-violet-500" />
+        <StatCard title="Reports" value={s.completed_reports} icon={FileText} color="bg-emerald-500" />
+        <StatCard title="Variants" value={s.variants_detected.toLocaleString("fa-IR")} icon={Dna} color="bg-rose-500" />
+        <StatCard title="Drug recommendations" value={s.drug_recommendations} icon={Pill} color="bg-amber-500" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="stat-card lg:col-span-2">
-          <h3 className="mb-4 text-sm font-semibold text-slate-700">روند نمونه‌ها و گزارش‌ها</h3>
+          <h3 className="mb-4 text-sm font-semibold text-slate-700">Sample and report trend</h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis dataKey="month" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="samples" name="نمونه" fill="#0891b2" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="reports" name="گزارش" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="samples" name="Samples" fill="#0891b2" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="reports" name="Reports" fill="#6366f1" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className="stat-card">
-          <h3 className="mb-4 text-sm font-semibold text-slate-700">توزیع نوع واریانت</h3>
+          <h3 className="mb-4 text-sm font-semibold text-slate-700">Variant type distribution</h3>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie data={variantTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value">
@@ -117,9 +117,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="stat-card">
-        <h3 className="mb-4 text-sm font-semibold text-slate-700">فعالیت‌های اخیر (از API)</h3>
+        <h3 className="mb-4 text-sm font-semibold text-slate-700">Recent activity (from the API)</h3>
         {activities.length === 0 ? (
-          <p className="text-sm text-slate-400">فعالیتی ثبت نشده</p>
+          <p className="text-sm text-slate-400">No activity recorded</p>
         ) : (
           <div className="space-y-3">
             {activities.map((item) => (

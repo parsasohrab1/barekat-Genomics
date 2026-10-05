@@ -11,28 +11,28 @@ export default function VariantsPage() {
   useEffect(() => {
     getVariants()
       .then(setVariants)
-      .catch(() => setError("خطا در بارگذاری واریانت‌ها"))
+      .catch(() => setError("Error loading variants"))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-sm text-slate-400">در حال بارگذاری...</p>;
+  if (loading) return <p className="text-sm text-slate-400">Loading...</p>;
   if (error) return <p className="text-sm text-rose-600">{error}</p>;
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-card">
       {variants.length === 0 ? (
-        <p className="p-8 text-center text-sm text-slate-400">واریانتی ثبت نشده</p>
+        <p className="p-8 text-center text-sm text-slate-400">No variants recorded</p>
       ) : (
         <table className="data-table">
           <thead>
             <tr>
-              <th>بیمار</th>
-              <th>ژن</th>
+              <th>Patient</th>
+              <th>Gene</th>
               <th>rsID</th>
-              <th>موقعیت</th>
-              <th>اهمیت بالینی</th>
-              <th>اولویت</th>
-              <th>دارو</th>
+              <th>Position</th>
+              <th>Clinical significance</th>
+              <th>Priority</th>
+              <th>Drug</th>
             </tr>
           </thead>
           <tbody>

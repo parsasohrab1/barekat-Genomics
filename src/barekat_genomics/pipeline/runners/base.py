@@ -1,4 +1,4 @@
-"""رابط اجرای پایپ‌لاین روی بک‌اند‌های مختلف."""
+"""Interface for running the pipeline on different backends."""
 
 from __future__ import annotations
 
@@ -13,4 +13,4 @@ class PipelineRunner(ABC):
 
     @abstractmethod
     def submit(self, job: PipelineJob, sample: SequencingSample) -> str | None:
-        """شروع اجرا — برگرداندن external job id یا celery task id."""
+        """Start the run — return the external job id or celery task id."""

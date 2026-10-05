@@ -1,4 +1,4 @@
-"""متریک‌های Prometheus برای پایپ‌لاین و API."""
+"""Prometheus metrics for the pipeline and API."""
 
 from __future__ import annotations
 
@@ -10,56 +10,56 @@ from prometheus_client import Counter, Gauge, Histogram, Info, generate_latest
 # --- Pipeline ---
 PIPELINE_JOBS_TOTAL = Counter(
     "barekat_pipeline_jobs_total",
-    "تعداد کل jobهای پایپ‌لاین",
+    "Total number of pipeline jobs",
     ["status", "priority", "backend"],
 )
 
 PIPELINE_DURATION_SECONDS = Histogram(
     "barekat_pipeline_duration_seconds",
-    "مدت زمان اجرای پایپ‌لاین (ثانیه)",
+    "Pipeline run duration (seconds)",
     ["status", "priority", "backend"],
     buckets=(30, 60, 120, 300, 600, 1200, 1800, 3600, 7200),
 )
 
 PIPELINE_ACTIVE_JOBS = Gauge(
     "barekat_pipeline_active_jobs",
-    "jobهای در حال اجرا",
+    "Running jobs",
     ["priority"],
 )
 
 QC_CHECKS_TOTAL = Counter(
     "barekat_qc_checks_total",
-    "نتایج کنترل کیفیت",
+    "Quality control results",
     ["result"],
 )
 
 PIPELINE_STAGE_ERRORS_TOTAL = Counter(
     "barekat_pipeline_stage_errors_total",
-    "خطاهای پایپ‌لاین به تفکیک مرحله",
+    "Pipeline errors by stage",
     ["stage", "error_type"],
 )
 
 VARIANTS_CALLED_TOTAL = Counter(
     "barekat_variants_called_total",
-    "واریانت‌های شناسایی‌شده",
+    "Detected variants",
     ["priority"],
 )
 
 # --- API ---
 HTTP_REQUESTS_TOTAL = Counter(
     "barekat_http_requests_total",
-    "درخواست‌های HTTP",
+    "HTTP requests",
     ["method", "endpoint", "status_code"],
 )
 
 HTTP_REQUEST_DURATION_SECONDS = Histogram(
     "barekat_http_request_duration_seconds",
-    "مدت زمان درخواست HTTP",
+    "HTTP request duration",
     ["method", "endpoint"],
     buckets=(0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0),
 )
 
-APP_INFO = Info("barekat_app", "اطلاعات اپلیکیشن")
+APP_INFO = Info("barekat_app", "Application information")
 
 
 def init_app_info(version: str, env: str) -> None:

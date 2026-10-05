@@ -1,4 +1,4 @@
-"""مدل نمونه توالی‌یابی (FASTQ/BAM/VCF/CRAM + assay WGS/WES/Panel)."""
+"""Sequencing sample model (FASTQ/BAM/VCF/CRAM + assay WGS/WES/Panel)."""
 
 import uuid
 from datetime import datetime, timezone

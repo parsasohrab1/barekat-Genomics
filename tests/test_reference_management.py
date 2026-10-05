@@ -1,4 +1,4 @@
-"""تست مدیریت مرجع GRCh38 — install محلی، validation، manifest، MinIO bucket جدا."""
+"""GRCh38 reference management test — local install, validation, manifest, separate MinIO bucket."""
 
 from __future__ import annotations
 
@@ -104,7 +104,7 @@ def test_manifest_checksum_detects_tamper(ref_env):
     fasta.write_text(fasta.read_text(encoding="utf-8") + "N\n", encoding="utf-8")
     result = validate_reference_bundle()
     checksum_fails = [c for c in result.checks if c.name.startswith("checksum:") and not c.ok]
-    assert checksum_fails, "باید mismatch checksum را گزارش کند"
+    assert checksum_fails, "Must report a checksum mismatch"
 
 
 def test_write_manifest_explicit(ref_env):
@@ -118,7 +118,7 @@ def test_write_manifest_explicit(ref_env):
 
 def test_reference_status_api_includes_bucket(client, ref_env, monkeypatch):
     install_reference_from_local(ref_env["src"])
-    # client fixture از قبل ساخته شده؛ cache را برای درخواست بعدی تازه کنید
+    # the client fixture is already built; refresh the cache for the next request
     get_settings.cache_clear()
     resp = client.get("/api/v1/pipeline/reference/status")
     assert resp.status_code == 200

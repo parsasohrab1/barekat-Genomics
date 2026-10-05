@@ -1,4 +1,4 @@
-"""راه‌اندازی Sentry برای ردیابی exception."""
+"""Sentry setup for exception tracking."""
 
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ def init_sentry() -> None:
 
 
 def _scrub_phi(event: dict, _hint: dict) -> dict | None:
-    """حذف فیلدهای حساس قبل از ارسال به Sentry."""
+    """Remove sensitive fields before sending to Sentry."""
     if "request" in event and "data" in event["request"]:
         data = event["request"]["data"]
         if isinstance(data, dict):

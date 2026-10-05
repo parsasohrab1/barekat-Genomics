@@ -25,7 +25,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : "ورود ناموفق بود");
+      setError(err instanceof ApiClientError ? err.message : "Login failed");
     } finally {
       setSubmitting(false);
     }
@@ -39,12 +39,12 @@ export default function LoginPage() {
             <Activity className="h-6 w-6 text-white" />
           </div>
           <h1 className="text-xl font-bold text-slate-800">barekat Genomics</h1>
-          <p className="text-sm text-slate-500">ورود به پلتفرم ژنومیکس</p>
+          <p className="text-sm text-slate-500">Sign in to the genomics platform</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">ایمیل</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
             <input
               type="email"
               required
@@ -56,7 +56,7 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">رمز عبور</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
             <input
               type="password"
               required
@@ -75,12 +75,12 @@ export default function LoginPage() {
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
           >
             <LogIn className="h-4 w-4" />
-            {submitting ? "در حال ورود..." : "ورود"}
+            {submitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
         <div className="mt-6 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-          <p className="font-medium text-slate-600">کاربران نمونه:</p>
+          <p className="font-medium text-slate-600">Sample users:</p>
           <p className="mt-1" dir="ltr">clinician@barekat.local / clinician123</p>
           <p dir="ltr">geneticist@barekat.local / geneticist123</p>
           <p dir="ltr">lab@barekat.local / labtech123</p>

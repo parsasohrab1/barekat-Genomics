@@ -1,4 +1,4 @@
-"""ثبت دارایی دانشی / مالکیت فکری (مدل، روش، کیت نرم‌افزاری)."""
+"""Knowledge asset / intellectual property registration (model, method, software kit)."""
 
 from __future__ import annotations
 

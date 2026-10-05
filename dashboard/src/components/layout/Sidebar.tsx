@@ -15,17 +15,17 @@ import {
 import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
-  { to: "/", icon: LayoutDashboard, label: "داشبورد", roles: ["physician", "clinician", "analyst", "geneticist", "lab_tech", "admin"] },
-  { to: "/patients", icon: Users, label: "بیماران", roles: ["physician", "clinician", "analyst", "geneticist", "lab_tech", "admin"] },
-  { to: "/samples", icon: FlaskConical, label: "نمونه‌ها", roles: ["lab_tech", "admin"] },
-  { to: "/pipeline", icon: GitBranch, label: "پایپ‌لاین", roles: ["lab_tech", "admin"] },
-  { to: "/reports", icon: FileText, label: "گزارش‌ها", roles: ["physician", "clinician", "analyst", "geneticist", "admin"] },
-  { to: "/review", icon: ClipboardCheck, label: "در انتظار تأیید", roles: ["analyst", "geneticist", "admin"] },
-  { to: "/variants", icon: Dna, label: "واریانت‌ها", roles: ["physician", "clinician", "analyst", "geneticist", "admin"] },
-  { to: "/billing", icon: Activity, label: "اشتراک", roles: ["admin"] },
-  { to: "/compliance", icon: ScrollText, label: "انطباق", roles: ["admin", "analyst", "geneticist"] },
-  { to: "/audit", icon: ScrollText, label: "ممیزی", roles: ["admin"] },
-  { to: "/settings", icon: Settings, label: "تنظیمات", roles: ["admin"] },
+  { to: "/", icon: LayoutDashboard, label: "Dashboard", roles: ["physician", "clinician", "analyst", "geneticist", "lab_tech", "admin"] },
+  { to: "/patients", icon: Users, label: "Patients", roles: ["physician", "clinician", "analyst", "geneticist", "lab_tech", "admin"] },
+  { to: "/samples", icon: FlaskConical, label: "Samples", roles: ["lab_tech", "admin"] },
+  { to: "/pipeline", icon: GitBranch, label: "Pipeline", roles: ["lab_tech", "admin"] },
+  { to: "/reports", icon: FileText, label: "Reports", roles: ["physician", "clinician", "analyst", "geneticist", "admin"] },
+  { to: "/review", icon: ClipboardCheck, label: "Pending approval", roles: ["analyst", "geneticist", "admin"] },
+  { to: "/variants", icon: Dna, label: "Variants", roles: ["physician", "clinician", "analyst", "geneticist", "admin"] },
+  { to: "/billing", icon: Activity, label: "Subscription", roles: ["admin"] },
+  { to: "/compliance", icon: ScrollText, label: "Compliance", roles: ["admin", "analyst", "geneticist"] },
+  { to: "/audit", icon: ScrollText, label: "Audit", roles: ["admin"] },
+  { to: "/settings", icon: Settings, label: "Settings", roles: ["admin"] },
 ];
 
 interface SidebarProps {
@@ -50,7 +50,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {!collapsed && (
           <div className="overflow-hidden">
             <p className="truncate text-sm font-bold text-white">barekat Genomics</p>
-            <p className="truncate text-[10px] text-slate-400">پلتفرم ژنومیکس</p>
+            <p className="truncate text-[10px] text-slate-400">Genomics platform</p>
           </div>
         )}
       </div>
@@ -79,12 +79,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <button
           onClick={onToggle}
           className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-400 transition-colors hover:bg-sidebar-hover hover:text-white"
-          aria-label="جمع کردن سایدبار"
+          aria-label="Collapse sidebar"
         >
           <ChevronLeft
             className={`h-4 w-4 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
           />
-          {!collapsed && <span>جمع کردن</span>}
+          {!collapsed && <span>Collapse</span>}
         </button>
       </div>
     </aside>

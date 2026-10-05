@@ -1,4 +1,4 @@
-"""کش Redis + PostgreSQL برای تفسیر واریانت."""
+"""Redis + PostgreSQL cache for variant interpretation."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ def build_cache_key(
 
 
 class AnnotationCacheService:
-    """دو لایه Redis (سریع) + PostgreSQL (پایدار)."""
+    """Two layers: Redis (fast) + PostgreSQL (durable)."""
 
     def __init__(self, db: Session | None = None) -> None:
         self.settings = get_settings()

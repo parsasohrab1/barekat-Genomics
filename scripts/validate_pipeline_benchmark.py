@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""اعتبارسنجی پایپ‌لاین با دیتاست benchmark و گزارش حساسیت/ویژگی.
+"""Validate the pipeline with the benchmark dataset and report sensitivity/specificity.
 
 Usage:
   python scripts/validate_pipeline_benchmark.py
@@ -64,9 +64,9 @@ def render_markdown(metrics: dict) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--write", type=Path, help="خروجی Markdown")
-    parser.add_argument("--json-out", type=Path, help="خروجی JSON")
-    parser.add_argument("--regenerate", action="store_true", help="تولید دوباره data/benchmark")
+    parser.add_argument("--write", type=Path, help="Markdown output")
+    parser.add_argument("--json-out", type=Path, help="JSON output")
+    parser.add_argument("--regenerate", action="store_true", help="regenerate data/benchmark")
     args = parser.parse_args()
 
     if args.regenerate:
@@ -84,7 +84,7 @@ def main() -> int:
         args.write.write_text(render_markdown(metrics), encoding="utf-8")
         print(f"Wrote {args.write}")
 
-    # Gate اولیه فاز ۱
+    # Initial Phase 1 gate
     ok = metrics["sensitivity"] >= 0.8
     return 0 if ok else 2
 

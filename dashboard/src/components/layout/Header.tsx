@@ -8,21 +8,21 @@ import { useAuth, ROLE_LABELS } from "../../context/AuthContext";
 
 const pageTitles: Record<string, string> = {
 
-  "/": "داشبورد",
+  "/": "Dashboard",
 
-  "/patients": "بیماران",
+  "/patients": "Patients",
 
-  "/samples": "نمونه‌ها",
+  "/samples": "Samples",
 
-  "/pipeline": "پایپ‌لاین پردازش",
+  "/pipeline": "Processing pipeline",
 
-  "/reports": "گزارش‌های ژنومی",
+  "/reports": "Genomic reports",
 
-  "/variants": "واریانت‌ها",
+  "/variants": "Variants",
 
-  "/settings": "تنظیمات",
+  "/settings": "Settings",
 
-  "/audit": "لاگ ممیزی",
+  "/audit": "Audit log",
 
 };
 
@@ -46,9 +46,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
     location.pathname.startsWith("/reports/") && location.pathname !== "/reports"
 
-      ? "جزئیات گزارش"
+      ? "Report details"
 
-      : (pageTitles[location.pathname] ?? "داشبورد");
+      : (pageTitles[location.pathname] ?? "Dashboard");
 
 
 
@@ -64,7 +64,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
           className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 lg:hidden"
 
-          aria-label="منو"
+          aria-label="Menu"
 
         >
 
@@ -94,7 +94,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
             type="text"
 
-            placeholder="جستجوی بیمار، نمونه، واریانت..."
+            placeholder="Search patient, sample, variant..."
 
             className="w-56 bg-transparent text-sm outline-none placeholder:text-slate-400"
 
@@ -140,7 +140,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
             className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-rose-600"
 
-            title="خروج"
+            title="Log out"
 
           >
 

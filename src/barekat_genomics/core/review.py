@@ -1,4 +1,4 @@
-"""آستانه‌ها و وضعیت‌های گردش کار بررسی ژنتیک‌دان."""
+"""Thresholds and states of the geneticist review workflow."""
 
 ML_REVIEW_THRESHOLD = 0.7
 

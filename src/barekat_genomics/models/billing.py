@@ -1,4 +1,4 @@
-"""پلن اشتراک و صورتحساب (SaaS / On-prem)."""
+"""Subscription plan and billing (SaaS / On-prem)."""
 
 from __future__ import annotations
 

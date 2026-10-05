@@ -1,4 +1,4 @@
-"""مدل‌های یکپارچه پایگاه دانش."""
+"""Unified knowledge base models."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ class VariantKnowledge:
     clinvar_review_status: str | None = None
     # gnomAD
     gnomad_af: float | None = None
-    # درون‌گنی (CADD, SIFT, PolyPhen, conservation)
+    # intragenic (CADD, SIFT, PolyPhen, conservation)
     cadd_phred: float | None = None
     sift_score: float | None = None
     polyphen_score: float | None = None
@@ -38,7 +38,7 @@ class VariantKnowledge:
     sources: list[str] = field(default_factory=list)
 
     def merge(self, other: VariantKnowledge) -> VariantKnowledge:
-        """ادغام رکوردها با اولویت مقادیر غیرخالی."""
+        """Merge records, giving priority to non-empty values."""
         for src in other.sources:
             if src not in self.sources:
                 self.sources.append(src)

@@ -1,4 +1,4 @@
-"""کانکتور تجهیز — نرم‌افزار رایج HIS ایران."""
+"""Tajhiz connector — a common Iranian HIS software."""
 
 from __future__ import annotations
 
@@ -11,15 +11,15 @@ from barekat_genomics.ehr.models import ConnectorResult, EHRContext
 
 class TajhizConnector(EHRConnector):
     """
-    اتصال به سامانه تجهیز (HIS).
+    Connection to the Tajhiz (HIS) system.
 
-    در حالت production پیام FHIR Bundle یا HL7 ORU را به API تجهیز ارسال می‌کند.
-    بدون تنظیم URL، حالت dry-run فعال است.
+    In production mode it sends a FHIR Bundle or HL7 ORU message to the Tajhiz API.
+    Without a configured URL, dry-run mode is active.
     """
 
     name = "tajhiz"
     display_name = "Tajhiz HIS"
-    display_name_fa = "تجهیز"
+    display_name_fa = "Tajhiz"
     supported_formats = ("fhir", "hl7", "json")
 
     def push(self, ctx: EHRContext, payload: str | dict, fmt: str) -> ConnectorResult:
@@ -42,7 +42,7 @@ class TajhizConnector(EHRConnector):
                 success=True,
                 connector=self.name,
                 format=fmt,
-                message="dry-run: تجهیز — URL پیکربندی نشده",
+                message="dry-run: Tajhiz — URL not configured",
                 external_id=f"TAJ-DRY-{ctx.report_id or ctx.patient_ehr_id}",
                 details={"mode": "dry_run", "endpoint": None},
             )
@@ -60,7 +60,7 @@ class TajhizConnector(EHRConnector):
                     success=True,
                     connector=self.name,
                     format=fmt,
-                    message="ارسال موفق به تجهیز",
+                    message="Successfully sent to Tajhiz",
                     external_id=data.get("transactionId") or data.get("id"),
                     details=data,
                 )
@@ -69,6 +69,6 @@ class TajhizConnector(EHRConnector):
                 success=False,
                 connector=self.name,
                 format=fmt,
-                message=f"خطا در ارسال به تجهیز: {exc}",
+                message=f"Error sending to Tajhiz: {exc}",
                 details={"error": str(exc)},
             )

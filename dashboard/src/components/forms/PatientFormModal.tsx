@@ -36,44 +36,44 @@ export default function PatientFormModal({ open, onClose, onSuccess }: PatientFo
       onClose();
       setForm({ external_id: "", name: "", age: undefined, gender: "", ehr_patient_id: "" });
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : "خطا در ثبت بیمار");
+      setError(err instanceof ApiClientError ? err.message : "Error registering patient");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="ثبت بیمار جدید">
+    <Modal open={open} onClose={onClose} title="Register new patient">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Field label="شناسه بیمار *" value={form.external_id} onChange={(v) => setForm({ ...form, external_id: v })} required />
-        <Field label="نام" value={form.name ?? ""} onChange={(v) => setForm({ ...form, name: v })} />
+        <Field label="Patient ID *" value={form.external_id} onChange={(v) => setForm({ ...form, external_id: v })} required />
+        <Field label="Name" value={form.name ?? ""} onChange={(v) => setForm({ ...form, name: v })} />
         <div className="grid grid-cols-2 gap-3">
-          <Field label="سن" value={String(form.age ?? "")} onChange={(v) => setForm({ ...form, age: v ? Number(v) : undefined })} type="number" />
+          <Field label="Age" value={String(form.age ?? "")} onChange={(v) => setForm({ ...form, age: v ? Number(v) : undefined })} type="number" />
           <div>
-            <label className="mb-1 block text-sm text-slate-600">جنسیت</label>
+            <label className="mb-1 block text-sm text-slate-600">Gender</label>
             <select
               value={form.gender ?? ""}
               onChange={(e) => setForm({ ...form, gender: e.target.value })}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
             >
               <option value="">—</option>
-              <option value="Male">مرد</option>
-              <option value="Female">زن</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
             </select>
           </div>
         </div>
-        <Field label="شناسه EHR" value={form.ehr_patient_id ?? ""} onChange={(v) => setForm({ ...form, ehr_patient_id: v })} />
+        <Field label="EHR ID" value={form.ehr_patient_id ?? ""} onChange={(v) => setForm({ ...form, ehr_patient_id: v })} />
         {error && <p className="text-sm text-rose-600">{error}</p>}
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" onClick={onClose} className="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50">
-            انصراف
+            Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
             className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
           >
-            {loading ? "در حال ثبت..." : "ثبت بیمار"}
+            {loading ? "Registering..." : "Register patient"}
           </button>
         </div>
       </form>

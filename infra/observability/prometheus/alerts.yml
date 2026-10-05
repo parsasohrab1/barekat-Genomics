@@ -13,8 +13,8 @@ groups:
           severity: critical
           team: bioinformatics
         annotations:
-          summary: "نرخ خطای پایپ‌لاین بالای ۱۰٪"
-          description: "بیش از ۱۰٪ jobهای پایپ‌لاین در ۱۰ دقیقه گذشته شکست خورده‌اند."
+          summary: "Pipeline error rate above 10%"
+          description: "More than 10% of pipeline jobs failed in the last 10 minutes."
 
       - alert: PipelineJobFailed
         expr: increase(barekat_pipeline_jobs_total{status="failed"}[5m]) > 0
@@ -23,8 +23,8 @@ groups:
           severity: warning
           team: bioinformatics
         annotations:
-          summary: "پایپ‌لاین شکست خورد"
-          description: "حداقل یک job پایپ‌لاین در ۵ دقیقه گذشته با status=failed ثبت شده."
+          summary: "Pipeline failed"
+          description: "At least one pipeline job was recorded with status=failed in the last 5 minutes."
 
       - alert: QCSampleRejected
         expr: increase(barekat_qc_checks_total{result="failed"}[5m]) > 0
@@ -33,8 +33,8 @@ groups:
           severity: warning
           team: lab
         annotations:
-          summary: "نمونه در QC رد شد"
-          description: "حداقل یک نمونه در کنترل کیفیت رد شده — بررسی نمونه و پارامترهای QC."
+          summary: "Sample rejected in QC"
+          description: "At least one sample was rejected in quality control — check the sample and QC parameters."
 
       - alert: APIUnhealthy
         expr: up{job="barekat-api"} == 0
@@ -43,8 +43,8 @@ groups:
           severity: critical
           team: platform
         annotations:
-          summary: "API barekat در دسترس نیست"
-          description: "Prometheus نمی‌تواند متریک API را scrape کند."
+          summary: "barekat API is unavailable"
+          description: "Prometheus cannot scrape the API metrics."
 
       - alert: PipelineSlowP95
         expr: |
@@ -55,5 +55,5 @@ groups:
           severity: warning
           team: bioinformatics
         annotations:
-          summary: "پایپ‌لاین کند — P95 بالای ۱ ساعت"
-          description: "زمان اجرای پایپ‌لاین (P95) از ۳۶۰۰ ثانیه بیشتر شده."
+          summary: "Slow pipeline — P95 above 1 hour"
+          description: "Pipeline run time (P95) has exceeded 3600 seconds."

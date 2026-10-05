@@ -1,4 +1,4 @@
-"""دستیار پشتیبان تصمیم — خلاصه ساده و پرسش واریانت."""
+"""Decision-support assistant — plain summary and variant question."""
 
 import uuid
 
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/ai")
 
 def _require_ai_assist(user: CurrentUser) -> None:
     if not has_permission(user.role, Permission.AI_ASSIST):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی به دستیار مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access to the assistant is not allowed")
 
 
 @router.get("/disclaimer")
@@ -40,11 +40,11 @@ def plain_summary(
     _require_ai_assist(user)
     service = AIAssistService(db)
     if not service.is_enabled():
-        raise HTTPException(status_code=503, detail="دستیار پشتیبان تصمیم غیرفعال است")
+        raise HTTPException(status_code=503, detail="The decision-support assistant is disabled")
 
     report = service.reports.get_report(report_id)
     if not report:
-        raise HTTPException(status_code=404, detail="گزارش یافت نشد")
+        raise HTTPException(status_code=404, detail="Report not found")
 
     if has_permission(user.role, Permission.REPORTS_READ_OWN) and not has_permission(
         user.role, Permission.REPORTS_READ
@@ -79,12 +79,12 @@ def ask_variant(
     _require_ai_assist(user)
     service = AIAssistService(db)
     if not service.is_enabled():
-        raise HTTPException(status_code=503, detail="دستیار پشتیبان تصمیم غیرفعال است")
+        raise HTTPException(status_code=503, detail="The decision-support assistant is disabled")
 
     if not data.variant_id and not data.rs_id:
         raise HTTPException(
             status_code=400,
-            detail="variant_id یا rs_id الزامی است",
+            detail="variant_id or rs_id is required",
         )
 
     try:

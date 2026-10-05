@@ -10,7 +10,7 @@ from barekat_genomics.core.security import (
 
 
 def test_phi_encryption_roundtrip():
-    original = "احمد محمدی"
+    original = "Ahmad Mohammadi"
     encrypted = encrypt_phi(original)
     assert encrypted != original
     decrypted = decrypt_phi(encrypted)

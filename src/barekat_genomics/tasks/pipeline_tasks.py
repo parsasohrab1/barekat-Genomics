@@ -1,4 +1,4 @@
-"""وظایف Celery برای پایپ‌لاین با retry هوشمند."""
+"""Celery tasks for the pipeline with smart retry."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from barekat_genomics.tasks.celery_app import celery_app
 
 init_sentry()
 
-# خطاهای موقتی قابل retry (IO / broker / شبکه)
+# Transient errors that can be retried (IO / broker / network)
 _RETRYABLE_MARKERS = (
     "Timeout",
     "Connection",

@@ -22,30 +22,30 @@
 
 ```bash
 docker compose -f docker-compose.staging.yml up -d --build
-# یا: bash scripts/bootstrap_staging.sh
+# or: bash scripts/bootstrap_staging.sh
 ```
 
-| سرویس | پورت |
+| Service | Port |
 |--------|------|
 | API/Dashboard | 8000 |
 | Postgres | 5433 |
 | Redis | 6380 |
 | MinIO | 9010 / 9011 |
 
-راهنمای اپراتور: [OPERATOR_GUIDE.md](OPERATOR_GUIDE.md)
+Operator guide: [OPERATOR_GUIDE.md](OPERATOR_GUIDE.md)
 
 ## Dashboard
 
 | Page | Route | Description |
 |------|-------|-------------|
-| داشبورد | `/` | آمار کلی، نمودارها، فعالیت‌های اخیر |
-| بیماران | `/patients` | لیست و جستجوی بیماران |
-| نمونه‌ها | `/samples` | آپلود و وضعیت FASTQ/BAM |
-| پایپ‌لاین | `/pipeline` | وظایف پردازش و پیشرفت |
-| گزارش‌ها | `/reports` | گزارش‌های ژنومی و EHR |
-| گزارش | `/reports/:id` | جزئیات واریانت و توصیه دارویی |
-| واریانت‌ها | `/variants` | واریانت‌ها با اولویت‌بندی ML |
-| تنظیمات | `/settings` | HIPAA، مدل ML، EHR |
+| Dashboard | `/` | Overall statistics, charts, recent activity |
+| Patients | `/patients` | Patient list and search |
+| Samples | `/samples` | FASTQ/BAM upload and status |
+| Pipeline | `/pipeline` | Processing jobs and progress |
+| Reports | `/reports` | Genomic reports and EHR |
+| Report | `/reports/:id` | Variant details and drug recommendation |
+| Variants | `/variants` | Variants with ML prioritization |
+| Settings | `/settings` | HIPAA, ML model, EHR |
 
 ## API Endpoints
 

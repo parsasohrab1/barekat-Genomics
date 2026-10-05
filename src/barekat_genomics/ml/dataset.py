@@ -1,4 +1,4 @@
-"""ساخت دیتاست برچسب‌خورده از ClinVar + PharmGKB."""
+"""Build a labeled dataset from ClinVar + PharmGKB."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ def _label_from_clinvar(sig: str | None) -> int | None:
 
 
 def load_variant_scores(path: Path) -> dict[str, dict]:
-    """CADD, SIFT, PolyPhen, PhyloP از فایل annotation."""
+    """CADD, SIFT, PolyPhen, PhyloP from the annotation file."""
     scores: dict[str, dict] = {}
     if not path.is_file():
         return scores
@@ -50,9 +50,9 @@ def load_variant_scores(path: Path) -> dict[str, dict]:
 
 def build_labeled_dataset(knowledge_dir: Path) -> tuple[np.ndarray, np.ndarray, list[str]]:
     """
-    برچسب‌گذاری:
-    - مثبت: ClinVar pathogenic/drug_response یا PharmGKB level 1A/1B
-    - منفی: ClinVar benign
+    Labeling:
+    - Positive: ClinVar pathogenic/drug_response or PharmGKB level 1A/1B
+    - Negative: ClinVar benign
     """
     d = knowledge_dir
     clinvar = load_clinvar_tsv(d / "clinvar.tsv")
@@ -107,7 +107,7 @@ def build_labeled_dataset(knowledge_dir: Path) -> tuple[np.ndarray, np.ndarray, 
         ids.append(rsid)
 
     if not X_rows:
-        raise ValueError(f"هیچ نمونه برچسب‌خورده‌ای در {knowledge_dir} یافت نشد")
+        raise ValueError(f"No labeled sample was found in {knowledge_dir}")
 
     return np.array(X_rows, dtype=np.float32), np.array(y_rows, dtype=np.int32), ids
 
@@ -120,7 +120,7 @@ def augment_dataset(
     copies: int = 20,
     seed: int = 42,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """افزایش داده با نویز کنترل‌شده برای آموزش پایدار."""
+    """Data augmentation with controlled noise for stable training."""
     rng = np.random.RandomState(seed)
     xs, ys = [X], [y]
     for _ in range(copies):
@@ -131,7 +131,7 @@ def augment_dataset(
     return np.vstack(xs), np.concatenate(ys)
 
 
-# سطح شواهد PharmGKB تقریبی برای SNPهای شناخته‌شده در داده سنتتیک
+# Approximate PharmGKB evidence level for known SNPs in synthetic data
 _PGX_LEVEL_HINTS: dict[str, float] = {
     "rs1801133": 0.7,
     "rs4244285": 1.0,
@@ -151,15 +151,15 @@ _ANON_RSID_ORDER: list[str] = [
 
 def load_anonymized_training(csv_path: Path) -> tuple[np.ndarray, np.ndarray, list[str]]:
     """
-    نگاشت anonymized_training.csv به بردار ویژگی ۱۲بعدی مدل.
+    Mapping of anonymized_training.csv to the model's 12-dimensional feature vector.
 
-    هر ردیف نمونه جمعیتی → یک نمونه آموزشی با فیچرهای تقریبی از دوز الل PGx.
+    Each population row → one training sample with approximate features from the PGx allele dose.
     """
     import pandas as pd
 
     df = pd.read_csv(csv_path)
     if "label" not in df.columns:
-        raise ValueError(f"ستون label در {csv_path} نیست")
+        raise ValueError(f"The label column is not in {csv_path}")
 
     rsid_cols = [rs for rs in _ANON_RSID_ORDER if rs in df.columns]
     if not rsid_cols:
@@ -199,5 +199,5 @@ def load_anonymized_training(csv_path: Path) -> tuple[np.ndarray, np.ndarray, li
         ids.append(str(row["sample_hash"]) if "sample_hash" in df.columns else f"anon-{idx}")
 
     if not X_rows:
-        raise ValueError(f"هیچ ردیفی در {csv_path} نیست")
+        raise ValueError(f"There are no rows in {csv_path}")
     return np.array(X_rows, dtype=np.float32), np.array(y_rows, dtype=np.int32), ids

@@ -1,4 +1,4 @@
-"""تنظیمات پلتفرم و وضعیت HIPAA (فقط خواندنی از env)."""
+"""Platform settings and HIPAA status (read-only from env)."""
 
 from fastapi import APIRouter, Depends
 

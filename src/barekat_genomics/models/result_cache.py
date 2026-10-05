@@ -1,4 +1,4 @@
-"""کش نتایج پایپ‌لاین و هزینه محاسبات."""
+"""Pipeline result cache and computation cost."""
 
 from __future__ import annotations
 

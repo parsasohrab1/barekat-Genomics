@@ -1,4 +1,4 @@
-"""وابستگی‌های FastAPI: احراز هویت، RBAC و multi-tenant."""
+"""FastAPI dependencies: authentication, RBAC and multi-tenant."""
 
 from __future__ import annotations
 
@@ -65,7 +65,7 @@ async def get_current_user(
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="احراز هویت لازم است",
+            detail="Authentication required",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -75,13 +75,13 @@ async def get_current_user(
     except (TokenDecodeError, KeyError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="توکن نامعتبر",
+            detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
     user = db.query(User).filter(User.id == user_id, User.is_active.is_(True)).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="کاربر یافت نشد")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
     org_id = user.organization_id
     token_org = payload.get("org")
@@ -95,11 +95,11 @@ async def get_current_user(
         try:
             requested = uuid.UUID(x_organization_id)
         except ValueError:
-            raise HTTPException(status_code=400, detail="X-Organization-Id نامعتبر")
+            raise HTTPException(status_code=400, detail="Invalid X-Organization-Id")
         if user.role == "admin" or OrganizationService(db).user_belongs(user.id, requested):
             org_id = requested
         else:
-            raise HTTPException(status_code=403, detail="عضویت در این سازمان مجاز نیست")
+            raise HTTPException(status_code=403, detail="Membership in this organization is not allowed")
 
     set_current_org_id(org_id)
     return CurrentUser(
@@ -116,7 +116,7 @@ def require_permission(permission: Permission):
         if not has_permission(user.role, permission):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"دسترسی مجاز نیست: {permission.value}",
+                detail=f"Access not allowed: {permission.value}",
             )
         return user
 
@@ -136,4 +136,4 @@ def can_access_patient(user: CurrentUser, patient: Patient) -> bool:
 
 def assert_patient_access(user: CurrentUser, patient: Patient) -> None:
     if not can_access_patient(user, patient):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی به این بیمار مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access to this patient is not allowed")

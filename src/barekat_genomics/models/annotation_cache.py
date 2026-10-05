@@ -1,4 +1,4 @@
-"""کش تفسیر واریانت — جلوگیری از annotate مجدد همان rsID."""
+"""Variant interpretation cache — avoids re-annotating the same rsID."""
 
 import uuid
 from datetime import datetime, timezone

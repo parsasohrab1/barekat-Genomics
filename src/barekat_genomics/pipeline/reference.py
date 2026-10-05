@@ -1,4 +1,4 @@
-"""مسیرهای مرجع ژنوم GRCh38، اعتبارسنجی Pass/Fail، و همگام‌سازی با MinIO."""
+"""GRCh38 genome reference paths, Pass/Fail validation, and synchronization with MinIO."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from barekat_genomics.core.config import get_settings
 REFERENCE_PREFIX = "genomes"
 MANIFEST_NAME = "reference_manifest.json"
 
-# پسوندهای ایندکس BWA-MEM2 و BWA کلاسیک
+# BWA-MEM2 and classic BWA index suffixes
 BWA_MEM2_SUFFIXES = (".amb", ".ann", ".bwt.2bit.64", ".pac", ".0123")
 BWA_CLASSIC_SUFFIXES = (".amb", ".ann", ".bwt", ".pac", ".sa")
 
@@ -96,14 +96,14 @@ class ReferenceBundle:
         return self.reference_dir / "known-sites"
 
     def bwa_index_files(self) -> dict[str, Path]:
-        """کشف فایل‌های ایندکس BWA-MEM2 یا BWA کنار prefix."""
+        """Discover BWA-MEM2 or BWA index files next to the prefix."""
         found: dict[str, Path] = {}
         prefix = str(self.bwa_index_prefix)
         for suffix in BWA_MEM2_SUFFIXES + BWA_CLASSIC_SUFFIXES:
             candidate = Path(prefix + suffix)
             if candidate.is_file():
                 found[suffix] = candidate
-        # glob اضافی برای نام‌گذاری غیراستاندارد
+        # extra glob for non-standard naming
         parent = self.bwa_index_prefix.parent
         stem = self.bwa_index_prefix.name
         if parent.is_dir():
@@ -138,7 +138,7 @@ def get_reference_bundle(genome_build: str | None = None) -> ReferenceBundle:
     if settings.bwa_index_prefix:
         bwa_prefix = Path(settings.bwa_index_prefix)
     else:
-        # هم‌نام با basename فاستا داخل REFERENCE_DIR
+        # same name as the fasta basename inside REFERENCE_DIR
         bwa_prefix = ref_dir / ref_fasta.stem
 
     known_sites = None
@@ -177,7 +177,7 @@ def sample_work_dir(sample_label: str) -> Path:
 
 
 def file_sha256(path: Path, *, full: bool = False, max_bytes: int = 64 * 1024 * 1024) -> str:
-    """Checksum SHA-256 — full برای فایل‌های کوچک، نمونه‌گیری برای فایل‌های بزرگ."""
+    """SHA-256 checksum — full for small files, sampling for large files."""
     h = hashlib.sha256()
     size = path.stat().st_size
     limit = size if full or size <= max_bytes else max_bytes
@@ -218,7 +218,7 @@ def _guess_build_from_header(header: str | None) -> str | None:
 
 
 def ensure_reference_layout(genome_build: str | None = None) -> Path:
-    """ایجاد ساختار پوشه REFERENCE_DIR."""
+    """Create the REFERENCE_DIR folder structure."""
     refs = get_reference_bundle(genome_build)
     refs.reference_dir.mkdir(parents=True, exist_ok=True)
     (refs.reference_dir / "known-sites").mkdir(exist_ok=True)
@@ -235,29 +235,29 @@ def install_reference_from_local(
     copy: bool = True,
 ) -> dict:
     """
-    بارگذاری GRCh38 از مسیر محلی به REFERENCE_DIR.
+    Load GRCh38 from a local path into REFERENCE_DIR.
 
-    source_dir باید شامل حداقل `*.fa|*.fasta` و در صورت وجود `.fai` / `.dict` / ایندکس BWA باشد.
+    source_dir must contain at least `*.fa|*.fasta` and, if present, `.fai` / `.dict` / the BWA index.
     """
     settings = get_settings()
     src = Path(source_dir)
     if not src.is_dir():
-        raise FileNotFoundError(f"مسیر مبدأ معتبر نیست: {src}")
+        raise FileNotFoundError(f"Source path is not valid: {src}")
 
     refs = get_reference_bundle(genome_build)
     dest = ensure_reference_layout(refs.genome_build)
     build = refs.genome_build
     version = genome_version or settings.genome_version
 
-    # یافتن فاستا
+    # find the fasta
     fasta_candidates = list(src.glob("*.fa")) + list(src.glob("*.fasta")) + list(src.glob("*.fa.gz"))
     if not fasta_candidates:
-        # یک سطح پایین‌تر
+        # one level down
         fasta_candidates = list(src.rglob("*.fa")) + list(src.rglob("*.fasta"))
     if not fasta_candidates:
-        raise FileNotFoundError(f"هیچ فایل FASTA در {src} یافت نشد")
+        raise FileNotFoundError(f"No FASTA file found in {src}")
 
-    # ترجیح نام GRCh38*
+    # prefer the GRCh38* name
     fasta_src = next(
         (p for p in fasta_candidates if build.lower() in p.name.lower() or "hg38" in p.name.lower()),
         fasta_candidates[0],
@@ -265,7 +265,7 @@ def install_reference_from_local(
     fasta_dest = dest / f"{build}.fa"
     _transfer(fasta_src, fasta_dest, copy=copy)
 
-    # fai / dict هم‌نام
+    # same-name fai / dict
     for suffix, dest_name in ((".fai", f"{build}.fa.fai"), (".dict", f"{build}.dict")):
         sibling = Path(str(fasta_src) + suffix) if suffix == ".fai" else fasta_src.with_suffix(".dict")
         alt = src / dest_name
@@ -273,14 +273,14 @@ def install_reference_from_local(
         if chosen:
             _transfer(chosen, dest / dest_name, copy=copy)
 
-    # ایندکس‌های BWA از مبدأ
+    # BWA indexes from the source
     copied_indexes: list[str] = []
     for path in src.rglob("*"):
         if not path.is_file():
             continue
         name = path.name
         if any(name.endswith(sfx) for sfx in BWA_MEM2_SUFFIXES + BWA_CLASSIC_SUFFIXES):
-            # نرمال‌سازی به {build}{suffix}
+            # normalize to {build}{suffix}
             for sfx in BWA_MEM2_SUFFIXES + BWA_CLASSIC_SUFFIXES:
                 if name.endswith(sfx):
                     target = dest / f"{build}{sfx}"
@@ -311,7 +311,7 @@ def write_reference_manifest(
     *,
     genome_version: str | None = None,
 ) -> dict:
-    """ نوشتن manifest با checksum برای validation بعدی."""
+    """ Write the manifest with checksum for later validation."""
     settings = get_settings()
     refs = get_reference_bundle(genome_build)
     version = genome_version or refs.genome_version or settings.genome_version
@@ -356,12 +356,12 @@ def write_reference_manifest(
 
 
 def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValidationResult:
-    """چک‌لیست Pass/Fail: وجود فایل، checksum، نسخه ژنوم."""
+    """Pass/Fail checklist: file presence, checksum, genome version."""
     settings = get_settings()
     refs = get_reference_bundle(genome_build)
     checks: list[ReferenceCheck] = []
 
-    # پوشه REFERENCE_DIR
+    # REFERENCE_DIR folder
     dir_ok = refs.reference_dir.is_dir()
     checks.append(
         ReferenceCheck(
@@ -369,7 +369,7 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
             str(refs.reference_dir),
             dir_ok,
             True,
-            "حاضر" if dir_ok else "REFERENCE_DIR وجود ندارد",
+            "Present" if dir_ok else "REFERENCE_DIR does not exist",
         )
     )
 
@@ -380,7 +380,7 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
             str(refs.ref_fasta),
             fasta_ok,
             True,
-            "حاضر" if fasta_ok else "فاستا یافت نشد",
+            "Present" if fasta_ok else "FASTA not found",
         )
     )
 
@@ -391,7 +391,7 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
             str(refs.fasta_index),
             fai_ok,
             True,
-            "حاضر" if fai_ok else ".fai یافت نشد (samtools faidx)",
+            "Present" if fai_ok else ".fai not found (samtools faidx)",
         )
     )
 
@@ -403,7 +403,7 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
             str(refs.sequence_dict),
             dict_ok,
             dict_required,
-            "حاضر" if dict_ok else ".dict یافت نشد (gatk CreateSequenceDictionary)",
+            "Present" if dict_ok else ".dict not found (gatk CreateSequenceDictionary)",
         )
     )
 
@@ -418,7 +418,7 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
                 str(path),
                 ok,
                 True,
-                "حاضر" if ok else f"ایندکس BWA {sfx} یافت نشد",
+                "Present" if ok else f"BWA index {sfx} not found",
             )
         )
 
@@ -430,7 +430,7 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
             str(bwt_path or Path(str(refs.bwa_index_prefix) + ".bwt*")),
             bwt_ok,
             True,
-            "حاضر" if bwt_ok else "ایندکس BWA .bwt / .bwt.2bit.64 یافت نشد",
+            "Present" if bwt_ok else "BWA index .bwt / .bwt.2bit.64 not found",
         )
     )
 
@@ -443,11 +443,11 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
             str(ks or refs.known_sites_dir / "dbsnp.vcf.gz"),
             ks_ok,
             settings.reference_require_known_sites,
-            "حاضر" if ks_ok else "known-sites/dbSNP یافت نشد (اختیاری مگر require=true)",
+            "Present" if ks_ok else "known-sites/dbSNP not found (optional unless require=true)",
         )
     )
 
-    # نسخه ژنوم از هدر فاستا / manifest
+    # genome version from the FASTA header / manifest
     header = _read_fasta_header(refs.ref_fasta) if fasta_ok else None
     guessed = _guess_build_from_header(header)
     version_ok = True
@@ -463,11 +463,11 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
             str(refs.ref_fasta),
             version_ok if fasta_ok else False,
             True,
-            version_detail if fasta_ok else "بدون فاستا قابل بررسی نیست",
+            version_detail if fasta_ok else "cannot be checked without a FASTA",
         )
     )
 
-    # checksum از manifest
+    # checksum from the manifest
     manifest_data = None
     if refs.manifest_path.is_file():
         try:
@@ -479,7 +479,7 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
                     str(refs.manifest_path),
                     False,
                     False,
-                    "manifest نامعتبر",
+                    "manifest invalid",
                 )
             )
         else:
@@ -504,7 +504,7 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
                             str(path),
                             False,
                             bool(meta.get("required", False)),
-                            "فایل manifest موجود نیست",
+                            "manifest file does not exist",
                         )
                     )
                     continue
@@ -527,7 +527,7 @@ def validate_reference_bundle(genome_build: str | None = None) -> ReferenceValid
                 str(refs.manifest_path),
                 False,
                 False,
-                "manifest هنوز ساخته نشده (write_reference_manifest)",
+                "manifest has not been built yet (write_reference_manifest)",
             )
         )
 
@@ -565,7 +565,7 @@ def sync_reference_to_minio(
     include_optional: bool = True,
     require_ready: bool = True,
 ) -> dict:
-    """آپلود بسته مرجع به bucket جداگانه reference در MinIO."""
+    """Upload the reference bundle to a separate reference bucket in MinIO."""
     from barekat_genomics.core.storage import get_reference_storage
 
     settings = get_settings()
@@ -576,7 +576,7 @@ def sync_reference_to_minio(
     validation = validate_reference_bundle(genome_build)
     if require_ready and not validation.ready:
         raise FileNotFoundError(
-            "مرجع ژنوم Pass نشده است. خروجی validation را ببینید و فایل‌های FAIL را تکمیل کنید."
+            "Genome reference has not passed. See the validation output and complete the FAIL files."
         )
 
     storage = get_reference_storage()
@@ -623,7 +623,7 @@ def download_reference_from_minio(
     dest_dir: Path | str | None = None,
     genome_build: str | None = None,
 ) -> dict:
-    """دانلود بسته مرجع از bucket مرجع MinIO به REFERENCE_DIR."""
+    """Download the reference bundle from the MinIO reference bucket to REFERENCE_DIR."""
     from barekat_genomics.core.storage import get_reference_storage
 
     settings = get_settings()
@@ -638,11 +638,11 @@ def download_reference_from_minio(
     try:
         keys = storage.list_keys(prefix)
     except Exception as exc:
-        raise RuntimeError(f"لیست اشیای MinIO ناموفق ({settings.s3_reference_bucket}): {exc}") from exc
+        raise RuntimeError(f"MinIO object listing failed ({settings.s3_reference_bucket}): {exc}") from exc
 
     if not keys:
         raise FileNotFoundError(
-            f"هیچ شیئی زیر s3://{settings.s3_reference_bucket}/{prefix} یافت نشد"
+            f"No object found under s3://{settings.s3_reference_bucket}/{prefix}"
         )
 
     for key in keys:
@@ -651,7 +651,7 @@ def download_reference_from_minio(
         storage.download_file(key, local_path)
         downloaded.append(str(local_path))
 
-    # رفرش مسیرهای تنظیمات نسبت به dest
+    # refresh settings paths relative to dest
     validation = validate_reference_bundle(build)
     return {
         "bucket": settings.s3_reference_bucket,

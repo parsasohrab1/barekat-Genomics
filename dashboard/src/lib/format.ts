@@ -15,19 +15,19 @@ export function formatDateTime(iso: string): string {
 }
 
 export const sampleStatusMap: Record<string, { label: string; class: string }> = {
-  processed: { label: "پردازش‌شده", class: "badge-success" },
-  processing: { label: "در حال پردازش", class: "badge-info" },
-  uploaded: { label: "آپلود شده", class: "badge-warning" },
-  failed: { label: "خطا", class: "badge-danger" },
+  processed: { label: "Processed", class: "badge-success" },
+  processing: { label: "Processing", class: "badge-info" },
+  uploaded: { label: "Uploaded", class: "badge-warning" },
+  failed: { label: "Error", class: "badge-danger" },
 };
 
 export const stageLabel: Record<string, string> = {
-  queued: "در صف",
-  quality_control: "کنترل کیفیت",
-  alignment: "هم‌ترازسازی",
-  variant_calling: "شناسایی واریانت",
-  interpretation: "تفسیر",
-  done: "تکمیل",
+  queued: "Queued",
+  quality_control: "Quality control",
+  alignment: "Alignment",
+  variant_calling: "Variant calling",
+  interpretation: "Interpretation",
+  done: "Done",
 };
 
 export const jobStatusClass: Record<string, string> = {
@@ -38,10 +38,10 @@ export const jobStatusClass: Record<string, string> = {
 };
 
 export const jobStatusLabel: Record<string, string> = {
-  running: "در حال اجرا",
-  completed: "تکمیل",
-  failed: "خطا",
-  pending: "در انتظار",
+  running: "Running",
+  completed: "Completed",
+  failed: "Error",
+  pending: "Pending",
 };
 
 export const sigClass: Record<string, string> = {
@@ -52,10 +52,10 @@ export const sigClass: Record<string, string> = {
 };
 
 export const sigLabel: Record<string, string> = {
-  pathogenic: "بیماری‌زا",
-  likely_pathogenic: "احتمال بیماری‌زا",
-  uncertain_significance: "نامشخص",
-  benign: "خنثی",
+  pathogenic: "Pathogenic",
+  likely_pathogenic: "Likely pathogenic",
+  uncertain_significance: "Uncertain",
+  benign: "Benign",
 };
 
 export const cpicLevelClass: Record<string, string> = {

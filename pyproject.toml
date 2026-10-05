@@ -1,7 +1,7 @@
 [project]
 name = "barekat-genomics"
 version = "0.1.0"
-description = "پلتفرم تحلیل داده‌های ژنومی و فارماکوژنومیک"
+description = "Genomic and pharmacogenomic data analysis platform"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

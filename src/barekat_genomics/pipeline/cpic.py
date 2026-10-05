@@ -1,60 +1,60 @@
-"""راهنمای CPIC — بارگذاری از فایل رسمی cpic.tsv."""
+"""CPIC guideline — loaded from the official cpic.tsv file."""
 
 from __future__ import annotations
 
 from barekat_genomics.knowledge import get_knowledge_registry
 
 CPIC_LEVEL_LABELS: dict[str, str] = {
-    "A": "سطح A — شواهد قوی (توصیه قطعی)",
-    "B": "سطح B — شواهد متوسط (توصیه ترجیحی)",
-    "C": "سطح C — شواهد محدود (در صورت امکان جایگزین)",
-    "D": "سطح D — بدون توصیه عملی",
+    "A": "Level A — strong evidence (definitive recommendation)",
+    "B": "Level B — moderate evidence (preferred recommendation)",
+    "C": "Level C — limited evidence (alternative if possible)",
+    "D": "Level D — no actionable recommendation",
 }
 
-# تداخلات دارویی (DrugBank / FDA label summaries)
+# Drug interactions (DrugBank / FDA label summaries)
 DRUG_INTERACTIONS: list[dict] = [
     {
         "drugs": ("warfarin", "clopidogrel"),
         "severity": "major",
-        "warning_fa": "خطر افزایش قابل توجه خونریزی گوارشی و داخل‌جمجمه‌ای",
-        "recommendation_fa": "در صورت نیاز به ترکیب، پایش INR و علائم خونریزی ضروری است؛ ترکیب با احتیاط شدید.",
+        "warning_fa": "Significantly increased risk of gastrointestinal and intracranial bleeding",
+        "recommendation_fa": "If combination is needed, INR and bleeding signs must be monitored; combine with extreme caution.",
     },
     {
         "drugs": ("warfarin", "aspirin"),
         "severity": "major",
-        "warning_fa": "افزایش خطر خونریزی به‌ویژه در سالمندان",
-        "recommendation_fa": "حداقل دوز آسپرین و پایش منظم INR توصیه می‌شود.",
+        "warning_fa": "Increased bleeding risk, especially in the elderly",
+        "recommendation_fa": "The minimum aspirin dose and regular INR monitoring are recommended.",
     },
     {
         "drugs": ("clopidogrel", "aspirin"),
         "severity": "moderate",
-        "warning_fa": "دوگانه ضدپلاکتی — خطر خونریزی افزایش می‌یابد",
-        "recommendation_fa": "در صورت تجویز DAPT، مدت کوتاه و ارزیابی ریسک-فایده انجام شود.",
+        "warning_fa": "Dual antiplatelet therapy — bleeding risk increases",
+        "recommendation_fa": "If DAPT is prescribed, use a short duration and perform a risk-benefit assessment.",
     },
     {
         "drugs": ("azathioprine", "allopurinol"),
         "severity": "major",
-        "warning_fa": "مهار متابولیسم آزاتیوپرین — خطر میلوساپرسیون شدید",
-        "recommendation_fa": "از ترکیب خودداری شود یا دوز آزاتیوپرین به ۲۵٪ کاهش یابد.",
+        "warning_fa": "Inhibition of azathioprine metabolism — risk of severe myelosuppression",
+        "recommendation_fa": "Avoid the combination or reduce the azathioprine dose to 25%.",
     },
     {
         "drugs": ("fluorouracil", "capecitabine"),
         "severity": "major",
-        "warning_fa": "مسیر متابولیکی مشترک DPYD — سمیت تجمعی",
-        "recommendation_fa": "هرگز به‌صورت همزمان تجویز نشود.",
+        "warning_fa": "Shared DPYD metabolic pathway — cumulative toxicity",
+        "recommendation_fa": "Never prescribe concurrently.",
     },
     {
         "drugs": ("warfarin", "fluorouracil"),
         "severity": "moderate",
-        "warning_fa": "فلوروراسیل مهار متابولیسم وارفارین را افزایش می‌دهد",
-        "recommendation_fa": "پایش INR با فواصل کوتاه‌تر در طول شیمی‌درمانی.",
+        "warning_fa": "Fluorouracil increases inhibition of warfarin metabolism",
+        "recommendation_fa": "Monitor INR at shorter intervals during chemotherapy.",
     },
 ]
 
 SEVERITY_LABELS: dict[str, str] = {
-    "major": "شدید",
-    "moderate": "متوسط",
-    "minor": "خفیف",
+    "major": "Severe",
+    "moderate": "Moderate",
+    "minor": "Mild",
 }
 
 
@@ -91,8 +91,8 @@ def get_cpic_info(drug: str, gene: str | None = None) -> dict:
         "drug_fa": drug,
         "gene": gene or "—",
         "cpic_level": "C",
-        "guideline": "CPIC — شواهد محدود",
-        "action_fa": "پایش بالینی و ارزیابی موردی توصیه می‌شود.",
+        "guideline": "CPIC — limited evidence",
+        "action_fa": "Clinical monitoring and case-by-case evaluation are recommended.",
     }
 
 

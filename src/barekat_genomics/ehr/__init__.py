@@ -1,4 +1,4 @@
-"""اتصال استاندارد EHR — FHIR R4، HL7 v2، کانکتورهای بیمارستانی."""
+"""Standard EHR connection — FHIR R4, HL7 v2, hospital connectors."""
 
 from barekat_genomics.ehr.fhir_r4 import build_fhir_bundle
 from barekat_genomics.ehr.hl7_v2 import build_oru_message

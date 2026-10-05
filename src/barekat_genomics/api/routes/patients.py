@@ -23,9 +23,9 @@ router = APIRouter(prefix="/patients")
 def _require_patient_list(user: CurrentUser) -> None:
     if is_physician_role(user.role):
         if not has_permission(user.role, Permission.PATIENTS_READ_OWN):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
     elif not has_permission(user.role, Permission.PATIENTS_READ):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
 
 
 @router.post("/", response_model=PatientResponse, status_code=201)
@@ -82,7 +82,7 @@ def get_patient(
     service = PatientService(db)
     patient = service.get_by_id(patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detail="بیمار یافت نشد")
+        raise HTTPException(status_code=404, detail="Patient not found")
     assert_patient_access(user, patient)
     log_audit_event(
         db,

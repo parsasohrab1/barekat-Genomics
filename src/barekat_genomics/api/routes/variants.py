@@ -30,7 +30,7 @@ def list_variants(
     ):
         from fastapi import HTTPException
 
-        raise HTTPException(status_code=403, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=403, detail="Access not allowed")
 
     query = (
         db.query(Variant, SequencingSample, Patient)

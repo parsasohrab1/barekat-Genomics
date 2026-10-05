@@ -1,4 +1,4 @@
-"""امنیت و رعایت HIPAA برای داده‌های PHI."""
+"""Security and HIPAA compliance for PHI data."""
 
 import base64
 import hashlib
@@ -22,14 +22,14 @@ def _derive_fernet_key(secret: str) -> bytes:
 
 
 def encrypt_phi(plaintext: str) -> str:
-    """رمزنگاری داده‌های محافظت‌شده سلامت (PHI)."""
+    """Encryption of protected health information (PHI)."""
     settings = get_settings()
     fernet = Fernet(_derive_fernet_key(settings.encryption_key))
     return fernet.encrypt(plaintext.encode()).decode()
 
 
 def decrypt_phi(ciphertext: str) -> str:
-    """رمزگشایی داده‌های PHI."""
+    """Decryption of PHI data."""
     settings = get_settings()
     fernet = Fernet(_derive_fernet_key(settings.encryption_key))
     return fernet.decrypt(ciphertext.encode()).decode()
@@ -83,9 +83,9 @@ def verify_access_token(token: str) -> dict:
     try:
         return decode_access_token(token)
     except JWTError as exc:
-        raise TokenDecodeError("توکن نامعتبر یا منقضی شده") from exc
+        raise TokenDecodeError("Invalid or expired token") from exc
 
 
 def anonymize_patient_id(patient_id: str, salt: str) -> str:
-    """تولید شناسه ناشناس برای استفاده در تحلیل‌ها."""
+    """Generate an anonymous identifier for use in analyses."""
     return hmac.new(salt.encode(), patient_id.encode(), hashlib.sha256).hexdigest()[:16]

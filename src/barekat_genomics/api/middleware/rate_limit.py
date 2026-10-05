@@ -1,4 +1,4 @@
-"""محدودیت نرخ درخواست برای API شرکا (in-memory)."""
+"""Request rate limiting for the partner API (in-memory)."""
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ _limiter = InMemoryRateLimiter()
 
 
 class PartnerRateLimitMiddleware(BaseHTTPMiddleware):
-    """فقط مسیرهای /api/v1/partner/* را محدود می‌کند."""
+    """Limits only /api/v1/partner/* paths."""
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
@@ -40,12 +40,12 @@ class PartnerRateLimitMiddleware(BaseHTTPMiddleware):
             api_key = request.headers.get("X-API-Key") or ""
             limit = int(request.headers.get("X-RateLimit-Override", "60") or 60)
             bucket = api_key[:24] or (request.client.host if request.client else "anon")
-            # حد واقعی از state مسیر partner ست می‌شود؛ پیش‌فرض 60
+            # the actual limit is set from the partner route state; default 60
             limit = getattr(request.state, "partner_rate_limit", limit)
             if not _limiter.allow(f"partner:{bucket}", limit):
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="سقف نرخ درخواست API شریک تجاوز شد",
+                    detail="Partner API request rate limit exceeded",
                 )
         return await call_next(request)
 
@@ -54,5 +54,5 @@ def check_partner_rate(key_id: str, limit_per_minute: int) -> None:
     if not _limiter.allow(f"partner:{key_id}", limit_per_minute):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="سقف نرخ درخواست API شریک تجاوز شد",
+            detail="Partner API request rate limit exceeded",
         )

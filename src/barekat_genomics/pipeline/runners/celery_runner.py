@@ -1,4 +1,4 @@
-"""اجرای پایپ‌لاین از طریق صف اولویت‌دار Celery."""
+"""Running the pipeline through the Celery priority queue."""
 
 from barekat_genomics.models.pipeline import PipelineJob
 from barekat_genomics.models.sample import SequencingSample

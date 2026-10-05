@@ -1,4 +1,4 @@
-"""رجیستری یکپارچه پایگاه دانش — جستجو بر اساس rsID یا موقعیت."""
+"""Unified knowledge base registry — lookup by rsID or position."""
 
 from __future__ import annotations
 

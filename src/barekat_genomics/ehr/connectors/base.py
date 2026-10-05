@@ -1,4 +1,4 @@
-"""رابط پایه کانکتور EHR."""
+"""Base EHR connector interface."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ class EHRConnector(ABC):
         payload: str | dict,
         fmt: str,
     ) -> ConnectorResult:
-        """ارسال payload به سیستم مقصد."""
+        """Send the payload to the target system."""
 
     def info(self) -> dict:
         return {

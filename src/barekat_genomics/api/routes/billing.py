@@ -1,4 +1,4 @@
-"""صورتحساب و پلن اشتراک."""
+"""Billing and subscription plan."""
 
 import uuid
 

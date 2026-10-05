@@ -1,4 +1,4 @@
-"""سازنده FHIR R4 — Bundle شامل Observation، DiagnosticReport، MedicationRequest."""
+"""FHIR R4 builder — Bundle including Observation, DiagnosticReport, MedicationRequest."""
 
 from __future__ import annotations
 
@@ -272,7 +272,7 @@ def _organization_resource(ctx: EHRContext) -> dict:
 
 
 def build_fhir_bundle(ctx: EHRContext) -> dict:
-    """ساخت Bundle نوع collection با Patient، Observations، DiagnosticReport، MedicationRequest."""
+    """Build a collection-type Bundle with Patient, Observations, DiagnosticReport, MedicationRequest."""
     entries: list[dict] = []
     obs_ids: list[str] = []
     report_res_id = ctx.report_id or _uuid()

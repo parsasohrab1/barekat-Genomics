@@ -1,4 +1,4 @@
-"""دریافت FHIR Bundle و ایجاد/به‌روزرسانی بیمار."""
+"""Receive a FHIR Bundle and create/update the patient."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import Any
 
 
 def parse_fhir_patient_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
-    """استخراج اطلاعات Patient از Bundle یا منبع Patient واحد."""
+    """Extract Patient information from a Bundle or a single Patient resource."""
     resources: list[dict] = []
     if bundle.get("resourceType") == "Bundle":
         for entry in bundle.get("entry") or []:
@@ -17,11 +17,11 @@ def parse_fhir_patient_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
     elif bundle.get("resourceType") == "Patient":
         resources.append(bundle)
     else:
-        raise ValueError("ورودی باید Bundle یا Patient باشد")
+        raise ValueError("Input must be a Bundle or Patient")
 
     patient_res = next((r for r in resources if r.get("resourceType") == "Patient"), None)
     if not patient_res:
-        raise ValueError("منبع Patient در FHIR یافت نشد")
+        raise ValueError("Patient resource not found in FHIR")
 
     external_id = None
     for ident in patient_res.get("identifier") or []:

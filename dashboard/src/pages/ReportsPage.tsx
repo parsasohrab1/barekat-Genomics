@@ -19,7 +19,7 @@ export default function ReportsPage() {
         setReports(r);
         setPatients(Object.fromEntries(p.map((x) => [x.id, x.external_id])));
       })
-      .catch(() => setError("خطا در بارگذاری گزارش‌ها"))
+      .catch(() => setError("Error loading reports"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -33,7 +33,7 @@ export default function ReportsPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      setError("خطا در تولید PDF");
+      setError("Error generating PDF");
     }
   };
 
@@ -59,18 +59,18 @@ export default function ReportsPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      setError("خطا در خروجی EHR");
+      setError("Error in EHR export");
     }
   };
 
-  if (loading) return <p className="text-sm text-slate-400">در حال بارگذاری...</p>;
+  if (loading) return <p className="text-sm text-slate-400">Loading...</p>;
   if (error) return <p className="text-sm text-rose-600">{error}</p>;
 
   return (
     <div className="space-y-4">
       {reports.length === 0 ? (
         <p className="stat-card text-center text-sm text-slate-400">
-          گزارشی موجود نیست — ابتدا پایپ‌لاین را اجرا کنید
+          No report available — run the pipeline first
         </p>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -80,23 +80,23 @@ export default function ReportsPage() {
                 <div>
                   <p className="font-medium text-slate-700">{r.id.slice(0, 8)}...</p>
                   <p className="text-xs text-slate-400">
-                    بیمار: {patients[r.patient_id] ?? r.patient_id.slice(0, 8)} — {r.report_type}
+                    Patient: {patients[r.patient_id] ?? r.patient_id.slice(0, 8)} — {r.report_type}
                   </p>
                 </div>
                 <span className={r.status === "completed" ? "badge-success" : "badge-warning"}>
                   {r.status === "completed"
-                    ? "نهایی"
+                    ? "Final"
                     : r.status === "pending_genetic_review"
-                      ? "در انتظار ژنتیک‌دان"
+                      ? "Awaiting geneticist"
                       : r.status === "pending_review"
-                        ? "آماده تأیید"
-                        : "پیش‌نویس"}
+                        ? "Ready for approval"
+                        : "Draft"}
                 </span>
               </div>
               <p className="mt-3 text-sm text-slate-600">{r.summary ?? "—"}</p>
               {r.variant_summary && (
                 <p className="mt-1 text-xs text-slate-400">
-                  {r.variant_summary.total_variants} واریانت — {r.variant_summary.high_priority} با اولویت بالا
+                  {r.variant_summary.total_variants} variants — {r.variant_summary.high_priority} high priority
                 </p>
               )}
               <div className="mt-4 flex items-center justify-between">
@@ -107,7 +107,7 @@ export default function ReportsPage() {
                     className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs hover:bg-slate-50"
                   >
                     <Eye className="h-3.5 w-3.5" />
-                    مشاهده
+                    View
                   </Link>
                   <button
                     onClick={() => handlePdfDownload(r.id)}

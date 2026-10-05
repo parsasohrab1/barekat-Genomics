@@ -110,8 +110,8 @@ export function useAuth() {
 }
 
 export const ROLE_LABELS: Record<string, string> = {
-  clinician: "پزشک",
-  geneticist: "ژنتیک‌دان",
-  lab_tech: "تکنسین آزمایشگاه",
-  admin: "مدیر سیستم",
+  clinician: "Physician",
+  geneticist: "Geneticist",
+  lab_tech: "Lab technician",
+  admin: "System administrator",
 };

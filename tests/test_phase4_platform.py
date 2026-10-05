@@ -44,7 +44,7 @@ class TestPhase4CohortAPI:
             json={
                 "code": "IR-PGX-01",
                 "name": "Iranian PGx Pilot",
-                "name_fa": "کوهورت پایلوت ایرانی",
+                "name_fa": "Iranian pilot cohort",
                 "population": "iranian",
             },
         )

@@ -1,4 +1,4 @@
-"""مدل واریانت‌های ژنومی."""
+"""Genomic variant model."""
 
 import uuid
 from datetime import datetime, timezone

@@ -1,4 +1,4 @@
-"""مدیریت کاربران و RBAC."""
+"""User management and RBAC."""
 
 from __future__ import annotations
 
@@ -32,9 +32,9 @@ class UserService:
         organization_id: uuid.UUID | None = None,
     ) -> User:
         if not is_valid_role(role):
-            raise ValueError(f"نقش نامعتبر: {role}")
+            raise ValueError(f"Invalid role: {role}")
         if self.db.query(User).filter(User.email == email).first():
-            raise ValueError("ایمیل تکراری است")
+            raise ValueError("Duplicate email")
         user = User(
             email=email,
             hashed_password=hash_password(password),
@@ -68,7 +68,7 @@ class UserService:
 
     def update_role(self, user_id: uuid.UUID, role: str) -> User | None:
         if not is_valid_role(role):
-            raise ValueError(f"نقش نامعتبر: {role}")
+            raise ValueError(f"Invalid role: {role}")
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user:
             return None

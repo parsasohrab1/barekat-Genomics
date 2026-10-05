@@ -1,4 +1,4 @@
-"""تحلیل کوهورت و discovery نشانگر برای جمعیت ایرانی."""
+"""Cohort analysis and biomarker discovery for the Iranian population."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ def _iranian_af_path() -> Path:
 
 
 def load_iranian_af(path: Path | None = None) -> dict[str, dict]:
-    """بارگذاری فراوانی الل جمعیت ایرانی (rsid → AF)."""
+    """Load Iranian population allele frequencies (rsid → AF)."""
     p = path or _iranian_af_path()
     out: dict[str, dict] = {}
     if not p.is_file():
@@ -61,7 +61,7 @@ class CohortService:
     ) -> Cohort:
         existing = self.db.query(Cohort).filter(Cohort.code == code).first()
         if existing:
-            raise ValueError(f"کوهورت تکراری: {code}")
+            raise ValueError(f"Duplicate cohort: {code}")
         cohort = Cohort(
             code=code,
             name=name,
@@ -92,7 +92,7 @@ class CohortService:
     def add_sample(self, cohort_id: uuid.UUID, sample_id: uuid.UUID) -> CohortMember:
         sample = self.db.query(SequencingSample).filter(SequencingSample.id == sample_id).first()
         if not sample:
-            raise ValueError("نمونه یافت نشد")
+            raise ValueError("Sample not found")
         existing = (
             self.db.query(CohortMember)
             .filter(CohortMember.cohort_id == cohort_id, CohortMember.sample_id == sample_id)
@@ -113,14 +113,14 @@ class CohortService:
 
     def discover_biomarkers(self, cohort_id: uuid.UUID, *, top_k: int = 20) -> dict:
         """
-        اولویت‌بندی نشانگر در کوهورت:
-        - فراوانی حامل در کوهورت
-        - غنی‌سازی نسبت به AF ایرانی (enrichment)
-        - سهم واریانت‌های با اهمیت بالینی بالا
+        Biomarker prioritization in the cohort:
+        - Carrier frequency in the cohort
+        - Enrichment relative to the Iranian AF
+        - Share of variants with high clinical significance
         """
         cohort = self.get(cohort_id)
         if not cohort:
-            raise ValueError("کوهورت یافت نشد")
+            raise ValueError("Cohort not found")
 
         members = self.db.query(CohortMember).filter(CohortMember.cohort_id == cohort_id).all()
         sample_ids = [m.sample_id for m in members]
@@ -169,11 +169,11 @@ class CohortService:
             carrier_af = carrier_n / n_samples
             ref = iranian.get(rsid) if rsid.startswith("rs") else None
             pop_af = float(ref["af"]) if ref else None
-            # enrichment: نسبت فراوانی کوهورت به جمعیت مرجع (با هموارسازی)
+            # enrichment: ratio of cohort frequency to the reference population (with smoothing)
             if pop_af is not None and pop_af > 0:
                 enrichment = carrier_af / max(pop_af, 1e-6)
             else:
-                enrichment = carrier_af * 10.0  # نشانگر بدون مرجع AF ایرانی
+                enrichment = carrier_af * 10.0  # biomarker without an Iranian AF reference
             pathogenic_share = 0.0
             total_sig = sum(info["sig"].values()) or 1
             pathogenic_share = (

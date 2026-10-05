@@ -1,4 +1,4 @@
-"""ردیابی اختیاری MLflow برای آموزش مدل."""
+"""Optional MLflow tracking for model training."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ def log_training_run(
     params: dict | None = None,
 ) -> dict:
     """
-    اگر mlflow نصب باشد run را ثبت می‌کند؛ در غیر این صورت no-op امن.
+    If mlflow is installed it records the run; otherwise a safe no-op.
     """
     try:
         import mlflow

@@ -1,4 +1,4 @@
-"""مدل ML برای طبقه‌بندی واریانت — نسخه‌بندی + A/B test."""
+"""ML model for variant classification — versioning + A/B test."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from barekat_genomics.ml.training import train_variant_classifier
 
 
 class VariantClassifier:
-    """طبقه‌بند واریانت با ensemble و مسیریابی A/B."""
+    """Variant classifier with an ensemble and A/B routing."""
 
     def __init__(self) -> None:
         settings = get_settings()
@@ -43,7 +43,7 @@ class VariantClassifier:
                 self._train_bootstrap_model(ver)
 
     def _train_bootstrap_model(self, version: str) -> None:
-        """آموزش اولیه از ClinVar+PharmGKB اگر مدل وجود ندارد."""
+        """Initial training from ClinVar+PharmGKB if no model exists."""
         knowledge_dir = Path(get_settings().knowledge_dir) if get_settings().knowledge_dir else (
             Path(__file__).resolve().parents[3] / "data" / "reference" / "knowledge"
         )
@@ -65,8 +65,8 @@ class VariantClassifier:
         routing_key: str | None = None,
     ) -> tuple[float, float, str]:
         """
-        پیش‌بینی اهمیت واریانت.
-        بازگشت: (score, confidence, model_version)
+        Predict variant significance.
+        Returns: (score, confidence, model_version)
         """
         if isinstance(features, FeatureVector):
             vec = features.to_list()
@@ -78,7 +78,7 @@ class VariantClassifier:
             self._ensure_models_loaded()
         model = self._models.get(version) or self._models.get(self.registry.production_version)
         if model is None:
-            raise RuntimeError("مدل طبقه‌بندی واریانت بارگذاری نشد")
+            raise RuntimeError("The variant classification model was not loaded")
 
         X = np.array(vec, dtype=np.float32).reshape(1, -1)
         proba = model.predict_proba(X)[0]
@@ -95,7 +95,7 @@ class VariantClassifier:
         path.parent.mkdir(parents=True, exist_ok=True)
         model = self._models.get(version)
         if model is None:
-            raise ValueError(f"نسخه {version} بارگذاری نشده")
+            raise ValueError(f"Version {version} is not loaded")
         with open(path, "wb") as f:
             pickle.dump(model, f)
 

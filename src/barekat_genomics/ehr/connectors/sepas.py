@@ -1,4 +1,4 @@
-"""کانکتور سپاس — تبادل ملی سلامت الکترونیک."""
+"""SEPAS connector — national electronic health exchange."""
 
 from __future__ import annotations
 
@@ -11,14 +11,14 @@ from barekat_genomics.ehr.models import ConnectorResult, EHRContext
 
 class SepasConnector(EHRConnector):
     """
-    اتصال به سامانه سپاس (SEPAS).
+    Connection to the SEPAS system.
 
-    FHIR Bundle را در پوشش استاندارد سپاس برای DiagnosticReport و MedicationRequest ارسال می‌کند.
+    Sends a FHIR Bundle in the standard SEPAS wrapper for DiagnosticReport and MedicationRequest.
     """
 
     name = "sepas"
     display_name = "SEPAS"
-    display_name_fa = "سپاس"
+    display_name_fa = "SEPAS"
     supported_formats = ("fhir", "json")
 
     def push(self, ctx: EHRContext, payload: str | dict, fmt: str) -> ConnectorResult:
@@ -27,7 +27,7 @@ class SepasConnector(EHRConnector):
                 success=False,
                 connector=self.name,
                 format=fmt,
-                message="سپاس از HL7 v2 پشتیبانی نمی‌کند — از FHIR استفاده کنید",
+                message="SEPAS does not support HL7 v2 — use FHIR",
             )
 
         settings = get_settings()
@@ -50,7 +50,7 @@ class SepasConnector(EHRConnector):
                 success=True,
                 connector=self.name,
                 format=fmt,
-                message="dry-run: سپاس — URL پیکربندی نشده",
+                message="dry-run: SEPAS — URL not configured",
                 external_id=f"SEPAS-DRY-{ctx.report_id or ctx.patient_ehr_id}",
                 details={"mode": "dry_run", "envelope_keys": list(envelope.keys())},
             )
@@ -68,7 +68,7 @@ class SepasConnector(EHRConnector):
                     success=True,
                     connector=self.name,
                     format=fmt,
-                    message="ارسال موفق به سپاس",
+                    message="Successfully sent to SEPAS",
                     external_id=data.get("trackingCode") or data.get("messageId"),
                     details=data,
                 )
@@ -77,6 +77,6 @@ class SepasConnector(EHRConnector):
                 success=False,
                 connector=self.name,
                 format=fmt,
-                message=f"خطا در ارسال به سپاس: {exc}",
+                message=f"Error sending to SEPAS: {exc}",
                 details={"error": str(exc)},
             )

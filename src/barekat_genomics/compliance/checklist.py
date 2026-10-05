@@ -1,4 +1,4 @@
-"""چک‌لیست انطباق رگولاتوری (GDPR-like / وزارت بهداشت)."""
+"""Regulatory compliance checklist (GDPR-like / Ministry of Health)."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "auth-rbac",
         "Access Control",
-        "احراز هویت و کنترل دسترسی مبتنی بر نقش",
+        "Authentication and role-based access control",
         "Authentication and RBAC",
         "implemented",
         "JWT + Role permissions (admin/analyst/physician)",
@@ -29,7 +29,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "phi-encryption",
         "Confidentiality",
-        "رمزنگاری نام بیمار (PHI at rest in app)",
+        "Patient name encryption (PHI at rest in app)",
         "PHI field encryption",
         "implemented",
         "Fernet encrypt_phi / decrypt_phi",
@@ -38,7 +38,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "audit-log",
         "Accountability",
-        "ثبت رویدادهای دسترسی و خروجی EHR",
+        "Access event logging and EHR export",
         "Immutable application audit trail",
         "implemented",
         "AuditLog + /api/v1/audit",
@@ -47,7 +47,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "multi-tenant",
         "Isolation",
-        "ایزولاسیون داده چندسازمانی",
+        "Multi-organization data isolation",
         "Multi-tenant data isolation",
         "implemented",
         "Organization + organization_id filters",
@@ -56,7 +56,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "ehr-standard",
         "Interoperability",
-        "تبادل استاندارد FHIR R4 / HL7 v2",
+        "FHIR R4 / HL7 v2 standard exchange",
         "Standard EHR export/import",
         "implemented",
         "/ehr/export|/ehr/import fhir+hl7",
@@ -65,7 +65,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "subject-access",
         "Data Subject Rights",
-        "حق دسترسی سوژه (Export داده بیمار)",
+        "Data subject right of access (patient data export)",
         "Subject access / data portability",
         "implemented",
         "GET /compliance/subjects/{patient_id}/export",
@@ -74,7 +74,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "erasure",
         "Data Subject Rights",
-        "درخواست حذف/ناشناس‌سازی (حق فراموشی نسبی)",
+        "Deletion/anonymization request (partial right to be forgotten)",
         "Erasure / anonymization request",
         "partial",
         "POST /compliance/subjects/{patient_id}/erase (anonymize PHI)",
@@ -83,7 +83,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "retention",
         "Lifecycle",
-        "سیاست نگهداری PHI (روزهای پیکربندی‌شده)",
+        "PHI retention policy (configured days)",
         "Retention policy configuration",
         "partial",
         "phi_retention_days in Settings; purge job planned",
@@ -92,7 +92,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "consent",
         "Lawfulness",
-        "ثبت رضایت آگاهانه بیمار برای تست ژنتیک",
+        "Recording of informed patient consent for genetic testing",
         "Informed consent record",
         "planned",
         "Consent entity roadmap",
@@ -101,7 +101,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "sepas-connectivity",
         "National Health Network",
-        "آمادگی اتصال سپاس / HIS",
+        "SEPAS / HIS connection readiness",
         "SEPAS / HIS connector readiness",
         "partial",
         "sepas + tajhiz connectors (configurable endpoints)",
@@ -110,7 +110,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "breach-notify",
         "Incident",
-        "رویه‌های اطلاع‌رسانی نقض داده",
+        "Data breach notification procedures",
         "Breach notification process",
         "planned",
         "Operator runbook + escalation",
@@ -119,7 +119,7 @@ COMPLIANCE_CHECKLIST: list[ComplianceItem] = [
     ComplianceItem(
         "dpiA",
         "Privacy by Design",
-        "ارزیابی تأثیر حریم خصوصی (DPIA)",
+        "Data protection impact assessment (DPIA)",
         "Data Protection Impact Assessment",
         "planned",
         "Template in COMPLIANCE_CHECKLIST.md",

@@ -1,4 +1,4 @@
-"""اجرای reproducible با Nextflow."""
+"""Reproducible run with Nextflow."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ class NextflowRunner(PipelineRunner):
         settings = get_settings()
         workflow = Path(settings.nextflow_workflow_path)
         if not workflow.exists():
-            raise FileNotFoundError(f"Nextflow workflow یافت نشد: {workflow}")
+            raise FileNotFoundError(f"Nextflow workflow not found: {workflow}")
 
         outdir = Path(settings.pipeline_work_dir) / str(job.id)
         outdir.mkdir(parents=True, exist_ok=True)

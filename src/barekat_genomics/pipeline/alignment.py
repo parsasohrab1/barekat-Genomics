@@ -1,4 +1,4 @@
-"""هم‌ترازسازی BWA-MEM2 + MarkDuplicates + samtools."""
+"""BWA-MEM2 alignment + MarkDuplicates + samtools."""
 
 from __future__ import annotations
 
@@ -15,12 +15,12 @@ def align_fastq(
     read_group: str = "@RG\\tID:sample\\tSM:sample\\tPL:ILLUMINA",
     fastq_r2: str | None = None,
 ) -> Path:
-    """FASTQ → sorted BAM با BWA-MEM2، MarkDuplicates و samtools."""
+    """FASTQ → sorted BAM with BWA-MEM2, MarkDuplicates and samtools."""
     refs = get_reference_bundle(genome_build)
     if not refs.reference_ready:
         raise FileNotFoundError(
-            f"مرجع ژنوم آماده نیست: {refs.ref_fasta}. "
-            "راهنما: data/reference/README.md یا scripts/setup_reference.py"
+            f"Genome reference is not ready: {refs.ref_fasta}. "
+            "Guide: data/reference/README.md or scripts/setup_reference.py"
         )
 
     input_path = Path(fastq_path)
@@ -52,7 +52,7 @@ def align_fastq(
     )
     run_command(["samtools", "index", str(sorted_bam)], timeout=600)
 
-    # MarkDuplicates برای کاهش false positive در GATK
+    # MarkDuplicates to reduce false positives in GATK
     if tool_available("gatk"):
         run_command(
             [
@@ -77,10 +77,10 @@ def align_fastq(
 
 
 def prepare_bam(bam_path: str, work_dir: Path) -> Path:
-    """ایندکس BAM و در صورت امکان MarkDuplicates روی ورودی BAM."""
+    """Index the BAM and, where possible, MarkDuplicates on BAM input."""
     path = Path(bam_path)
     if not path.is_file():
-        raise FileNotFoundError(f"BAM یافت نشد: {bam_path}")
+        raise FileNotFoundError(f"BAM not found: {bam_path}")
 
     align_dir = ensure_dir(work_dir / "alignment")
     bai = path.with_suffix(path.suffix + ".bai")

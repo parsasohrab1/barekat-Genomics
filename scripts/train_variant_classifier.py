@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""آموزش VariantClassifier ensemble (v2) از ClinVar/PharmGKB + anonymized_training."""
+"""Train the VariantClassifier ensemble (v2) from ClinVar/PharmGKB + anonymized_training."""
 
 import argparse
 import sys
@@ -13,32 +13,32 @@ def main() -> int:
     parser.add_argument(
         "--knowledge-dir",
         default="data/reference/knowledge",
-        help="مسیر فایل‌های ClinVar/PharmGKB/gnomAD/variant_scores",
+        help="Path to ClinVar/PharmGKB/gnomAD/variant_scores files",
     )
-    parser.add_argument("--model-dir", default="data/models", help="مسیر ذخیره مدل و registry")
-    parser.add_argument("--version", default="v2", help="نسخه مدل (پیشنهاد: v2)")
+    parser.add_argument("--model-dir", default="data/models", help="Path to save the model and registry")
+    parser.add_argument("--version", default="v2", help="Model version (suggested: v2)")
     parser.add_argument(
         "--training-csv",
         default=None,
-        help="مسیر anonymized_training.csv برای آموزش/fine-tune",
+        help="Path to anonymized_training.csv for training/fine-tune",
     )
     parser.add_argument(
         "--fine-tune",
         action="store_true",
-        help="fine-tune محدود روی داده ناشناس (تکرار سبک)",
+        help="limited fine-tune on anonymized data (light iteration)",
     )
-    parser.add_argument("--promote", action="store_true", help="تنظیم به‌عنوان production")
-    parser.add_argument("--no-augment", action="store_true", help="بدون data augmentation")
+    parser.add_argument("--promote", action="store_true", help="set as production")
+    parser.add_argument("--no-augment", action="store_true", help="without data augmentation")
     parser.add_argument(
         "--no-deep-tabular",
         action="store_true",
-        help="بدون MLP (فقط tree ensemble)",
+        help="without MLP (tree ensemble only)",
     )
-    parser.add_argument("--mlflow", action="store_true", help="لاگ به MLflow (اختیاری)")
+    parser.add_argument("--mlflow", action="store_true", help="log to MLflow (optional)")
     parser.add_argument(
         "--no-baseline-compare",
         action="store_true",
-        help="بدون مقایسه با baseline RF",
+        help="without comparison to the RF baseline",
     )
     args = parser.parse_args()
 
@@ -47,10 +47,10 @@ def main() -> int:
     training_csv = Path(args.training_csv) if args.training_csv else None
 
     if not knowledge_dir.is_dir():
-        print(f"خطا: {knowledge_dir} یافت نشد", file=sys.stderr)
+        print(f"Error: {knowledge_dir} not found", file=sys.stderr)
         return 1
     if training_csv is not None and not training_csv.is_file():
-        print(f"خطا: {training_csv} یافت نشد", file=sys.stderr)
+        print(f"Error: {training_csv} not found", file=sys.stderr)
         return 1
 
     _, metrics, registry = train_variant_classifier(
@@ -67,7 +67,7 @@ def main() -> int:
     )
 
     summary = model_dir / f"train_summary_{args.version}.json"
-    print(f"نسخه: {args.version}")
+    print(f"Version: {args.version}")
     print(f"production: {registry.production_version}")
     print(f"metrics: {metrics.to_dict()}")
     if summary.is_file():

@@ -25,7 +25,7 @@ export default function SampleUploadModal({ open, onClose, onSuccess }: SampleUp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      setError("فایل را انتخاب کنید");
+      setError("Select a file");
       return;
     }
     setError("");
@@ -38,24 +38,24 @@ export default function SampleUploadModal({ open, onClose, onSuccess }: SampleUp
       setSampleId("");
       setFile(null);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : "خطا در آپلود");
+      setError(err instanceof ApiClientError ? err.message : "Upload error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="آپلود نمونه توالی‌یابی">
+    <Modal open={open} onClose={onClose} title="Upload sequencing sample">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm text-slate-600">بیمار *</label>
+          <label className="mb-1 block text-sm text-slate-600">Patient *</label>
           <select
             required
             value={patientId}
             onChange={(e) => setPatientId(e.target.value)}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
           >
-            <option value="">انتخاب بیمار...</option>
+            <option value="">Select patient...</option>
             {patients.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.external_id} {p.ehr_patient_id ? `(${p.ehr_patient_id})` : ""}
@@ -64,7 +64,7 @@ export default function SampleUploadModal({ open, onClose, onSuccess }: SampleUp
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-sm text-slate-600">شناسه نمونه *</label>
+          <label className="mb-1 block text-sm text-slate-600">Sample ID *</label>
           <input
             required
             value={sampleId}
@@ -74,7 +74,7 @@ export default function SampleUploadModal({ open, onClose, onSuccess }: SampleUp
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-slate-600">نوع فایل *</label>
+          <label className="mb-1 block text-sm text-slate-600">File type *</label>
           <select
             value={fileType}
             onChange={(e) => setFileType(e.target.value as "FASTQ" | "BAM")}
@@ -85,7 +85,7 @@ export default function SampleUploadModal({ open, onClose, onSuccess }: SampleUp
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-sm text-slate-600">فایل *</label>
+          <label className="mb-1 block text-sm text-slate-600">File *</label>
           <input
             type="file"
             required
@@ -97,14 +97,14 @@ export default function SampleUploadModal({ open, onClose, onSuccess }: SampleUp
         {error && <p className="text-sm text-rose-600">{error}</p>}
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" onClick={onClose} className="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50">
-            انصراف
+            Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
             className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
           >
-            {loading ? "در حال آپلود..." : "آپلود"}
+            {loading ? "Uploading..." : "Upload"}
           </button>
         </div>
       </form>

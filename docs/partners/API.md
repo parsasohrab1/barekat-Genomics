@@ -10,9 +10,9 @@ Keys are created by org admins via `POST /api/v1/integrations/api-keys` (returne
 
 | Method | Path | Scope | Description |
 |--------|------|-------|-------------|
-| GET | `/partner/health` | any | اتصال و قابلیت‌ها |
-| POST | `/partner/patients` | `samples:write` | ایجاد بیمار |
-| POST | `/partner/pipeline/run` | `pipeline:run` | اجرای workflow با کش |
+| GET | `/partner/health` | any | Connectivity and capabilities |
+| POST | `/partner/patients` | `samples:write` | Create patient |
+| POST | `/partner/pipeline/run` | `pipeline:run` | Run workflow with cache |
 
 ### Sample pipeline body
 

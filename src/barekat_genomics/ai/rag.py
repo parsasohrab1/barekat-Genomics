@@ -1,4 +1,4 @@
-"""RAG سبک روی PharmGKB/CPIC — بازیابی + پاسخ مبتنی بر دانش."""
+"""Lightweight RAG over PharmGKB/CPIC — retrieval + knowledge-based answer."""
 
 from __future__ import annotations
 
@@ -29,21 +29,21 @@ def _kb_to_chunk(rsid: str, kb: VariantKnowledge) -> str:
     if rsid:
         parts.append(rsid)
     if kb.gene:
-        parts.append(f"ژن {kb.gene}")
+        parts.append(f"Gene {kb.gene}")
     if kb.drug:
-        parts.append(f"دارو {kb.drug}")
+        parts.append(f"Drug {kb.drug}")
     if kb.phenotype:
         parts.append(kb.phenotype)
     if kb.pgx_level:
-        parts.append(f"سطح PharmGKB: {kb.pgx_level}")
+        parts.append(f"PharmGKB level: {kb.pgx_level}")
     if kb.cpic_level:
-        parts.append(f"سطح CPIC: {kb.cpic_level}")
+        parts.append(f"CPIC level: {kb.cpic_level}")
     if kb.cpic_action_fa:
-        parts.append(f"توصیه CPIC: {kb.cpic_action_fa}")
+        parts.append(f"CPIC recommendation: {kb.cpic_action_fa}")
     if kb.clinical_significance:
         parts.append(f"ClinVar: {kb.clinical_significance}")
     if kb.gnomad_af is not None:
-        parts.append(f"فراوانی gnomAD: {kb.gnomad_af:.4f}")
+        parts.append(f"gnomAD frequency: {kb.gnomad_af:.4f}")
     return " — ".join(parts)
 
 
@@ -63,7 +63,7 @@ def retrieve_context(
     annotation: dict | None = None,
     registry: KnowledgeRegistry | None = None,
 ) -> tuple[list[str], list[str]]:
-    """بازیابی قطعات دانش مرتبط."""
+    """Retrieve relevant knowledge chunks."""
     reg = registry or get_knowledge_registry()
     reg._ensure_loaded()
 
@@ -84,9 +84,9 @@ def retrieve_context(
 
     if annotation:
         ann_text = (
-            f"[گزارش بالینی] ژن {annotation.get('gene')} — "
+            f"[Clinical report] Gene {annotation.get('gene')} — "
             f"{annotation.get('interpretation', '')} — "
-            f"اهمیت: {annotation.get('clinical_significance')}"
+            f"Significance: {annotation.get('clinical_significance')}"
         )
         chunks.append(ann_text)
 
@@ -120,25 +120,25 @@ def retrieve_context(
 
 
 def compose_answer(question: str, chunks: list[str], sources: list[str]) -> dict:
-    """ساخت پاسخ فارسی از قطعات بازیابی‌شده (بدون LLM)."""
+    """Build an answer from the retrieved chunks (without an LLM)."""
     if not chunks:
         answer = (
-            "در پایگاه دانش PharmGKB/CPIC موجود، اطلاعات مستقیمی برای این سؤال یافت نشد. "
-            "لطفاً rsID، نام ژن، یا دارو را مشخص کنید."
+            "No direct information was found for this question in the available PharmGKB/CPIC knowledge base. "
+            "Please specify an rsID, gene name, or drug."
         )
         result = wrap_answer(answer)
         result["sources"] = []
         result["context_chunks"] = []
         return result
 
-    intro = "بر اساس منابع PharmGKB و CPIC موجود در سامانه:\n\n"
+    intro = "Based on the PharmGKB and CPIC sources available in the system:\n\n"
     body_parts = []
     for i, chunk in enumerate(chunks, 1):
         body_parts.append(f"{i}. {chunk}")
 
     closing = (
-        "\n\nاین اطلاعات صرفاً برای پشتیبانی تصمیم بالینی است و "
-        "جایگزین قضاوت پزشک یا تشخیص قطعی نیست."
+        "\n\nThis information is for clinical decision support only and "
+        "is not a substitute for physician judgment or a definitive diagnosis."
     )
     answer = intro + "\n".join(body_parts) + closing
 

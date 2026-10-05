@@ -1,4 +1,4 @@
-"""مدل وظایف پایپ‌لاین پردازش."""
+"""Processing pipeline job model."""
 
 import uuid
 from datetime import datetime, timezone

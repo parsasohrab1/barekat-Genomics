@@ -1,4 +1,4 @@
-"""احراز هویت JWT."""
+"""JWT authentication."""
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -20,7 +20,7 @@ def login(
     service = AuthService(db)
     result = service.authenticate(form.username, form.password)
     if not result:
-        raise HTTPException(status_code=401, detail="ایمیل یا رمز عبور نادرست است")
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
     user, token = result
     return TokenResponse(
         access_token=token,

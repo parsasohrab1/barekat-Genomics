@@ -1,4 +1,4 @@
-"""سازنده پیام HL7 v2 ORU^R01 برای سیستم‌های قدیمی."""
+"""HL7 v2 ORU^R01 message builder for legacy systems."""
 
 from __future__ import annotations
 
@@ -209,7 +209,7 @@ def _obx_summary(set_id: int, text: str) -> str:
 
 
 def build_oru_message(ctx: EHRContext, *, receiving_facility: str = "HIS") -> str:
-    """ساخت پیام ORU^R01 با سگمنت‌های MSH، PID، OBR و OBX."""
+    """Build an ORU^R01 message with MSH, PID, OBR and OBX segments."""
     msg_id = (ctx.report_id or _hl7_ts(ctx.issued_at))[:20]
     segments = [_msh(ctx, msg_id, receiving_facility), _pid(ctx), _obr(ctx)]
 

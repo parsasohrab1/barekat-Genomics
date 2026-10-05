@@ -1,4 +1,4 @@
-"""سرویس پلن و اشتراک."""
+"""Plan and subscription service."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ DEFAULT_PLANS = [
     {
         "code": "starter",
         "name": "Starter",
-        "name_fa": "پایه",
+        "name_fa": "Basic",
         "deployment_mode": "saas",
         "price_monthly_usd": 499.0,
         "max_users": 5,
@@ -29,7 +29,7 @@ DEFAULT_PLANS = [
     {
         "code": "professional",
         "name": "Professional",
-        "name_fa": "حرفه‌ای",
+        "name_fa": "Professional",
         "deployment_mode": "saas",
         "price_monthly_usd": 1499.0,
         "max_users": 25,
@@ -40,7 +40,7 @@ DEFAULT_PLANS = [
     {
         "code": "enterprise_onprem",
         "name": "Enterprise On-Prem",
-        "name_fa": "سازمانی درون‌سازمانی",
+        "name_fa": "Enterprise on-premise",
         "deployment_mode": "on_prem",
         "price_monthly_usd": 0.0,
         "max_users": 500,
@@ -103,7 +103,7 @@ class BillingService:
         self.seed_plans()
         plan = self.db.query(Plan).filter(Plan.code == plan_code, Plan.is_active.is_(True)).first()
         if not plan:
-            raise ValueError(f"پلن ناشناخته: {plan_code}")
+            raise ValueError(f"Unknown plan: {plan_code}")
 
         existing = self.get_subscription(organization_id)
         now = datetime.now(timezone.utc)
@@ -185,4 +185,4 @@ class BillingService:
             return
         info = self.usage(organization_id)
         if info["samples_limit"] is not None and not info["within_sample_limit"]:
-            raise PermissionError("سقف نمونه ماهانه پلن به پایان رسیده است")
+            raise PermissionError("The plan's monthly sample limit has been reached")

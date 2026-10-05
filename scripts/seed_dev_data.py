@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ایجاد بیماران، نمونه‌ها و گزارش‌های سنتتیک برای توسعه."""
+"""Create synthetic patients, samples and reports for development."""
 
 import sys
 

@@ -1,4 +1,4 @@
-"""نسخه‌بندی مدل و A/B test در production."""
+"""Model versioning and A/B test in production."""
 
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ class ModelRegistry:
         registry_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
     def route_version(self, routing_key: str | None) -> str:
-        """انتخاب نسخه مدل برای A/B test."""
+        """Select the model version for the A/B test."""
         if not self.ab_test.enabled or not self.ab_test.challenger_version:
             return self.production_version
         if not routing_key:

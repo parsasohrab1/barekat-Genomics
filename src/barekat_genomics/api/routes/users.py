@@ -1,4 +1,4 @@
-"""مدیریت کاربران (Admin)."""
+"""User management (Admin)."""
 
 import uuid
 
@@ -70,7 +70,7 @@ def update_role(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if not updated:
-        raise HTTPException(status_code=404, detail="کاربر یافت نشد")
+        raise HTTPException(status_code=404, detail="User not found")
     return UserResponse.model_validate(updated)
 
 
@@ -83,5 +83,5 @@ def set_active(
 ) -> UserResponse:
     updated = UserService(db).set_active(user_id, body.is_active)
     if not updated:
-        raise HTTPException(status_code=404, detail="کاربر یافت نشد")
+        raise HTTPException(status_code=404, detail="User not found")
     return UserResponse.model_validate(updated)

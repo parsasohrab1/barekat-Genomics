@@ -50,5 +50,5 @@
       "expected_in_simulated": true
     }
   ],
-  "notes_fa": "در حالت simulated، پایپ‌لاین باید حداقل این rsIDها را برگرداند. ژنوتیپ‌های نمونه برای اعتبارسنجی cross-check هستند."
+  "notes_fa": "In simulated mode, the pipeline must return at least these rsIDs. The sample genotypes are for cross-check validation."
 }

@@ -1,4 +1,4 @@
-"""لاگ ممیزی HIPAA."""
+"""HIPAA audit log."""
 
 import uuid
 from datetime import datetime, timezone

@@ -1,4 +1,4 @@
-"""ماژول‌های تشخیصی افزایشی barekat Genomics."""
+"""Incremental diagnostic modules of barekat Genomics."""
 
 from barekat_genomics.modules.registry import GenomicsModule, get_module, list_modules
 

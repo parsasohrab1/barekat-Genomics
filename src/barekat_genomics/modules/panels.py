@@ -1,6 +1,6 @@
-"""ژن‌های پنل‌های تشخیصی — CPIC، CGP، Carrier، PRS."""
+"""Genes of the diagnostic panels — CPIC, CGP, Carrier, PRS."""
 
-# پنل استاندارد فارماکوژنومیک CPIC (۱۸ ژن)
+# Standard CPIC pharmacogenomic panel (18 genes)
 CPIC_PANEL_GENES = frozenset({
     "CYP2D6", "CYP2C19", "CYP2C9", "CYP3A5", "CYP4F2",
     "TPMT", "NUDT15", "DPYD", "UGT1A1", "SLCO1B1",
@@ -8,9 +8,9 @@ CPIC_PANEL_GENES = frozenset({
     "ABCG2", "RYR1", "CACNA1S", "MT-RNR1", "CFTR",
 })
 
-PHARMACOGENOMIC_GENES = CPIC_PANEL_GENES  # سازگاری با کد موجود
+PHARMACOGENOMIC_GENES = CPIC_PANEL_GENES  # compatibility with existing code
 
-# ژن‌های actionable سرطان (CGP / NCCN)
+# Actionable cancer genes (CGP / NCCN)
 CGP_ACTIONABLE_GENES = frozenset({
     "BRCA1", "BRCA2", "ATM", "PALB2", "CHEK2", "TP53",
     "MLH1", "MSH2", "MSH6", "PMS2", "EPCAM", "BARD1",
@@ -19,7 +19,7 @@ CGP_ACTIONABLE_GENES = frozenset({
     "ERBB2", "BRAF", "KRAS", "NRAS", "PIK3CA",
 })
 
-# غربالگری ناقل (Carrier Screening) — قبل از بارداری
+# Carrier screening — before pregnancy
 CARRIER_SCREENING_GENES = frozenset({
     "CFTR", "SMN1", "HBB", "PAH", "GAA", "ACADM", "HEXA",
     "GBA", "HBA1", "HBA2", "SERPINA1", "FMR1", "DMD",
@@ -27,25 +27,25 @@ CARRIER_SCREENING_GENES = frozenset({
     "SMA", "PKHD1", "ATP7B", "MEFV",
 })
 
-# SNPهای PRS (نمونه — در production از PGS Catalog)
+# PRS SNPs (sample — in production from the PGS Catalog)
 PRS_TRAITS = {
     "coronary_artery_disease": {
-        "name_fa": "بیماری عروق کرونر",
+        "name_fa": "Coronary artery disease",
         "snps": ["rs10757274", "rs1333049", "rs4977574"],
         "weights": [0.15, 0.12, 0.10],
     },
     "type_2_diabetes": {
-        "name_fa": "دیابت نوع ۲",
+        "name_fa": "Type 2 diabetes",
         "snps": ["rs7903146", "rs1801282", "rs5219"],
         "weights": [0.18, 0.11, 0.09],
     },
     "breast_cancer": {
-        "name_fa": "سرطان پستان",
+        "name_fa": "Breast cancer",
         "snps": ["rs2981582", "rs3803662", "rs889312"],
         "weights": [0.14, 0.13, 0.11],
     },
     "colorectal_cancer": {
-        "name_fa": "سرطان روده بزرگ",
+        "name_fa": "Colorectal cancer",
         "snps": ["rs6983267", "rs4779584", "rs10795668"],
         "weights": [0.12, 0.10, 0.08],
     },

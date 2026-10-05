@@ -1,4 +1,4 @@
-"""آموزش ensemble پیشرفته (HistGB / XGB / RF / MLP) با مقایسه baseline."""
+"""Advanced ensemble training (HistGB / XGB / RF / MLP) with baseline comparison."""
 
 from __future__ import annotations
 
@@ -41,11 +41,11 @@ def build_baseline_rf() -> RandomForestClassifier:
 
 def build_ensemble_model(*, deep_tabular: bool = True) -> object:
     """
-    Ensemble نسخه v2:
-    - HistGradientBoosting (tabular مدرن)
+    v2 Ensemble:
+    - HistGradientBoosting (modern tabular)
     - RandomForest
-    - XGBoost در صورت نصب
-    - MLP به‌عنوان لایه deep tabular (اختیاری)
+    - XGBoost if installed
+    - MLP as a deep tabular layer (optional)
     """
     rf = build_baseline_rf()
     hist = HistGradientBoostingClassifier(
@@ -71,7 +71,7 @@ def build_ensemble_model(*, deep_tabular: bool = True) -> object:
         weights = [2, 2, 1]
 
     if deep_tabular:
-        # early_stopping روی دیتاست‌های کوچک دانش بالینی (hold-out) می‌شکند
+        # early_stopping breaks on small clinical-knowledge datasets (hold-out)
         mlp = MLPClassifier(
             hidden_layer_sizes=(64, 32),
             activation="relu",
@@ -114,7 +114,7 @@ def train_variant_classifier(
     if training_csv and Path(training_csv).is_file():
         X_anon, y_anon, _ = load_anonymized_training(Path(training_csv))
         if fine_tune:
-            # fine-tune محدود: تکرار کمتر داده ناشناس برای تطبیق خفیف
+            # limited fine-tune: fewer iterations of anonymized data for mild adaptation
             X = np.vstack([X, X_anon, X_anon[: max(1, len(X_anon) // 3)]])
             y = np.concatenate([y, y_anon, y_anon[: max(1, len(y_anon) // 3)]])
         else:

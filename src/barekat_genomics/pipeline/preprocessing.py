@@ -1,4 +1,4 @@
-"""مرحله پیش‌پردازش: FastQC + MultiQC / samtools QC + عمق پوشش."""
+"""Preprocessing stage: FastQC + MultiQC / samtools QC + coverage depth."""
 
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ def run_quality_control(
 
 
 def enrich_qc_with_bam_coverage(qc: QCMetrics, bam_path: Path) -> QCMetrics:
-    """پس از alignment، متریک عمق پوشش را به QC اضافه می‌کند."""
+    """After alignment, add the coverage depth metric to QC."""
     if not bam_path.is_file():
         return qc
     try:
@@ -49,9 +49,9 @@ def enrich_qc_with_bam_coverage(qc: QCMetrics, bam_path: Path) -> QCMetrics:
 
     warnings = list(qc.warnings)
     if coverage["mean_depth"] is not None and coverage["mean_depth"] < 20:
-        warnings.append("عمق میانگین پوشش کمتر از ۲۰×")
+        warnings.append("Mean coverage depth below 20×")
     if coverage["coverage_pct_20x"] is not None and coverage["coverage_pct_20x"] < 0.8:
-        warnings.append("پوشش ۲۰× کمتر از ۸۰٪ بازه‌های هدف")
+        warnings.append("20× coverage below 80% of target regions")
 
     passed = qc.passed and (coverage["mean_depth"] is None or coverage["mean_depth"] >= 10)
 
@@ -80,16 +80,16 @@ def _run_simulated_qc(file_type: str) -> QCMetrics:
     elif file_type in ("VCF", "CRAM"):
         total_reads, mean_quality, gc_content, duplication_rate = 0, 40.0, 0.42, 0.0
         mean_depth, cov10, cov20 = (80.0 if file_type == "CRAM" else 100.0), 0.99, 0.95
-        warnings.append("ورودی VCF/CRAM — QC توالی خام محدود")
+        warnings.append("VCF/CRAM input — limited raw sequence QC")
     else:
-        raise ValueError(f"نوع فایل پشتیبانی‌نشده: {file_type}")
+        raise ValueError(f"Unsupported file type: {file_type}")
 
     if mean_quality < 20:
-        warnings.append("کیفیت پایه پایین")
+        warnings.append("Low base quality")
     if duplication_rate > 0.3:
-        warnings.append("نرخ تکرار بالا")
+        warnings.append("High duplication rate")
     if gc_content < 0.35 or gc_content > 0.65:
-        warnings.append("محتوای GC غیرعادی")
+        warnings.append("Abnormal GC content")
 
     return QCMetrics(
         total_reads=total_reads,
@@ -107,7 +107,7 @@ def _run_simulated_qc(file_type: str) -> QCMetrics:
 def _run_production_qc(file_path: str, file_type: str, work_dir: Path | None) -> QCMetrics:
     input_path = Path(file_path)
     if not input_path.is_file():
-        raise FileNotFoundError(f"فایل ورودی یافت نشد: {file_path}")
+        raise FileNotFoundError(f"Input file not found: {file_path}")
 
     qc_dir = ensure_dir((work_dir or input_path.parent) / "qc")
     warnings: list[str] = []
@@ -127,14 +127,14 @@ def _run_production_qc(file_path: str, file_type: str, work_dir: Path | None) ->
         coverage = _compute_bam_coverage(input_path)
         metrics.update(coverage)
     else:
-        raise ValueError(f"نوع فایل پشتیبانی‌نشده: {file_type}")
+        raise ValueError(f"Unsupported file type: {file_type}")
 
     if metrics["mean_quality"] < 20:
-        warnings.append("کیفیت پایه پایین")
+        warnings.append("Low base quality")
     if metrics["duplication_rate"] > 0.3:
-        warnings.append("نرخ تکرار بالا")
+        warnings.append("High duplication rate")
     if metrics["gc_content"] < 0.35 or metrics["gc_content"] > 0.65:
-        warnings.append("محتوای GC غیرعادی")
+        warnings.append("Abnormal GC content")
 
     multiqc_json = qc_dir / "multiqc" / "multiqc_data.json"
     if multiqc_json.is_file():
@@ -145,7 +145,7 @@ def _run_production_qc(file_path: str, file_type: str, work_dir: Path | None) ->
     passed = metrics["mean_quality"] >= 20 and metrics["duplication_rate"] <= 0.3
     if metrics.get("mean_depth") is not None and metrics["mean_depth"] < 10:
         passed = False
-        warnings.append("عمق میانگین پوشش کمتر از ۱۰×")
+        warnings.append("Mean coverage depth below 10×")
 
     return QCMetrics(
         total_reads=metrics["total_reads"],
@@ -162,7 +162,7 @@ def _run_production_qc(file_path: str, file_type: str, work_dir: Path | None) ->
 
 
 def _compute_bam_coverage(bam_path: Path) -> dict:
-    """محاسبه mean depth و درصد پوشش ۱۰×/۲۰× با sampling از samtools depth."""
+    """Compute mean depth and 10×/20× coverage percentage by sampling from samtools depth."""
     result = run_command(
         ["samtools", "depth", "-a", str(bam_path)],
         timeout=1800,
@@ -170,7 +170,7 @@ def _compute_bam_coverage(bam_path: Path) -> dict:
     depths: list[int] = []
     ge10 = 0
     ge20 = 0
-    # برای فایل‌های خیلی بزرگ فقط حداکثر ۱ میلیون پوزیشن را می‌خوانیم
+    # For very large files we read at most 1 million positions
     for i, line in enumerate(result.stdout.splitlines()):
         if i >= 1_000_000:
             break

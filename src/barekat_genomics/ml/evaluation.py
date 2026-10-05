@@ -1,4 +1,4 @@
-"""ارزیابی مدل: precision/recall روی hold-out."""
+"""Model evaluation: precision/recall on a hold-out."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ def evaluate_holdout(
     test_size: float = 0.25,
     random_state: int = 42,
 ) -> tuple[EvaluationMetrics, object]:
-    """تقسیم hold-out و محاسبه precision/recall."""
+    """Hold-out split and precision/recall computation."""
     stratify = y if len(np.unique(y)) > 1 else None
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state, stratify=stratify

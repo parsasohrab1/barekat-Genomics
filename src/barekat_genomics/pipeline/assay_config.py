@@ -1,4 +1,4 @@
-"""پیکربندی assay: WGS / WES / Panel در یک workflow."""
+"""Assay configuration: WGS / WES / Panel in one workflow."""
 
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ ASSAY_PROFILES: dict[str, AssayProfile] = {
 def get_assay_profile(assay_type: str | None) -> AssayProfile:
     key = (assay_type or "panel").lower()
     if key not in ASSAY_PROFILES:
-        raise ValueError(f"assay_type نامعتبر: {assay_type} — مجاز: {', '.join(ASSAY_TYPES)}")
+        raise ValueError(f"Invalid assay_type: {assay_type} — allowed: {', '.join(ASSAY_TYPES)}")
     return ASSAY_PROFILES[key]
 
 
@@ -70,7 +70,7 @@ def resolve_target_bed(assay_type: str) -> Path | None:
     candidate = base / f"{profile.target_bed}.bed"
     if candidate.is_file():
         return candidate
-    # مسیر نسبی پروژه
+    # project-relative path
     repo = Path(__file__).resolve().parents[3] / "data" / "reference" / "targets" / f"{profile.target_bed}.bed"
     return repo if repo.is_file() else None
 
@@ -78,5 +78,5 @@ def resolve_target_bed(assay_type: str) -> Path | None:
 def normalize_file_type(file_type: str) -> str:
     ft = file_type.upper()
     if ft not in FILE_TYPES:
-        raise ValueError(f"file_type نامعتبر: {file_type}")
+        raise ValueError(f"Invalid file_type: {file_type}")
     return ft

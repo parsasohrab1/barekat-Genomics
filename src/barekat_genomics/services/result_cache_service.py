@@ -1,4 +1,4 @@
-"""کش نتایج پایپ‌لاین و برآورد هزینه محاسبات."""
+"""Pipeline result cache and computation cost estimation."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from barekat_genomics.pipeline.assay_config import get_assay_profile
 
 
 def content_hash_for_path(path: str | Path, *, max_bytes: int = 1_048_576) -> str:
-    """هش محتوای فایل (تا 1MB اول + اندازه) برای کلید کش."""
+    """Hash of the file content (first 1MB + size) for the cache key."""
     p = Path(path)
     h = hashlib.sha256()
     h.update(str(p.name).encode())

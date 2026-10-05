@@ -80,7 +80,7 @@ export default function ReportDetailPage() {
 
       })
 
-      .catch(() => setError("گزارش یافت نشد"))
+      .catch(() => setError("Report not found"))
 
       .finally(() => setLoading(false));
 
@@ -114,7 +114,7 @@ export default function ReportDetailPage() {
 
     } catch {
 
-      setError("بررسی واریانت ناموفق بود");
+      setError("Variant review failed");
 
     } finally {
 
@@ -140,7 +140,7 @@ export default function ReportDetailPage() {
 
     } catch {
 
-      setError("تأیید گزارش ناموفق بود");
+      setError("Report approval failed");
 
     } finally {
 
@@ -176,7 +176,7 @@ export default function ReportDetailPage() {
 
     } catch {
 
-      setError("خطا در تولید PDF");
+      setError("Error generating PDF");
 
     } finally {
 
@@ -188,9 +188,9 @@ export default function ReportDetailPage() {
 
 
 
-  if (loading) return <p className="text-sm text-slate-400">در حال بارگذاری گزارش...</p>;
+  if (loading) return <p className="text-sm text-slate-400">Loading report...</p>;
 
-  if (error || !report) return <p className="text-sm text-rose-600">{error || "خطا"}</p>;
+  if (error || !report) return <p className="text-sm text-rose-600">{error || "Error"}</p>;
 
 
 
@@ -198,17 +198,17 @@ export default function ReportDetailPage() {
 
     report.status === "completed"
 
-      ? "نهایی"
+      ? "Final"
 
       : report.status === "pending_genetic_review"
 
-        ? "در انتظار بررسی ژنتیک‌دان"
+        ? "Awaiting geneticist review"
 
         : report.status === "pending_review"
 
-          ? "آماده تأیید نهایی"
+          ? "Ready for final approval"
 
-          : "پیش‌نویس";
+          : "Draft";
 
 
 
@@ -234,7 +234,7 @@ export default function ReportDetailPage() {
 
           <ArrowRight className="h-4 w-4" />
 
-          بازگشت به گزارش‌ها
+          Back to reports
 
         </Link>
 
@@ -252,7 +252,7 @@ export default function ReportDetailPage() {
 
             <Download className="h-3.5 w-3.5" />
 
-            {pdfLoading ? "در حال تولید..." : "دانلود PDF"}
+            {pdfLoading ? "Generating..." : "Download PDF"}
 
           </button>
 
@@ -270,7 +270,7 @@ export default function ReportDetailPage() {
 
               <CheckCircle className="h-3.5 w-3.5" />
 
-              {approving ? "در حال تأیید..." : "تأیید گزارش"}
+              {approving ? "Approving..." : "Approve report"}
 
             </button>
 
@@ -282,7 +282,7 @@ export default function ReportDetailPage() {
 
 
 
-      {/* سربرگ */}
+      {/* Header */}
 
       <div className="stat-card">
 
@@ -290,9 +290,9 @@ export default function ReportDetailPage() {
 
           <div>
 
-            <h2 className="text-lg font-bold text-slate-800">گزارش {report.report_type}</h2>
+            <h2 className="text-lg font-bold text-slate-800">Report {report.report_type}</h2>
 
-            <p className="text-sm text-slate-400">بیمار: {patientLabel}</p>
+            <p className="text-sm text-slate-400">Patient: {patientLabel}</p>
 
           </div>
 
@@ -306,9 +306,9 @@ export default function ReportDetailPage() {
 
         <p className="mt-2 text-xs text-slate-400">
 
-          ایجاد: {formatDateTime(report.created_at)}
+          Created: {formatDateTime(report.created_at)}
 
-          {report.finalized_at && ` — نهایی‌سازی: ${formatDateTime(report.finalized_at)}`}
+          {report.finalized_at && ` — Finalized: ${formatDateTime(report.finalized_at)}`}
 
         </p>
 
@@ -322,7 +322,7 @@ export default function ReportDetailPage() {
 
           <h3 className="mb-4 text-sm font-semibold text-amber-900">
 
-            واریانت‌های نیازمند بررسی (ML score &gt; 0.7)
+            Variants requiring review (ML score &gt; 0.7)
 
           </h3>
 
@@ -368,7 +368,7 @@ export default function ReportDetailPage() {
 
                         >
 
-                          تأیید
+                          Approve
 
                         </button>
 
@@ -382,7 +382,7 @@ export default function ReportDetailPage() {
 
                         >
 
-                          رد
+                          Reject
 
                         </button>
 
@@ -392,7 +392,7 @@ export default function ReportDetailPage() {
 
                       <span className={pv.review_status === "approved" ? "badge-success" : "badge-warning"}>
 
-                        {pv.review_status === "approved" ? "تأیید شده" : "رد شده"}
+                        {pv.review_status === "approved" ? "Approved" : "Rejected"}
 
                       </span>
 
@@ -414,7 +414,7 @@ export default function ReportDetailPage() {
 
 
 
-      {/* خلاصه اجرایی */}
+      {/* Executive summary */}
 
       <div className="stat-card">
 
@@ -422,7 +422,7 @@ export default function ReportDetailPage() {
 
           <FileText className="h-4 w-4 text-brand-600" />
 
-          خلاصه اجرایی
+          Executive summary
 
         </h3>
 
@@ -444,10 +444,10 @@ export default function ReportDetailPage() {
 
 
 
-      {/* خلاصه ساده — پشتیبان تصمیم */}
+      {/* Plain-language summary — decision support */}
       <div className="stat-card border-amber-100 bg-amber-50/40">
-        <h3 className="mb-2 text-sm font-semibold text-slate-700">خلاصه به زبان ساده (پشتیبان تصمیم)</h3>
-        <p className="mb-3 text-xs text-amber-700">نه تشخیص مستقیم — فقط کمک به تصمیم بالینی</p>
+        <h3 className="mb-2 text-sm font-semibold text-slate-700">Plain-language summary (decision support)</h3>
+        <p className="mb-3 text-xs text-amber-700">Not a direct diagnosis — only an aid to clinical decision-making</p>
         {!plainSummary ? (
           <button
             onClick={async () => {
@@ -456,7 +456,7 @@ export default function ReportDetailPage() {
               try {
                 setPlainSummary(await getPlainSummary(id));
               } catch {
-                setError("خطا در تولید خلاصه ساده");
+                setError("Error generating plain summary");
               } finally {
                 setPlainLoading(false);
               }
@@ -464,7 +464,7 @@ export default function ReportDetailPage() {
             disabled={plainLoading}
             className="rounded-lg bg-brand-600 px-4 py-2 text-sm text-white disabled:opacity-50"
           >
-            {plainLoading ? "در حال تولید..." : "نمایش خلاصه ساده"}
+            {plainLoading ? "Generating..." : "Show plain summary"}
           </button>
         ) : (
           <div className="space-y-2">
@@ -475,7 +475,7 @@ export default function ReportDetailPage() {
           </div>
         )}
         <div className="mt-4 border-t border-amber-100 pt-4">
-          <p className="mb-2 text-xs font-medium text-slate-600">پرسش درباره واریانت (PharmGKB)</p>
+          <p className="mb-2 text-xs font-medium text-slate-600">Question about a variant (PharmGKB)</p>
           <div className="flex flex-wrap gap-2">
             <input
               value={askRsId}
@@ -486,7 +486,7 @@ export default function ReportDetailPage() {
             <input
               value={askQuestion}
               onChange={(e) => setAskQuestion(e.target.value)}
-              placeholder="سؤال پزشک..."
+              placeholder="Physician's question..."
               className="min-w-[200px] flex-1 rounded border px-2 py-1 text-sm"
             />
             <button
@@ -498,7 +498,7 @@ export default function ReportDetailPage() {
                   const res = await askVariant(askQuestion, askRsId);
                   setAskAnswer(res.answer_fa);
                 } catch {
-                  setAskAnswer("خطا در پاسخ‌دهی");
+                  setAskAnswer("Error answering");
                 } finally {
                   setAskLoading(false);
                 }
@@ -506,7 +506,7 @@ export default function ReportDetailPage() {
               disabled={askLoading || !askRsId || !askQuestion}
               className="rounded-lg border border-brand-600 px-3 py-1 text-sm text-brand-700 disabled:opacity-50"
             >
-              {askLoading ? "..." : "پرسش"}
+              {askLoading ? "..." : "Ask"}
             </button>
           </div>
           {askAnswer && <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{askAnswer}</p>}
@@ -515,19 +515,19 @@ export default function ReportDetailPage() {
 
 
 
-      {/* جدول واریانت‌های با اهمیت بالا */}
+      {/* High-significance variants table */}
 
       <div className="stat-card">
 
         <h3 className="mb-4 text-sm font-semibold text-slate-700">
 
-          واریانت‌های با اهمیت بالا ({hpVariants.length})
+          High-significance variants ({hpVariants.length})
 
         </h3>
 
         {hpVariants.length === 0 ? (
 
-          <p className="text-sm text-slate-400">واریانت با اولویت بالا یافت نشد.</p>
+          <p className="text-sm text-slate-400">No high-priority variants found.</p>
 
         ) : (
 
@@ -539,21 +539,21 @@ export default function ReportDetailPage() {
 
                 <tr>
 
-                  <th>رتبه</th>
+                  <th>Rank</th>
 
-                  <th>ژن</th>
+                  <th>Gene</th>
 
                   <th>rsID</th>
 
-                  <th>موقعیت</th>
+                  <th>Position</th>
 
-                  <th>اهمیت</th>
+                  <th>Significance</th>
 
-                  <th>اولویت</th>
+                  <th>Priority</th>
 
-                  <th>توضیح مدل</th>
+                  <th>Model explanation</th>
 
-                  <th>تفسیر</th>
+                  <th>Interpretation</th>
 
                 </tr>
 
@@ -608,24 +608,24 @@ export default function ReportDetailPage() {
 
       </div>
 
-      {/* پنل نشانگر زیستی و ranking */}
+      {/* Biomarker panel and ranking */}
       <div className="stat-card">
         <h3 className="mb-4 text-sm font-semibold text-slate-700">
-          پنل نشانگر زیستی ({biomarkerPanel?.total_variants ?? rankedMarkers.length})
+          Biomarker panel ({biomarkerPanel?.total_variants ?? rankedMarkers.length})
         </h3>
         {rankedMarkers.length === 0 ? (
-          <p className="text-sm text-slate-400">نشانگر زیستی رتبه‌بندی‌شده‌ای موجود نیست.</p>
+          <p className="text-sm text-slate-400">No ranked biomarkers available.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>رتبه</th>
-                  <th>ژن / rsID</th>
-                  <th>امتیاز ML</th>
-                  <th>داروهای راهنما</th>
-                  <th>منابع</th>
-                  <th>ویژگی‌های مؤثر</th>
+                  <th>Rank</th>
+                  <th>Gene / rsID</th>
+                  <th>ML score</th>
+                  <th>Guideline drugs</th>
+                  <th>Sources</th>
+                  <th>Influential features</th>
                 </tr>
               </thead>
               <tbody>
@@ -637,8 +637,8 @@ export default function ReportDetailPage() {
                       <div className="font-mono text-xs text-slate-500">{m.rs_id ?? "—"}</div>
                     </td>
                     <td>{m.ml_score != null ? (m.ml_score * 100).toFixed(0) + "%" : "—"}</td>
-                    <td className="text-xs text-slate-600">{(m.guideline_drugs ?? []).join("، ") || "—"}</td>
-                    <td className="text-xs text-slate-500">{(m.knowledge_sources ?? []).join("، ") || "—"}</td>
+                    <td className="text-xs text-slate-600">{(m.guideline_drugs ?? []).join(", ") || "—"}</td>
+                    <td className="text-xs text-slate-500">{(m.knowledge_sources ?? []).join(", ") || "—"}</td>
                     <td className="text-xs text-slate-500">
                       {(m.top_features ?? [])
                         .map((f) => f.feature)
@@ -655,7 +655,7 @@ export default function ReportDetailPage() {
 
 
 
-      {/* توصیه‌های دارویی CPIC */}
+      {/* CPIC drug recommendations */}
 
       <div className="stat-card">
 
@@ -663,13 +663,13 @@ export default function ReportDetailPage() {
 
           <Pill className="h-4 w-4 text-brand-600" />
 
-          توصیه‌های دارویی (راهنمای CPIC)
+          Drug recommendations (CPIC guideline)
 
         </h3>
 
         {drugRecs.length === 0 ? (
 
-          <p className="text-sm text-slate-400">توصیه دارویی قابل اقدام یافت نشد.</p>
+          <p className="text-sm text-slate-400">No actionable drug recommendation found.</p>
 
         ) : (
 
@@ -693,7 +693,7 @@ export default function ReportDetailPage() {
 
                     <span className={cpicLevelClass[d.cpic_level] ?? "badge-info"}>
 
-                      {d.cpic_level_label ?? `سطح ${d.cpic_level}`}
+                      {d.cpic_level_label ?? `Level ${d.cpic_level}`}
 
                     </span>
 
@@ -701,7 +701,7 @@ export default function ReportDetailPage() {
 
                 </div>
 
-                <p className="mt-1 text-xs text-brand-700">ژن: {d.gene}</p>
+                <p className="mt-1 text-xs text-brand-700">Gene: {d.gene}</p>
 
                 {d.cpic_guideline && (
 
@@ -713,13 +713,13 @@ export default function ReportDetailPage() {
 
                 {d.action_fa && (
 
-                  <p className="mt-2 text-sm font-medium text-emerald-800">اقدام: {d.action_fa}</p>
+                  <p className="mt-2 text-sm font-medium text-emerald-800">Action: {d.action_fa}</p>
 
                 )}
 
                 <p className="mt-1 text-xs text-slate-400">
 
-                  اطمینان ML: {((d.confidence ?? 0) * 100).toFixed(0)}%
+                  ML confidence: {((d.confidence ?? 0) * 100).toFixed(0)}%
 
                 </p>
 
@@ -735,7 +735,7 @@ export default function ReportDetailPage() {
 
 
 
-      {/* هشدارهای تداخل دارویی */}
+      {/* Drug interaction warnings */}
 
       <div className="stat-card border-rose-100">
 
@@ -743,13 +743,13 @@ export default function ReportDetailPage() {
 
           <AlertTriangle className="h-4 w-4 text-rose-600" />
 
-          هشدارهای تداخل دارویی ({interactions.length})
+          Drug interaction warnings ({interactions.length})
 
         </h3>
 
         {interactions.length === 0 ? (
 
-          <p className="text-sm text-slate-500">تداخل دارویی مهمی بین داروهای توصیه‌شده شناسایی نشد.</p>
+          <p className="text-sm text-slate-500">No significant drug interaction was identified among the recommended drugs.</p>
 
         ) : (
 
@@ -777,7 +777,7 @@ export default function ReportDetailPage() {
 
                 <p className="mt-2 text-sm text-rose-800">{ix.warning_fa}</p>
 
-                <p className="mt-1 text-sm text-slate-600">توصیه: {ix.recommendation_fa}</p>
+                <p className="mt-1 text-sm text-slate-600">Recommendation: {ix.recommendation_fa}</p>
 
               </div>
 
@@ -791,13 +791,13 @@ export default function ReportDetailPage() {
 
 
 
-      {/* امضای دیجیتال */}
+      {/* Digital signature */}
 
       {clinical?.digital_signature && (
 
         <div className="stat-card border-emerald-100 bg-emerald-50/30">
 
-          <h3 className="mb-2 text-sm font-semibold text-emerald-800">امضای دیجیتال</h3>
+          <h3 className="mb-2 text-sm font-semibold text-emerald-800">Digital signature</h3>
 
           <p className="font-mono text-xs text-slate-600 break-all">
 
@@ -809,7 +809,7 @@ export default function ReportDetailPage() {
 
             <p className="mt-1 text-xs text-slate-500">
 
-              زمان امضا: {formatDateTime(clinical.digital_signature.signed_at)}
+              Signed at: {formatDateTime(clinical.digital_signature.signed_at)}
 
             </p>
 

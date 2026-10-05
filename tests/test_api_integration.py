@@ -1,4 +1,4 @@
-"""تست‌های یکپارچه API و پایپ‌لاین simulated."""
+"""Integrated tests of the API and the simulated pipeline."""
 
 from io import BytesIO
 

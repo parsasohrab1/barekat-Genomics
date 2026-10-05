@@ -1,4 +1,4 @@
-"""تفسیر واریانت با پایگاه دانش رسمی (PharmGKB, CPIC, ClinVar, gnomAD, dbSNP)."""
+"""Variant interpretation with official knowledge bases (PharmGKB, CPIC, ClinVar, gnomAD, dbSNP)."""
 
 from dataclasses import asdict, dataclass, field
 
@@ -77,7 +77,7 @@ def interpret_variants(
     for variant in variants:
         cached = cache.get(variant, genome_build=genome_build, model_version=model_version)
         if cached:
-            # سازگاری با کش قدیمی بدون فیلدهای جدید
+            # compatibility with old cache lacking the new fields
             cached.setdefault("feature_contributions", [])
             cached.setdefault("guideline_drugs", [])
             results.append((variant, VariantInterpretation(**cached)))
@@ -144,7 +144,7 @@ def interpret_variants(
 def generate_drug_recommendations(
     interpretations: list[tuple[CalledVariant, VariantInterpretation]],
 ) -> dict:
-    """توصیه دارویی مبتنی بر PharmGKB + CPIC (+ ClinVar در متن توصیه)."""
+    """Drug recommendation based on PharmGKB + CPIC (+ ClinVar in the recommendation text)."""
     recommendations = {}
     for variant, interp in interpretations:
         if not interp.pharmacogenomic_effect or not interp.gene:
@@ -153,7 +153,7 @@ def generate_drug_recommendations(
         drugs = interp.guideline_drugs or _drugs_for_variant(kb, interp.gene)
         for drug in drugs:
             cpic = _registry.get_cpic_for_gene_drug(interp.gene, drug) or {}
-            # نگه‌داشتن قوی‌ترین توصیه برای هر دارو
+            # keep the strongest recommendation for each drug
             existing = recommendations.get(drug)
             candidate = {
                 "gene": interp.gene,
@@ -193,7 +193,7 @@ def _drugs_for_variant(kb: VariantKnowledge | None, gene: str | None) -> list[st
         fallback = _registry.drug_for_gene(gene)
         if fallback:
             drugs.append(fallback)
-    # نرمال‌سازی
+    # Normalization
     return list(dict.fromkeys(d.lower() for d in drugs if d))
 
 
@@ -238,18 +238,18 @@ def _generate_pgx_effect(
         return None
     drug_list = drugs or ([drug] if drug else [])
     drug_name = (kb.drug_fa if kb and kb.drug_fa else None) or (
-        "، ".join(drug_list) if drug_list else "داروهای مرتبط"
+        ", ".join(drug_list) if drug_list else "related drugs"
     )
     phenotype = kb.phenotype if kb else None
     if phenotype:
-        base = f"ژن {gene} ({phenotype}): "
+        base = f"Gene {gene} ({phenotype}): "
     else:
-        base = f"ژن {gene}: "
+        base = f"Gene {gene}: "
     if kb and kb.cpic_action_fa:
         return base + kb.cpic_action_fa
     if significance == "pathogenic":
-        return base + f"احتمال پاسخ ضعیف یا عوارض جانبی به {drug_name}. دوزاژ جایگزین توصیه می‌شود."
-    return base + f"نیاز به پایش دقیق‌تر هنگام تجویز {drug_name}."
+        return base + f"Possible poor response or adverse effects to {drug_name}. An alternative dosage is recommended."
+    return base + f"Closer monitoring is needed when prescribing {drug_name}."
 
 
 def _compute_priority(
@@ -287,14 +287,14 @@ def _generate_interpretation(
 ) -> str:
     loc = f"{variant.chromosome}:{variant.position}"
     rs = f" ({variant.rs_id})" if variant.rs_id else ""
-    gene_str = f" در ژن {gene}" if gene else ""
-    base = f"واریانت {variant.ref_allele}>{variant.alt_allele} در {loc}{rs}{gene_str} با اهمیت بالینی {significance}."
+    gene_str = f" in gene {gene}" if gene else ""
+    base = f"Variant {variant.ref_allele}>{variant.alt_allele} at {loc}{rs}{gene_str} with clinical significance {significance}."
     if kb and kb.gnomad_af is not None:
-        base += f" فراوانی gnomAD: {kb.gnomad_af:.4f}."
+        base += f" gnomAD frequency: {kb.gnomad_af:.4f}."
     if kb and kb.sources:
-        base += f" منابع: {', '.join(kb.sources)}."
+        base += f" Sources: {', '.join(kb.sources)}."
     if kb and kb.cpic_guideline:
-        base += f" راهنمای CPIC: {kb.cpic_guideline}."
+        base += f" CPIC guideline: {kb.cpic_guideline}."
     if pgx_effect:
         base += f" {pgx_effect}"
     return base

@@ -1,4 +1,4 @@
-"""سرویس ثبت دارایی دانشی و مالکیت فکری."""
+"""Knowledge asset and intellectual property registration service."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ class KnowledgeAssetService:
             {
                 "asset_code": "BG-ML-VCF-V2",
                 "title": "Variant Classifier Ensemble v2",
-                "title_fa": "طبقه‌بند ensemble واریانت نسخه ۲",
+                "title_fa": "Variant ensemble classifier v2",
                 "asset_type": "model",
                 "version": "v2",
                 "inventors": "barekat Genomics ML Team",
@@ -33,7 +33,7 @@ class KnowledgeAssetService:
             {
                 "asset_code": "BG-METHOD-IR-COHORT",
                 "title": "Iranian Cohort Biomarker Discovery Method",
-                "title_fa": "روش کشف نشانگر کوهورت ایرانی",
+                "title_fa": "Iranian cohort biomarker discovery method",
                 "asset_type": "method",
                 "version": "1.0",
                 "inventors": "barekat Genomics Clinical Informatics",
@@ -45,7 +45,7 @@ class KnowledgeAssetService:
             {
                 "asset_code": "BG-KIT-PGX-WORKFLOW",
                 "title": "Unified WGS/WES/Panel PGx Workflow Kit",
-                "title_fa": "کیت نرم‌افزاری workflow یکپارچه WGS/WES/Panel",
+                "title_fa": "Integrated WGS/WES/Panel workflow software kit",
                 "asset_type": "software_kit",
                 "version": "1.0",
                 "inventors": "barekat Genomics Engineering",
@@ -83,11 +83,11 @@ class KnowledgeAssetService:
 
     def create(self, **kwargs) -> KnowledgeAsset:
         if kwargs.get("asset_type") not in ASSET_TYPES:
-            raise ValueError(f"asset_type نامعتبر — مجاز: {ASSET_TYPES}")
+            raise ValueError(f"Invalid asset_type — allowed: {ASSET_TYPES}")
         if kwargs.get("disclosure_status") not in DISCLOSURE_STATUSES:
-            raise ValueError(f"disclosure_status نامعتبر — مجاز: {DISCLOSURE_STATUSES}")
+            raise ValueError(f"Invalid disclosure_status — allowed: {DISCLOSURE_STATUSES}")
         if self.db.query(KnowledgeAsset).filter(KnowledgeAsset.asset_code == kwargs["asset_code"]).first():
-            raise ValueError("asset_code تکراری است")
+            raise ValueError("Duplicate asset_code")
         asset = KnowledgeAsset(**kwargs)
         self.db.add(asset)
         self.db.commit()
@@ -96,7 +96,7 @@ class KnowledgeAssetService:
 
     def update_status(self, asset_id: uuid.UUID, status: str, patent_ref: str | None = None) -> KnowledgeAsset | None:
         if status not in DISCLOSURE_STATUSES:
-            raise ValueError(f"وضعیت نامعتبر: {status}")
+            raise ValueError(f"Invalid status: {status}")
         asset = self.db.query(KnowledgeAsset).filter(KnowledgeAsset.id == asset_id).first()
         if not asset:
             return None

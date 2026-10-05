@@ -15,7 +15,7 @@ export default function SamplesPage() {
     setLoading(true);
     getSamples()
       .then(setSamples)
-      .catch(() => setError("خطا در بارگذاری نمونه‌ها"))
+      .catch(() => setError("Error loading samples"))
       .finally(() => setLoading(false));
   };
 
@@ -29,7 +29,7 @@ export default function SamplesPage() {
           className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
           <Upload className="h-4 w-4" />
-          آپلود نمونه
+          Upload sample
         </button>
       </div>
 
@@ -37,19 +37,19 @@ export default function SamplesPage() {
 
       <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-card">
         {loading ? (
-          <p className="p-8 text-center text-sm text-slate-400">در حال بارگذاری...</p>
+          <p className="p-8 text-center text-sm text-slate-400">Loading...</p>
         ) : samples.length === 0 ? (
-          <p className="p-8 text-center text-sm text-slate-400">نمونه‌ای ثبت نشده</p>
+          <p className="p-8 text-center text-sm text-slate-400">No samples recorded</p>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>شناسه نمونه</th>
-                <th>بیمار</th>
-                <th>نوع فایل</th>
-                <th>نسخه ژنوم</th>
-                <th>تاریخ</th>
-                <th>وضعیت</th>
+                <th>Sample ID</th>
+                <th>Patient</th>
+                <th>File type</th>
+                <th>Genome version</th>
+                <th>Date</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>

@@ -1,10 +1,10 @@
-"""Pytest configuration با دیتابیس تست SQLite و پوشش API."""
+"""Pytest configuration with an SQLite test database and API coverage."""
 
 import os
 import uuid
 from pathlib import Path
 
-# قبل از هر import برنامه
+# before any application import
 os.environ.setdefault("AUTH_ENABLED", "false")
 os.environ.setdefault("PIPELINE_MODE", "simulated")
 os.environ.setdefault("ANNOTATION_CACHE_ENABLED", "false")
@@ -26,7 +26,7 @@ from barekat_genomics.api.main import create_app
 from barekat_genomics.core.database import Base, get_db
 from barekat_genomics.models.user import User
 
-# مدل‌ها را برای metadata ثبت کنید
+# register the models for metadata
 import barekat_genomics.models.organization  # noqa: F401
 import barekat_genomics.models.billing  # noqa: F401
 import barekat_genomics.models.cohort  # noqa: F401
@@ -75,7 +75,7 @@ def db_session(db_engine):
     org = Organization(
         slug=DEFAULT_ORG_SLUG,
         name=DEFAULT_ORG_NAME,
-        name_fa="سازمان پیش‌فرض",
+        name_fa="Default organization",
         deployment_mode="saas",
         is_active=True,
     )

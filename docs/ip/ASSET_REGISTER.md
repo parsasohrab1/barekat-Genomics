@@ -1,8 +1,8 @@
 # Knowledge Asset / IP Register
 
-ثبت دارایی‌های دانشی پلتفرم barekat Genomics برای آمادگی پتنت و مالکیت فکری.
+Register of knowledge assets of the barekat Genomics platform for patent readiness and intellectual property.
 
-API زنده: `GET /api/v1/knowledge-assets`
+Live API: `GET /api/v1/knowledge-assets`
 
 ## Seed assets
 

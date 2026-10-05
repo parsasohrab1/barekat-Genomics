@@ -1,4 +1,4 @@
-"""ساخت محتوای گزارش بالینی برای پزشک."""
+"""Build clinical report content for the physician."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ CLINICAL_REPORT_SCHEMA_VERSION = "1.0"
 
 
 def validate_clinical_content(content: dict) -> dict:
-    """اعتبارسنجی و نرمال‌سازی محتوای گزارش طبق اسکمای v1."""
+    """Validate and normalize report content per the v1 schema."""
     from barekat_genomics.schemas import ClinicalReportContent
 
     payload = dict(content or {})
@@ -109,7 +109,7 @@ def _build_biomarker_panel(
     interpretations: list[tuple[CalledVariant, VariantInterpretation]],
     high_priority: list[dict],
 ) -> dict:
-    """پنل نشانگر زیستی با ranking بالینی قابل تفسیر."""
+    """Biomarker panel with interpretable clinical ranking."""
     markers = []
     for variant, interp in interpretations:
         markers.append(
@@ -178,11 +178,11 @@ def _build_executive_summary(
     drug_count = len(drugs)
     level_a = sum(1 for d in drugs if d.get("cpic_level") == "A")
 
-    patient_ref = f"بیمار {patient_external_id}" if patient_external_id else "بیمار"
+    patient_ref = f"patient {patient_external_id}" if patient_external_id else "the patient"
     sentences = [
         (
-            f"{patient_ref}: بر اساس تحلیل نمونه ژنومی ({genome_build})، "
-            f"{total} واریانت فارماکوژنومی غربالگری و {hp_count} مورد با اهمیت بالینی بالا شناسایی شد."
+            f"{patient_ref}: based on analysis of the genomic sample ({genome_build}), "
+            f"{total} pharmacogenomic variants were screened and {hp_count} with high clinical significance were identified."
         ),
     ]
 
@@ -192,34 +192,34 @@ def _build_executive_summary(
         )
         if genes:
             sentences.append(
-                f"واریانت‌های با اولویت بالا در ژن‌های {genes} یافت شدند که بر متابولیسم و پاسخ دارویی تأثیر مستقیم دارند."
+                f"High-priority variants were found in the genes {genes} that directly affect drug metabolism and response."
             )
 
     if drug_count:
         sentences.append(
-            f"بر اساس راهنمای CPIC، {drug_count} توصیه دارویی تولید شد "
-            f"({level_a} مورد با سطح شواهد A — توصیه قطعی)."
+            f"Per the CPIC guideline, {drug_count} drug recommendations were generated "
+            f"({level_a} with evidence level A — definitive recommendation)."
         )
     else:
         sentences.append(
-            "در این نمونه واریانت فارماکوژنومی با اهمیت بالینی قابل اقدام یافت نشد؛ "
-            "ادامه درمان بر اساس پروتکل استاندارد توصیه می‌شود."
+            "No actionable pharmacogenomic variant of clinical significance was found in this sample; "
+            "continuing treatment per the standard protocol is recommended."
         )
 
     if interactions:
         sentences.append(
-            f"هشدار: {len(interactions)} تداخل دارویی بالقوه بین داروهای توصیه‌شده شناسایی شد "
-            "که نیازمند بازنگری نسخه و پایش دقیق‌تر است."
+            f"Warning: {len(interactions)} potential drug interactions were identified among the recommended drugs, "
+            "requiring review of the prescription and closer monitoring."
         )
     else:
         sentences.append(
-            "تداخل دارویی مهمی بین داروهای توصیه‌شده در این گزارش شناسایی نشد؛ "
-            "با این حال، پایش بالینی توصیه می‌شود."
+            "No significant drug interaction was identified among the drugs recommended in this report; "
+            "nevertheless, clinical monitoring is recommended."
         )
 
     sentences.append(
-        "این گزارش صرفاً جنبه مشاوره‌ای دارد و جایگزین قضاوت بالینی پزشک معالج نیست؛ "
-        "تصمیم نهایی درمانی با پزشک است."
+        "This report is advisory only and is not a substitute for the clinical judgment of the treating physician; "
+        "the final treatment decision rests with the physician."
     )
 
     return sentences[:5]
@@ -242,7 +242,7 @@ def rebuild_clinical_content_from_db(
     *,
     patient_external_id: str | None = None,
 ) -> dict:
-    """بازسازی محتوای بالینی برای گزارش‌های قدیمی از داده‌های DB."""
+    """Reconstruct clinical content for legacy reports from DB data."""
     interpretations: list[tuple[CalledVariant, VariantInterpretation]] = []
     for row in variants_with_annotations:
         variant = CalledVariant(

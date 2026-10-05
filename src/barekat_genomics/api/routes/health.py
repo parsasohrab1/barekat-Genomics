@@ -1,4 +1,4 @@
-"""Health check و متریک‌های Prometheus."""
+"""Health check and Prometheus metrics."""
 
 from fastapi import APIRouter, Response, status
 from fastapi.responses import PlainTextResponse
@@ -18,13 +18,13 @@ router = APIRouter()
 
 @router.get("/health/live")
 def liveness() -> dict:
-    """Liveness probe — API در حال اجراست."""
+    """Liveness probe — the API is running."""
     return {"status": "alive", "version": __version__}
 
 
 @router.get("/health/ready")
 def readiness(response: Response) -> dict:
-    """Readiness probe — وابستگی‌های حیاتی."""
+    """Readiness probe — critical dependencies."""
     checks = run_health_checks(include_celery=False)
     overall = aggregate_status(checks)
     if overall == "unhealthy":
@@ -38,7 +38,7 @@ def readiness(response: Response) -> dict:
 
 @router.get("/health", response_model=HealthResponse)
 def health_check(response: Response) -> HealthResponse:
-    """بررسی کامل سلامت تمام سرویس‌ها."""
+    """Full health check of all services."""
     checks = run_health_checks(include_celery=True)
     overall = aggregate_status(checks)
     if overall == "unhealthy":
@@ -52,7 +52,7 @@ def health_check(response: Response) -> HealthResponse:
 
 @router.get("/metrics")
 def prometheus_metrics() -> PlainTextResponse:
-    """Endpoint متریک Prometheus."""
+    """Prometheus metrics endpoint."""
     settings = get_settings()
     if not settings.metrics_enabled:
         return PlainTextResponse("metrics disabled", status_code=404)

@@ -1,4 +1,4 @@
-"""سرویس گزارش‌های ژنومی."""
+"""Genomic report service."""
 
 import uuid
 from datetime import datetime, timezone
@@ -158,7 +158,7 @@ class ReportService:
     def generate_pdf(self, report_id: uuid.UUID) -> bytes:
         report = self.get_report(report_id)
         if not report:
-            raise ValueError("گزارش یافت نشد")
+            raise ValueError("Report not found")
 
         patient = self.db.query(Patient).filter(Patient.id == report.patient_id).first()
         content = self.get_clinical_content(report, refresh=report.status == REPORT_STATUS_COMPLETED)

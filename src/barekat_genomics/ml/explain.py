@@ -1,4 +1,4 @@
-"""Explainability: SHAP در صورت نصب، در غیر این صورت feature_importances_ / permutation."""
+"""Explainability: SHAP if installed, otherwise feature_importances_ / permutation."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def _iter_estimators(model) -> list[tuple[str, object]]:
 
 
 def extract_native_importance(model) -> dict[str, float]:
-    """استخراج اهمیت ویژگی از اعضای درخت‌محور ensemble."""
+    """Extract feature importance from the tree-based ensemble members."""
     agg = np.zeros(len(FEATURE_NAMES), dtype=float)
     count = 0
     for _name, est in _iter_estimators(model):
@@ -49,7 +49,7 @@ def permutation_importance_map(model, X: np.ndarray, y: np.ndarray) -> dict[str,
 
 
 def shap_contributions(model, feature_vector: list[float]) -> dict[str, float] | None:
-    """سعی در محاسبه SHAP؛ بدون وابستگی اجباری."""
+    """Try to compute SHAP; no mandatory dependency."""
     try:
         import shap
     except ImportError:
@@ -86,15 +86,15 @@ def explain_prediction(
     top_k: int = 5,
 ) -> dict:
     """
-    توضیح تصمیم مدل برای یک نمونه.
-    اولویت: SHAP → مشارکت وزن‌دار ویژگی × اهمیت سراسری → اهمیت سراسری.
+    Explanation of the model's decision for one sample.
+    Priority: SHAP → value-weighted feature contribution × global importance → global importance.
     """
     shap_vals = shap_contributions(model, feature_vector)
     method = "shap" if shap_vals else "feature_importance"
     contrib = shap_vals
     if contrib is None:
         base = global_importance or extract_native_importance(model)
-        # وزن‌دهی با مقدار ویژگی برای تفسیر محلی ساده
+        # Weighting by feature value for simple local interpretation
         local = {
             name: float(base.get(name, 0.0) * (0.35 + 0.65 * float(feature_vector[i])))
             for i, name in enumerate(FEATURE_NAMES)
@@ -125,7 +125,7 @@ def compute_and_persist_importance(
     except Exception:
         perm = native
 
-    # میانگین native و permutation
+    # mean of native and permutation
     blended = {
         name: round(0.5 * native.get(name, 0.0) + 0.5 * perm.get(name, 0.0), 4)
         for name in FEATURE_NAMES

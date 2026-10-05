@@ -1,4 +1,4 @@
-"""پیکربندی structlog برای Loki (JSON stdout)."""
+"""structlog configuration for Loki (JSON stdout)."""
 
 from __future__ import annotations
 

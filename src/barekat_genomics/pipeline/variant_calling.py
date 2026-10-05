@@ -1,4 +1,4 @@
-"""شناسایی واریانت: GATK HaplotypeCaller + پارس VCF."""
+"""Variant calling: GATK HaplotypeCaller + VCF parsing."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ def call_variants(
 ) -> list[CalledVariant]:
     ft = file_type.upper()
     if ft == "VCF":
-        # میان‌بر: فایل VCF آماده — فقط annotate/parse
+        # shortcut: ready VCF file — only annotate/parse
         if is_production_pipeline():
             base_dir = ensure_dir(work_dir or Path(file_path).parent / "variants")
             annotated = annotate_vcf(Path(file_path), base_dir, genome_build)
@@ -76,7 +76,7 @@ def _run_production_calling(
 
     refs = get_reference_bundle(genome_build)
     if not refs.reference_ready:
-        raise FileNotFoundError(f"مرجع ژنوم آماده نیست: {refs.ref_fasta}")
+        raise FileNotFoundError(f"Genome reference is not ready: {refs.ref_fasta}")
 
     base_dir = ensure_dir(work_dir or Path(file_path).parent / "variants")
     vcf_raw = base_dir / "raw.vcf.gz"
@@ -104,7 +104,7 @@ def _run_production_calling(
 
 
 def parse_vcf(vcf_path: Path) -> list[CalledVariant]:
-    """پارس VCF با bcftools query."""
+    """Parse VCF with bcftools query."""
     result = run_command(
         [
             "bcftools", "query",

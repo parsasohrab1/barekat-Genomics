@@ -31,7 +31,7 @@ receivers:
       - url: "http://api:8000/api/v1/health/live"
         send_resolved: true
 
-# برای production: جایگزین webhook با Slack/PagerDuty/email
+# For production: replace the webhook with Slack/PagerDuty/email
 # slack_configs:
 #   - api_url: 'https://hooks.slack.com/services/...'
 #     channel: '#barekat-alerts'

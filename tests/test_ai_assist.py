@@ -29,7 +29,7 @@ class TestPlainSummarizer:
         clinical = build_clinical_report(interps, drugs, patient_external_id="P-TEST")
         result = summarize_report_plain(clinical, patient_label="P-TEST")
         assert result["decision_support_only"] is True
-        assert "تشخیص" in result["disclaimer"] or "قضاوت" in result["disclaimer"]
+        assert "diagnosis" in result["disclaimer"].lower() or "judgment" in result["disclaimer"].lower()
         assert len(result["plain_summary"]) >= 3
         assert "P-TEST" in result["plain_summary_text"]
 
@@ -53,7 +53,7 @@ class TestRAG:
     def test_diagnosis_redirect(self):
         result = answer_variant_question("آیا بیمار قطعاً مبتلا به بیماری X است؟")
         assert result["blocked"] is True
-        assert "تشخیص" in result["answer_fa"]
+        assert "diagnosis" in result["answer_fa"].lower()
 
 
 class TestAIAPI:

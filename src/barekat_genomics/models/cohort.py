@@ -1,4 +1,4 @@
-"""مدل کوهورت و عضویت نمونه برای discovery نشانگر."""
+"""Cohort and sample membership model for biomarker discovery."""
 
 from __future__ import annotations
 

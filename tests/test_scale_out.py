@@ -62,7 +62,7 @@ class TestRunners:
         from barekat_genomics.pipeline.runners import get_runner
         import pytest
 
-        with pytest.raises(ValueError, match="ناشناخته"):
+        with pytest.raises(ValueError, match="Unknown"):
             get_runner("unknown")
 
 

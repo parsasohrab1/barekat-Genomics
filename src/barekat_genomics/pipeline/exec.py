@@ -1,4 +1,4 @@
-"""اجرای ابزارهای خط فرمان bioinformatics."""
+"""Running bioinformatics command-line tools."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def tool_available(name: str) -> bool:
 def require_tools(*names: str) -> None:
     missing = [n for n in names if not tool_available(n)]
     if missing:
-        raise ToolNotFoundError(f"ابزارهای یافت‌نشده: {', '.join(missing)}")
+        raise ToolNotFoundError(f"Tools not found: {', '.join(missing)}")
 
 
 def run_command(

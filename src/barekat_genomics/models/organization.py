@@ -1,4 +1,4 @@
-"""سازمان / multi-tenant."""
+"""Organization / multi-tenant."""
 
 from __future__ import annotations
 

@@ -20,7 +20,7 @@ export default function SettingsPage() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof ApiClientError ? err.message : "خطا در دریافت تنظیمات");
+          setError(err instanceof ApiClientError ? err.message : "Error fetching settings");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -32,7 +32,7 @@ export default function SettingsPage() {
   }, []);
 
   if (loading) {
-    return <p className="text-sm text-slate-500">در حال بارگذاری تنظیمات...</p>;
+    return <p className="text-sm text-slate-500">Loading settings...</p>;
   }
 
   if (error || !settings) {
@@ -40,8 +40,8 @@ export default function SettingsPage() {
       <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
         <div>
-          <p className="font-medium">تنظیمات در دسترس نیست</p>
-          <p className="mt-1">{error ?? "فقط نقش مدیر می‌تواند تنظیمات HIPAA را ببیند."}</p>
+          <p className="font-medium">Settings unavailable</p>
+          <p className="mt-1">{error ?? "Only the admin role can view HIPAA settings."}</p>
         </div>
       </div>
     );
@@ -50,32 +50,32 @@ export default function SettingsPage() {
   const cards = [
     {
       icon: Shield,
-      title: "امنیت و HIPAA",
-      desc: `رمزنگاری PHI · ممیزی ${settings.audit_log_enabled ? "فعال" : "غیرفعال"} · نگهداری ${settings.phi_retention_days} روز`,
+      title: "Security and HIPAA",
+      desc: `PHI encryption · Audit ${settings.audit_log_enabled ? "enabled" : "disabled"} · Retention ${settings.phi_retention_days} days`,
       enabled: settings.audit_log_enabled,
     },
     {
       icon: Database,
-      title: "پایگاه داده مرجع",
-      desc: `${settings.genome_build} · اسکمای گزارش v${settings.clinical_report_schema_version}`,
+      title: "Reference database",
+      desc: `${settings.genome_build} · Report schema v${settings.clinical_report_schema_version}`,
       enabled: true,
     },
     {
       icon: Cpu,
-      title: "مدل ML",
-      desc: `${settings.variant_classifier_model} · A/B test ${settings.ml_ab_test_enabled ? "فعال" : "غیرفعال"}`,
+      title: "ML model",
+      desc: `${settings.variant_classifier_model} · A/B test ${settings.ml_ab_test_enabled ? "enabled" : "disabled"}`,
       enabled: true,
     },
     {
       icon: Globe,
-      title: "اتصال EHR",
+      title: "EHR connection",
       desc: `FHIR org: ${settings.ehr_fhir_organization_id} · HL7: ${settings.ehr_hl7_sending_facility}`,
       enabled: true,
     },
     {
       icon: Activity,
-      title: "پایپ‌لاین و محیط",
-      desc: `محیط ${settings.app_env} · حالت ${settings.pipeline_mode} · backend ${settings.pipeline_backend}`,
+      title: "Pipeline and environment",
+      desc: `Environment ${settings.app_env} · Mode ${settings.pipeline_mode} · backend ${settings.pipeline_backend}`,
       enabled: settings.pipeline_mode === "production" || settings.app_env !== "production",
     },
   ];
@@ -83,7 +83,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-500">
-        مقادیر از پیکربندی سرور خوانده می‌شوند. تغییر دائمی از طریق متغیرهای محیطی و راه‌اندازی مجدد انجام می‌شود.
+        Values are read from the server configuration. Permanent changes are made through environment variables and a restart.
       </p>
       <div className="grid gap-4 md:grid-cols-2">
         {cards.map(({ icon: Icon, title, desc, enabled }) => (
@@ -96,7 +96,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <p className="font-medium text-slate-700">{title}</p>
                   <span className={enabled ? "badge-success" : "badge-warning"}>
-                    {enabled ? "فعال" : "غیرفعال"}
+                    {enabled ? "Enabled" : "Disabled"}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">{desc}</p>

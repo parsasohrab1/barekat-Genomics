@@ -1,4 +1,4 @@
-"""تحلیل‌گر ماژول‌های تشخیصی."""
+"""Diagnostic module analyzer."""
 
 from __future__ import annotations
 
@@ -95,7 +95,7 @@ def _analyze_gene_panel(
     covered = len(genes_found)
     total = len(module.genes)
     summary = (
-        f"پنل {module.name_fa}: {actionable} واریانت actionable در {covered}/{total} ژن پوشش‌داده‌شده."
+        f"Panel {module.name_fa}: {actionable} actionable variants in {covered}/{total} covered genes."
     )
 
     return ModuleAnalysisResult(
@@ -144,8 +144,8 @@ def _analyze_carrier(
 
     findings.sort(key=lambda f: f.priority_score, reverse=True)
     summary = (
-        f"غربالگری ناقل: {len(findings)} واریانت در {len(carrier_genes)} ژن — "
-        f"{'نیاز به مشاوره ژنتیک' if findings else 'ناقل شناسایی نشد در پنل'}"
+        f"Carrier screening: {len(findings)} variants in {len(carrier_genes)} genes — "
+        f"{'genetic counseling needed' if findings else 'no carrier identified in the panel'}"
     )
 
     return ModuleAnalysisResult(
@@ -209,7 +209,7 @@ def _analyze_tumor_normal(
     somatic = sum(1 for f in findings if f.extra.get("origin") == "somatic")
     germline = sum(1 for f in findings if f.extra.get("origin") == "germline")
     summary = (
-        f"مقایسه تومور/نرمال: {somatic} واریانت سوماتیک، {germline} واریانت ژرم‌لاین actionable"
+        f"Tumor/normal comparison: {somatic} somatic variants, {germline} actionable germline variants"
     )
 
     return ModuleAnalysisResult(
@@ -253,8 +253,8 @@ def _analyze_prs(
 
     high_risk = [t for t in trait_scores if t["risk_level"] == "high"]
     summary = (
-        f"PRS: {len(high_risk)} بیماری با ریسک بالا از {len(trait_scores)} ارزیابی‌شده"
-        + (f" — بیمار {patient_label}" if patient_label else "")
+        f"PRS: {len(high_risk)} high-risk diseases out of {len(trait_scores)} evaluated"
+        + (f" — patient {patient_label}" if patient_label else "")
     )
 
     return ModuleAnalysisResult(

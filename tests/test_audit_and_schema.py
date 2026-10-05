@@ -1,4 +1,4 @@
-"""تست ممیزی HIPAA و اسکمای گزارش."""
+"""HIPAA audit and report schema test."""
 
 from barekat_genomics.core.audit import log_audit_event
 from barekat_genomics.core.config import get_settings
@@ -57,7 +57,7 @@ class TestClinicalSchemaV1:
 
     def test_validate_upgrades_legacy_payload(self):
         legacy = {
-            "executive_summary": ["خلاصه"],
+            "executive_summary": ["Summary"],
             "high_priority_variants": [],
             "drug_recommendations": [],
             "drug_interactions": [],

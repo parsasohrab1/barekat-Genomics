@@ -1,4 +1,4 @@
-"""راه‌اندازی observability برای production."""
+"""Observability setup for production."""
 
 from barekat_genomics.core.observability.logging_config import configure_logging
 from barekat_genomics.core.observability.sentry_setup import init_sentry

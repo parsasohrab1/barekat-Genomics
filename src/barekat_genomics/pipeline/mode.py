@@ -1,4 +1,4 @@
-"""حالت اجرای پایپ‌لاین: simulated یا production."""
+"""Pipeline execution mode: simulated or production."""
 
 from barekat_genomics.core.config import get_settings
 from barekat_genomics.pipeline.exec import tool_available
@@ -25,7 +25,7 @@ def is_production_pipeline() -> bool:
 
 
 def assert_production_ready(genome_build: str | None = None) -> None:
-    """بلاک شروع Job production در صورت نبود ابزار یا مرجع."""
+    """Block the start of a production Job if tools or the reference are missing."""
     from barekat_genomics.pipeline.reference import validate_reference_bundle
 
     settings = get_settings()
@@ -35,7 +35,7 @@ def assert_production_ready(genome_build: str | None = None) -> None:
     missing = missing_production_tools()
     if missing:
         raise RuntimeError(
-            "حالت production فعال است ولی ابزارهای بیوانفورماتیک موجود نیستند: "
+            "Production mode is enabled but bioinformatics tools are not available: "
             + ", ".join(missing)
         )
 
@@ -43,7 +43,7 @@ def assert_production_ready(genome_build: str | None = None) -> None:
     if not validation.ready:
         failed = validation.to_dict().get("failed") or [c.name for c in validation.checks if not c.ok]
         raise FileNotFoundError(
-            f"مرجع ژنوم validation={validation.overall} "
+            f"Genome reference validation={validation.overall} "
             f"(failed={', '.join(failed)}). "
-            "راهنما: data/reference/README.md یا scripts/setup_reference.py validate"
+            "Guide: data/reference/README.md or scripts/setup_reference.py validate"
         )

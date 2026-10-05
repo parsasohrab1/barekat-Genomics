@@ -1,4 +1,4 @@
-"""لاگ ممیزی دسترسی به داده‌های حساس (HIPAA)."""
+"""Audit log of access to sensitive data (HIPAA)."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ def log_audit_event(
     details: str | None = None,
     ip_address: str | None = None,
 ) -> None:
-    """ثبت رویداد ممیزی در پایگاه داده — خطا نباید جریان اصلی را متوقف کند."""
+    """Record an audit event in the database — an error must not halt the main flow."""
     settings = get_settings()
     if not settings.audit_log_enabled:
         logger.debug(

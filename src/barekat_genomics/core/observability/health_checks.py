@@ -1,4 +1,4 @@
-"""بررسی سلامت وابستگی‌ها برای production."""
+"""Dependency health checks for production."""
 
 from __future__ import annotations
 

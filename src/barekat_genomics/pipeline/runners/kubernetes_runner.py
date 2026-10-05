@@ -1,4 +1,4 @@
-"""اجرای پایپ‌لاین روی Kubernetes Job."""
+"""Running the pipeline on a Kubernetes Job."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ class KubernetesRunner(PipelineRunner):
         settings = get_settings()
         template_path = Path(settings.kubernetes_job_template)
         if not template_path.exists():
-            raise FileNotFoundError(f"قالب K8s یافت نشد: {template_path}")
+            raise FileNotFoundError(f"K8s template not found: {template_path}")
 
         template = template_path.read_text(encoding="utf-8")
         job_name = f"barekat-pipeline-{str(job.id)[:8]}"

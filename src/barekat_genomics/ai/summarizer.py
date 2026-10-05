@@ -1,4 +1,4 @@
-"""خلاصه‌سازی گزارش به زبان ساده فارسی — پشتیبان تصمیم."""
+"""Plain-language report summarization — decision support."""
 
 from __future__ import annotations
 
@@ -9,67 +9,67 @@ from barekat_genomics.ai.disclaimer import (
 )
 
 SIGNIFICANCE_PLAIN: dict[str, str] = {
-    "pathogenic": "این تغییر ژنتیکی احتمالاً مضر است و ممکن است عملکرد ژن را تحت تأثیر قرار دهد",
-    "likely_pathogenic": "این تغییر احتمال زیادی دارد که مضر باشد",
-    "drug_response": "این تغییر مستقیماً با پاسخ بدن به دارو مرتبط است",
-    "uncertain_significance": "اهمیت بالینی این تغییر هنوز قطعی نیست",
-    "likely_benign": "این تغییر احتمالاً بی‌ضرر است",
-    "benign": "این تغییر معمولاً بی‌ضرر در نظر گرفته می‌شود",
+    "pathogenic": "This genetic change is likely harmful and may affect gene function",
+    "likely_pathogenic": "This change is highly likely to be harmful",
+    "drug_response": "This change is directly related to the body's response to a drug",
+    "uncertain_significance": "The clinical significance of this change is not yet definitive",
+    "likely_benign": "This change is probably harmless",
+    "benign": "This change is generally considered harmless",
 }
 
 CPIC_LEVEL_PLAIN: dict[str, str] = {
-    "A": "شواهد قوی — توصیه دارویی با اطمینان بالا",
-    "B": "شواهد متوسط — توصیه دارویی با احتیاط",
-    "C": "شواهد محدود — تصمیم با پزشک",
-    "D": "بدون توصیه مشخص — ادامه پروتکل معمول",
+    "A": "Strong evidence — drug recommendation with high confidence",
+    "B": "Moderate evidence — drug recommendation with caution",
+    "C": "Limited evidence — decision left to the physician",
+    "D": "No specific recommendation — continue the usual protocol",
 }
 
 
 def summarize_report_plain(clinical_content: dict, *, patient_label: str | None = None) -> dict:
-    """تبدیل محتوای بالینی به پاراگراف‌های ساده فارسی."""
+    """Convert clinical content into simple plain-language paragraphs."""
     paragraphs: list[str] = [DECISION_SUPPORT_BANNER]
 
-    patient_ref = f"بیمار {patient_label}" if patient_label else "بیمار"
-    paragraphs.append(f"خلاصه ساده برای {patient_ref}:")
+    patient_ref = f"patient {patient_label}" if patient_label else "the patient"
+    paragraphs.append(f"Plain summary for {patient_ref}:")
 
     hp = clinical_content.get("high_priority_variants") or []
     if hp:
         paragraphs.append(
-            f"در آزمایش ژنی، {len(hp)} مورد مهم پیدا شد که ممکن است روی داروها یا درمان اثر بگذارد:"
+            f"In the genetic test, {len(hp)} important findings were found that may affect drugs or treatment:"
         )
         for v in hp[:6]:
-            gene = v.get("gene") or "ژن نامشخص"
+            gene = v.get("gene") or "unspecified gene"
             rs = v.get("rs_id") or f"{v.get('chromosome')}:{v.get('position')}"
             sig_plain = SIGNIFICANCE_PLAIN.get(
                 v.get("clinical_significance", ""),
-                "نیاز به بررسی بیشتر دارد",
+                "needs further review",
             )
             paragraphs.append(f"• {gene} ({rs}): {sig_plain}.")
     else:
         paragraphs.append(
-            "در این آزمایش، واریانت با اهمیت بالای بالینی شناسایی نشد. "
-            "ادامه درمان معمولاً طبق پروتکل استاندارد انجام می‌شود."
+            "No variant of high clinical significance was identified in this test. "
+            "Treatment usually continues according to the standard protocol."
         )
 
     drugs = clinical_content.get("drug_recommendations") or []
     if drugs:
-        paragraphs.append("توصیه‌های دارویی (بر اساس راهنمای CPIC):")
+        paragraphs.append("Drug recommendations (based on the CPIC guideline):")
         for d in drugs[:8]:
             drug_name = d.get("drug_fa") or d.get("drug", "")
             level = d.get("cpic_level", "C")
             level_plain = CPIC_LEVEL_PLAIN.get(level, "")
-            action = d.get("action_fa") or d.get("recommendation") or "نیاز به بررسی پزشک"
+            action = d.get("action_fa") or d.get("recommendation") or "needs physician review"
             gene = d.get("gene") or ""
-            gene_part = f" (ژن {gene})" if gene else ""
+            gene_part = f" (gene {gene})" if gene else ""
             paragraphs.append(f"• {drug_name}{gene_part}: {action}. {level_plain}")
 
     interactions = clinical_content.get("drug_interactions") or []
     if interactions:
-        paragraphs.append(f"توجه: {len(interactions)} تداخل احتمالی بین داروها شناسایی شد — بازنگری نسخه توصیه می‌شود.")
+        paragraphs.append(f"Note: {len(interactions)} possible drug interactions were identified — a review of the prescription is recommended.")
 
     module = clinical_content.get("module_analysis")
     if module and module.get("summary_fa"):
-        paragraphs.append(f"تحلیل ماژول: {module['summary_fa']}")
+        paragraphs.append(f"Module analysis: {module['summary_fa']}")
 
     paragraphs.append(SHORT_DISCLAIMER_FA)
 

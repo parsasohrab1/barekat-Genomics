@@ -1,4 +1,4 @@
-"""حاشیه‌نویسی واریانت: SnpEff + یکپارچه‌سازی با پایگاه دانش ClinVar/PharmGKB."""
+"""Variant annotation: SnpEff + integration with the ClinVar/PharmGKB knowledge base."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from barekat_genomics.pipeline.reference import get_reference_bundle
 
 
 def annotate_vcf(vcf_path: Path, work_dir: Path, genome_build: str) -> Path | None:
-    """SnpEff annotation — در صورت نصب بودن."""
+    """SnpEff annotation — if installed."""
     if not tool_available("snpEff"):
         return _annotate_with_bcftools_cs(vcf_path, work_dir, genome_build)
     return _annotate_with_snpeff(vcf_path, work_dir, genome_build)
@@ -33,7 +33,7 @@ def _annotate_with_snpeff(vcf_path: Path, work_dir: Path, genome_build: str) -> 
 
 
 def _annotate_with_bcftools_cs(vcf_path: Path, work_dir: Path, genome_build: str) -> Path:
-    """fallback: bcftools annotate با ClinVar در صورت موجود بودن."""
+    """fallback: bcftools annotate with ClinVar if available."""
     refs = get_reference_bundle(genome_build)
     out_vcf = work_dir / "annotated.vcf.gz"
     cmd = ["bcftools", "view", str(vcf_path), "-Oz", "-o", str(out_vcf)]
@@ -58,7 +58,7 @@ def _annotate_with_bcftools_cs(vcf_path: Path, work_dir: Path, genome_build: str
 
 
 def _enrich_with_clinvar_pharmgkb(vcf_path: Path, work_dir: Path, genome_build: str) -> None:
-    """افزودن اطلاعات PharmGKB از فایل CSV محلی."""
+    """Add PharmGKB information from a local CSV file."""
     refs = get_reference_bundle(genome_build)
     if not refs.pharmgkb_dir or not refs.pharmgkb_dir.is_dir():
         return

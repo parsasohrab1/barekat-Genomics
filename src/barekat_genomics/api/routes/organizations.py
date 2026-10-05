@@ -1,4 +1,4 @@
-"""سازمان‌ها (multi-tenant)."""
+"""Organizations (multi-tenant)."""
 
 import uuid
 
@@ -54,7 +54,7 @@ def my_organization(
     else:
         org = svc.ensure_default()
     if not org:
-        raise HTTPException(status_code=404, detail="سازمان یافت نشد")
+        raise HTTPException(status_code=404, detail="Organization not found")
     return OrganizationResponse.model_validate(org)
 
 
@@ -66,7 +66,7 @@ def create_organization(
 ) -> OrganizationResponse:
     svc = OrganizationService(db)
     if svc.get_by_slug(body.slug):
-        raise HTTPException(status_code=400, detail="slug تکراری است")
+        raise HTTPException(status_code=400, detail="Duplicate slug")
     org = svc.create(
         slug=body.slug,
         name=body.name,

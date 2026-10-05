@@ -1,4 +1,4 @@
-"""سرویس مدیریت بیماران با ایزولاسیون سازمانی."""
+"""Patient management service with organizational isolation."""
 
 import uuid
 

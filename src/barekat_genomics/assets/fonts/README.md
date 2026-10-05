@@ -1,8 +1,8 @@
-# فونت فارسی برای PDF
+# Persian font for PDF
 
-برای تولید PDF با متن فارسی، یکی از این گزینه‌ها کافی است:
+To generate PDFs with Persian text, any one of these options is enough:
 
-1. **Docker**: فونت `fonts-noto-core` در Dockerfile نصب شده است.
-2. **Windows**: از فونت سیستمی Tahoma استفاده می‌شود.
-3. **اختیاری**: فونت [Vazirmatn](https://github.com/rastikerdar/vazirmatn) را در این پوشه قرار دهید:
+1. **Docker**: the `fonts-noto-core` font is installed in the Dockerfile.
+2. **Windows**: the system font Tahoma is used.
+3. **Optional**: place the [Vazirmatn](https://github.com/rastikerdar/vazirmatn) font in this folder:
    `Vazirmatn-Regular.ttf`

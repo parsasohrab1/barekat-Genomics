@@ -325,7 +325,7 @@ export async function downloadReportPdf(reportId: string): Promise<Blob> {
   if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
   const res = await fetch(`${API_BASE}/reports/${reportId}/pdf`, { headers });
   if (!res.ok) {
-    throw new ApiClientError("خطا در دریافت PDF", res.status);
+    throw new ApiClientError("Error downloading PDF", res.status);
   }
   return res.blob();
 }
@@ -350,7 +350,7 @@ export async function exportEhrFhir(patientId: string): Promise<Blob> {
   const headers: HeadersInit = {};
   if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
   const res = await fetch(`${API_BASE}/ehr/export/${patientId}/fhir`, { headers });
-  if (!res.ok) throw new ApiClientError("خطا در خروجی FHIR", res.status);
+  if (!res.ok) throw new ApiClientError("Error in FHIR export", res.status);
   return res.blob();
 }
 
@@ -358,7 +358,7 @@ export async function exportEhrHl7(patientId: string): Promise<Blob> {
   const headers: HeadersInit = {};
   if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
   const res = await fetch(`${API_BASE}/ehr/export/${patientId}/hl7`, { headers });
-  if (!res.ok) throw new ApiClientError("خطا در خروجی HL7", res.status);
+  if (!res.ok) throw new ApiClientError("Error in HL7 export", res.status);
   return res.blob();
 }
 

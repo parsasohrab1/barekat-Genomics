@@ -1,4 +1,4 @@
-"""بسته انطباق رگولاتوری."""
+"""Regulatory compliance package."""
 
 from barekat_genomics.compliance.checklist import checklist_as_dicts, summary_counts
 

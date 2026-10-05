@@ -70,16 +70,16 @@ async def upload_sample(
     user: CurrentUser = Depends(require_permission(Permission.SAMPLES_WRITE)),
 ) -> SampleResponse:
     if file_type not in ("FASTQ", "BAM", "VCF", "CRAM"):
-        raise HTTPException(status_code=400, detail="نوع فایل باید FASTQ، BAM، VCF یا CRAM باشد")
+        raise HTTPException(status_code=400, detail="File type must be FASTQ, BAM, VCF or CRAM")
     if assay_type not in ("wgs", "wes", "panel"):
-        raise HTTPException(status_code=400, detail="assay_type باید wgs، wes یا panel باشد")
+        raise HTTPException(status_code=400, detail="assay_type must be wgs, wes or panel")
     if priority not in ("normal", "urgent"):
-        raise HTTPException(status_code=400, detail="اولویت باید normal یا urgent باشد")
+        raise HTTPException(status_code=400, detail="Priority must be normal or urgent")
 
     patient_service = PatientService(db)
     patient = patient_service.get_by_id(patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detail="بیمار یافت نشد")
+        raise HTTPException(status_code=404, detail="Patient not found")
     assert_patient_access(user, patient)
 
     storage = get_storage()
@@ -125,7 +125,7 @@ def get_sample_qc(
 
     sample = db.query(SequencingSample).filter(SequencingSample.id == sample_id).first()
     if not sample:
-        raise HTTPException(status_code=404, detail="نمونه یافت نشد")
+        raise HTTPException(status_code=404, detail="Sample not found")
     patient = PatientService(db).get_by_id(sample.patient_id)
     if patient:
         assert_patient_access(user, patient)
@@ -161,7 +161,7 @@ def get_sample(
 ) -> SampleResponse:
     sample = db.query(SequencingSample).filter(SequencingSample.id == sample_id).first()
     if not sample:
-        raise HTTPException(status_code=404, detail="نمونه یافت نشد")
+        raise HTTPException(status_code=404, detail="Sample not found")
     patient = PatientService(db).get_by_id(sample.patient_id)
     if patient:
         assert_patient_access(user, patient)

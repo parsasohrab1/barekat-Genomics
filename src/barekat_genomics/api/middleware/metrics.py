@@ -1,4 +1,4 @@
-"""Middleware ثبت متریک HTTP."""
+"""HTTP metrics recording middleware."""
 
 from __future__ import annotations
 
@@ -40,7 +40,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
 
 
 def _normalize_path(path: str) -> str:
-    """کاهش cardinality — جایگزینی UUIDها."""
+    """Reduce cardinality — replace UUIDs."""
     parts = path.split("/")
     normalized = []
     for part in parts:

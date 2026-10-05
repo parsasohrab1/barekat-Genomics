@@ -1,4 +1,4 @@
-"""ثبت دارایی دانشی / مالکیت فکری."""
+"""Knowledge asset / intellectual property registry."""
 
 from __future__ import annotations
 
@@ -95,7 +95,7 @@ def update_status(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if not asset:
-        raise HTTPException(status_code=404, detail="دارایی یافت نشد")
+        raise HTTPException(status_code=404, detail="Asset not found")
     return AssetResponse.model_validate(asset)
 
 

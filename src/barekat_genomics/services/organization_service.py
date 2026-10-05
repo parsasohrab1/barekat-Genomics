@@ -1,4 +1,4 @@
-"""سرویس سازمان‌ها و عضویت."""
+"""Organization and membership service."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ class OrganizationService:
         org = Organization(
             slug=DEFAULT_ORG_SLUG,
             name=DEFAULT_ORG_NAME,
-            name_fa="سازمان پیش‌فرض",
+            name_fa="Default organization",
             deployment_mode="saas",
             is_active=True,
         )

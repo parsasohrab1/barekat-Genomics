@@ -1,6 +1,6 @@
-"""پایپ‌لاین پردازش داده‌های ژنومی."""
+"""Genomic data processing pipeline."""
 
-# Importهای سنگین به‌صورت lazy — از مسیر ماژول مستقیم import کنید:
+# Heavy imports are lazy — import directly from the module path:
 # barekat_genomics.pipeline.orchestrator.run_full_pipeline
 
 __all__: list[str] = []

@@ -1,4 +1,4 @@
-"""کانکتورهای EHR بیمارستانی ایران."""
+"""Iranian hospital EHR connectors."""
 
 from barekat_genomics.ehr.connectors.base import EHRConnector
 from barekat_genomics.ehr.connectors.registry import get_connector, list_connectors

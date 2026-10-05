@@ -1,4 +1,4 @@
-"""دستیار پشتیبان تصمیم — خلاصه‌سازی و RAG."""
+"""Decision-support assistant — summarization and RAG."""
 
 from barekat_genomics.ai.rag import answer_variant_question, retrieve_context
 from barekat_genomics.ai.summarizer import summarize_report_plain

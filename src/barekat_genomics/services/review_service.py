@@ -1,4 +1,4 @@
-"""بررسی واریانت‌های با ML score بالا توسط ژنتیک‌دان."""
+"""Review of high-ML-score variants by the geneticist."""
 
 from __future__ import annotations
 

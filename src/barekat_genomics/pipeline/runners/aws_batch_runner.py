@@ -1,4 +1,4 @@
-"""اجرای پایپ‌لاین روی AWS Batch."""
+"""Running the pipeline on AWS Batch."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ class AwsBatchRunner(PipelineRunner):
     def submit(self, job: PipelineJob, sample: SequencingSample) -> str | None:
         settings = get_settings()
         if not settings.aws_batch_job_queue or not settings.aws_batch_job_definition:
-            raise RuntimeError("AWS Batch پیکربندی نشده — AWS_BATCH_JOB_QUEUE و AWS_BATCH_JOB_DEFINITION")
+            raise RuntimeError("AWS Batch is not configured — AWS_BATCH_JOB_QUEUE and AWS_BATCH_JOB_DEFINITION")
 
         import boto3
 

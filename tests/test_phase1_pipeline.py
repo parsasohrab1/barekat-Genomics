@@ -1,4 +1,4 @@
-"""تست‌های فاز ۱: production readiness، QC، benchmark، reference."""
+"""Phase 1 tests: production readiness, QC, benchmark, reference."""
 
 from barekat_genomics.pipeline.mode import is_production_pipeline, missing_production_tools
 from barekat_genomics.pipeline.preprocessing import run_quality_control

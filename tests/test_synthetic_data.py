@@ -86,7 +86,7 @@ def test_training_dataset(tmp_path):
 
 
 def test_pipeline_benchmark_matches_simulated_variants():
-    """ground truth باید با simulated variant calling هم‌خوان باشد."""
+    """Ground truth must be consistent with simulated variant calling."""
     from barekat_genomics.pipeline.variant_calling import call_variants
 
     simulated_rsids = {v.rs_id for v in call_variants("/fake.bam", "BAM") if v.rs_id}

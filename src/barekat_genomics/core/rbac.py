@@ -1,20 +1,20 @@
-"""Role-Based Access Control — Admin / Analyst / Physician (+ نقش‌های عملیاتی)."""
+"""Role-Based Access Control — Admin / Analyst / Physician (+ operational roles)."""
 
 from enum import Enum
 
 
 class Role(str, Enum):
-    # نام‌های محصولی Phase 3
+    # Phase 3 product names
     ADMIN = "admin"
     ANALYST = "analyst"
     PHYSICIAN = "physician"
-    # نام‌های سازگار با نسخهٔ قبلی
+    # Names compatible with the previous version
     CLINICIAN = "clinician"
     GENETICIST = "geneticist"
     LAB_TECH = "lab_tech"
 
 
-# نگاشت نام‌های جایگزین به نقشِ canonical برای برخی بررسی‌ها
+# Mapping of alias names to the canonical role for some checks
 ROLE_ALIASES: dict[str, str] = {
     "physician": "clinician",
     "analyst": "geneticist",
@@ -108,12 +108,12 @@ ROLE_PERMISSIONS: dict[Role, set[Permission]] = {
 
 
 def normalize_role(role: str) -> str:
-    """نقش canonical برای سازگاری کدهای قدیمی (clinician/geneticist)."""
+    """Canonical role for compatibility with legacy code (clinician/geneticist)."""
     return ROLE_ALIASES.get(role, role)
 
 
 def canonical_product_role(role: str) -> str:
-    """نام محصولی: admin / analyst / physician / lab_tech."""
+    """Product name: admin / analyst / physician / lab_tech."""
     mapping = {
         "clinician": "physician",
         "geneticist": "analyst",
@@ -141,7 +141,7 @@ def has_permission(role: str, permission: Permission) -> bool:
 
 
 def is_privileged_role(role: str) -> bool:
-    """نقش‌هایی که به همه بیماران سازمان دسترسی دارند."""
+    """Roles that have access to all patients of the organization."""
     r = normalize_role(role)
     return r in (
         Role.ADMIN.value,

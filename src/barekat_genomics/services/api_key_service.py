@@ -1,4 +1,4 @@
-"""سرویس کلید API شرکا."""
+"""Partner API key service."""
 
 from __future__ import annotations
 

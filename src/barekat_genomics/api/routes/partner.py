@@ -1,4 +1,4 @@
-"""API عمومی شرکای آزمایشگاهی (X-API-Key)."""
+"""Public API for laboratory partners (X-API-Key)."""
 
 from __future__ import annotations
 
@@ -38,10 +38,10 @@ def get_partner(
     x_api_key: str | None = Header(default=None, alias="X-API-Key"),
 ) -> PartnerContext:
     if not x_api_key:
-        raise HTTPException(status_code=401, detail="X-API-Key لازم است")
+        raise HTTPException(status_code=401, detail="X-API-Key is required")
     row = ApiKeyService(db).authenticate(x_api_key)
     if not row:
-        raise HTTPException(status_code=401, detail="کلید API نامعتبر")
+        raise HTTPException(status_code=401, detail="Invalid API key")
     check_partner_rate(str(row.id), row.rate_limit_per_minute or 60)
     return PartnerContext(
         organization_id=row.organization_id,
@@ -54,7 +54,7 @@ def get_partner(
 def _require_scope(partner: PartnerContext, scope: str) -> None:
     if "*" in partner.scopes or scope in partner.scopes:
         return
-    raise HTTPException(status_code=403, detail=f"scope لازم است: {scope}")
+    raise HTTPException(status_code=403, detail=f"Scope required: {scope}")
 
 
 class PartnerPatientIn(BaseModel):
@@ -65,7 +65,7 @@ class PartnerPatientIn(BaseModel):
 
 
 class PartnerPipelineIn(BaseModel):
-    file_path: str = Field(description="مسیر محلی یا آبجکت ذخیره‌شده")
+    file_path: str = Field(description="Local path or stored object")
     file_type: str = Field(pattern="^(FASTQ|BAM|VCF|CRAM)$")
     assay_type: str = Field(default="panel", pattern="^(wgs|wes|panel)$")
     genome_build: str = "GRCh38"

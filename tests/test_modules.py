@@ -50,7 +50,7 @@ class TestModuleRegistry:
     def test_unknown_module_raises(self):
         import pytest
 
-        with pytest.raises(ValueError, match="ناشناخته"):
+        with pytest.raises(ValueError, match="Unknown"):
             get_module("invalid")
 
     def test_cpic_panel_has_at_least_12_genes(self):

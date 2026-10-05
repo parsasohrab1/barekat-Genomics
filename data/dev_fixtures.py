@@ -1,8 +1,8 @@
-"""داده‌های سنتتیک توسعه — هم‌راستا با پایگاه دانش PharmGKB."""
+"""Synthetic development data — aligned with the PharmGKB knowledge base."""
 
 from __future__ import annotations
 
-# SNPهای شناخته‌شده در pharmgkb.tsv و simulated pipeline
+# SNPs known in pharmgkb.tsv and the simulated pipeline
 KNOWN_PGX_SNPS: dict[str, dict] = {
     "rs1801133": {"gene": "MTHFR", "drug": "methotrexate", "snp_key": "SNP_MTHFR"},
     "rs4244285": {"gene": "CYP2C19", "drug": "clopidogrel", "snp_key": "SNP_CYP2C19"},
@@ -11,7 +11,7 @@ KNOWN_PGX_SNPS: dict[str, dict] = {
     "rs1800460": {"gene": "DPYD", "drug": "fluorouracil", "snp_key": "SNP_DPYD"},
 }
 
-# ترتیب و پارامترهای LD برای Copula
+# Order and LD parameters for the Copula
 PGX_SNPS_ORDERED: list[dict] = [
     {"rsid": "rs1801133", "gene": "MTHFR", "maf": 0.35, "ld_block": 0, "chrom": "chr1", "pos": 11796321},
     {"rsid": "rs1800460", "gene": "DPYD", "maf": 0.02, "ld_block": 0, "chrom": "chr1", "pos": 97915614},
@@ -20,7 +20,7 @@ PGX_SNPS_ORDERED: list[dict] = [
     {"rsid": "rs1142345", "gene": "TPMT", "maf": 0.02, "ld_block": 2, "chrom": "chr6", "pos": 18130918},
 ]
 
-# Ground truth برای benchmark پایپ‌لاین (حالت simulated)
+# Ground truth for the pipeline benchmark (simulated mode)
 PIPELINE_BENCHMARK_TRUTH: list[dict] = [
     {
         "rs_id": "rs1801133",
@@ -70,9 +70,9 @@ PIPELINE_BENCHMARK_TRUTH: list[dict] = [
 ]
 
 DEV_PATIENTS = [
-    {"external_id": "DEV-P001", "age": 58, "gender": "Male", "clinical_notes": "بیمار توسعه — فارماکوژنومیک"},
-    {"external_id": "DEV-P002", "age": 42, "gender": "Female", "clinical_notes": "بیمار توسعه — غربالگری ناقل"},
-    {"external_id": "DEV-P003", "age": 65, "gender": "Male", "clinical_notes": "بیمار توسعه — CGP"},
+    {"external_id": "DEV-P001", "age": 58, "gender": "Male", "clinical_notes": "Development patient — pharmacogenomics"},
+    {"external_id": "DEV-P002", "age": 42, "gender": "Female", "clinical_notes": "Development patient — carrier screening"},
+    {"external_id": "DEV-P003", "age": 65, "gender": "Male", "clinical_notes": "Development patient — CGP"},
 ]
 
 DEV_SAMPLES = [

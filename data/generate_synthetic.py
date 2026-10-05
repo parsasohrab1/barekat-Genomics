@@ -1,9 +1,9 @@
-"""تولید داده‌های سنتتیک ژنومیکس و فارماکوژنومیکس.
+"""Generation of synthetic genomics and pharmacogenomics data.
 
-خروجی‌ها:
-  - synthetic_genomics.csv       — دیتاست کامل با Copula LD
-  - benchmark/pipeline_*.csv/json — ground truth برای تست پایپ‌لاین
-  - training/anonymized_*.csv    — داده ناشناس برای آموزش مدل ML
+Outputs:
+  - synthetic_genomics.csv       — full dataset with Copula LD
+  - benchmark/pipeline_*.csv/json — ground truth for pipeline testing
+  - training/anonymized_*.csv    — anonymized data for ML model training
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ def _drug_response_from_genotypes(
     genotype_row: dict[str, int],
     rng: np.random.Generator,
 ) -> tuple[int, float]:
-    """فنوتیپ پاسخ دارو از ژنوتیپ‌های کلیدی."""
+    """Drug-response phenotype from key genotypes."""
     risk = 0.0
     cyp2c19 = genotype_row.get("rs4244285", genotype_row.get("SNP_3", 0))
     cyp2c9 = genotype_row.get("rs1799853", genotype_row.get("SNP_4", 0))
@@ -57,12 +57,12 @@ def generate_synthetic_genomics_data(
     block_size: int = 4,
 ) -> pd.DataFrame:
     """
-    تولید داده‌های سنتتیک با Gaussian Copula برای LD واقعی‌تر.
+    Generate synthetic data with a Gaussian Copula for more realistic LD.
 
-    پارامترها:
-        n_samples: تعداد نمونه‌ها
-        n_snps: تعداد SNPهای عمومی (علاوه بر rsIDهای PharmGKB)
-        use_copula: استفاده از Copula (پیش‌فرض)؛ False = HWE مستقل
+    Parameters:
+        n_samples: number of samples
+        n_snps: number of generic SNPs (in addition to the PharmGKB rsIDs)
+        use_copula: use the Copula (default); False = independent HWE
     """
     rng = np.random.default_rng(seed)
 
@@ -85,7 +85,7 @@ def generate_synthetic_genomics_data(
 
     snp_data = {f"SNP_{i + 1}": snp_matrix[:, i] for i in range(n_snps)}
 
-    # SNPهای PharmGKB با LD واقعی‌تر (بلوک جدا)
+    # PharmGKB SNPs with more realistic LD (separate block)
     pgx_corr, pgx_rsids, pgx_mafs = build_pgx_ld_matrix()
     pgx_matrix = simulate_genotypes_gaussian_copula(
         n_samples, pgx_mafs, pgx_corr, seed=seed + 1
@@ -128,12 +128,12 @@ def generate_benchmark_dataset(
     output_dir: Path | None = None,
 ) -> dict:
     """
-    دیتاست benchmark با ground truth برای تست پایپ‌لاین simulated.
+    Benchmark dataset with ground truth for testing the simulated pipeline.
 
-    خروجی:
-      - pipeline_benchmark_samples.csv  — ژنوتیپ نمونه‌ها
-      - pipeline_ground_truth.json      — واریانت‌های مورد انتظار
-      - pipeline_expected_counts.json   — آمار خلاصه
+    Output:
+      - pipeline_benchmark_samples.csv  — sample genotypes
+      - pipeline_ground_truth.json      — expected variants
+      - pipeline_expected_counts.json   — summary statistics
     """
     out = output_dir or DATA_DIR / "benchmark"
     out.mkdir(parents=True, exist_ok=True)
@@ -157,8 +157,8 @@ def generate_benchmark_dataset(
         "expected_variant_count": len(PIPELINE_BENCHMARK_TRUTH),
         "variants": PIPELINE_BENCHMARK_TRUTH,
         "notes_fa": (
-            "در حالت simulated، پایپ‌لاین باید حداقل این rsIDها را برگرداند. "
-            "ژنوتیپ‌های نمونه برای اعتبارسنجی cross-check هستند."
+            "In simulated mode, the pipeline must return at least these rsIDs. "
+            "The sample genotypes are for cross-check validation."
         ),
     }
     truth_path = out / "pipeline_ground_truth.json"
@@ -188,11 +188,11 @@ def anonymize_for_training(
     drop_age_exact: bool = True,
 ) -> pd.DataFrame:
     """
-    ناشناس‌سازی برای آموزش مدل — بدون PHI قابل‌شناسایی.
+    Anonymization for model training — without identifiable PHI.
 
     - Patient_ID → sample_hash (SHA-256)
     - Age → age_bin
-    - حذف Gender در صورت نیاز (نگه می‌داریم به صورت باینری برای ML)
+    - Drop Gender if needed (we keep it as binary for ML)
     """
     out = df.copy()
 
@@ -226,11 +226,11 @@ def generate_training_dataset(
     salt: str = DEFAULT_SALT,
 ) -> dict:
     """
-    دیتاست ناشناس برای آموزش VariantClassifier و مدل‌های ML.
+    Anonymized dataset for training VariantClassifier and ML models.
 
-    خروجی:
-      - anonymized_training.csv   — فیچر + برچسب
-      - training_manifest.json    — متادیتا و هش نمونه‌ها
+    Output:
+      - anonymized_training.csv   — features + label
+      - training_manifest.json    — metadata and sample hashes
     """
     out = output_dir or DATA_DIR / "training"
     out.mkdir(parents=True, exist_ok=True)
@@ -242,7 +242,7 @@ def generate_training_dataset(
     snp_cols = [c for c in anon.columns if c.startswith("SNP_")]
     feature_cols = rsid_cols + snp_cols + ["gender_code", "age_bin_code", "Response_Probability"]
 
-    # برچسب: پاسخ دارو (قابل جایگزینی با pathogenic از ClinVar در production)
+    # Label: drug response (replaceable with pathogenic from ClinVar in production)
     training_df = anon[feature_cols + ["Drug_Response", "sample_hash"]].copy()
     training_df = training_df.rename(columns={"Drug_Response": "label"})
 
@@ -271,7 +271,7 @@ def generate_training_dataset(
 
 
 def validate_ld_structure(df: pd.DataFrame, min_block_r2: float = 0.02) -> dict:
-    """اعتبارسنجی: SNPهای هم‌بلوک باید r² بالاتر از SNPهای مستقل داشته باشند."""
+    """Validation: SNPs in the same block must have higher r² than independent SNPs."""
     rsids = [s["rsid"] for s in PGX_SNPS_ORDERED if s["rsid"] in df.columns]
     if len(rsids) < 2:
         return {"valid": True, "reason": "insufficient_snps"}
@@ -306,20 +306,20 @@ def main() -> None:
 
     sys.stdout.reconfigure(encoding="utf-8")
 
-    parser = argparse.ArgumentParser(description="تولید داده سنتتیک barekat Genomics")
+    parser = argparse.ArgumentParser(description="Generate synthetic data for barekat Genomics")
     parser.add_argument(
         "--mode",
         choices=["all", "full", "benchmark", "training"],
         default="all",
-        help="full=CSV کامل | benchmark=تست پایپ‌لاین | training=ML ناشناس",
+        help="full=full CSV | benchmark=pipeline test | training=anonymized ML",
     )
-    parser.add_argument("-n", "--samples", type=int, default=500, help="تعداد نمونه")
+    parser.add_argument("-n", "--samples", type=int, default=500, help="number of samples")
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--no-copula", action="store_true", help="HWE مستقل بدون LD")
+    parser.add_argument("--no-copula", action="store_true", help="independent HWE without LD")
     args = parser.parse_args()
 
     if args.mode in ("all", "full"):
-        print("==> تولید دیتاست کامل (Copula LD)...")
+        print("==> Generating the full dataset (Copula LD)...")
         genomics_data = generate_synthetic_genomics_data(
             n_samples=args.samples,
             n_snps=20,
@@ -332,20 +332,20 @@ def main() -> None:
 
         output_path = DATA_DIR / "synthetic_genomics.csv"
         genomics_data.to_csv(output_path, index=False)
-        print(f"  ذخیره: {output_path} ({len(genomics_data)} رکورد)")
+        print(f"  Saved: {output_path} ({len(genomics_data)} records)")
 
     if args.mode in ("all", "benchmark"):
-        print("==> تولید benchmark پایپ‌لاین...")
+        print("==> Generating the pipeline benchmark...")
         bench = generate_benchmark_dataset(n_samples=min(args.samples, 100), seed=args.seed)
-        print(f"  نمونه‌ها: {bench['samples_path']}")
+        print(f"  Samples: {bench['samples_path']}")
         print(f"  ground truth: {bench['ground_truth_path']}")
 
     if args.mode in ("all", "training"):
-        print("==> تولید دیتاست ناشناس آموزش...")
+        print("==> Generating the anonymized training dataset...")
         train = generate_training_dataset(n_samples=max(args.samples, 1000), seed=args.seed)
         print(f"  training: {train['training_path']} ({train['n_features']} features)")
 
-    print("==> انجام شد.")
+    print("==> Done.")
 
 
 if __name__ == "__main__":

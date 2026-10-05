@@ -1,4 +1,4 @@
-"""انتخاب صف Celery بر اساس اولویت نمونه."""
+"""Selecting the Celery queue based on sample priority."""
 
 from barekat_genomics.services.annotation_cache_service import (
     CELERY_QUEUE_DEFAULT,

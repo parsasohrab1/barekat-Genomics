@@ -1,4 +1,4 @@
-"""استخراج ویژگی برای مدل طبقه‌بندی واریانت."""
+"""Feature extraction for the variant classification model."""
 
 from __future__ import annotations
 

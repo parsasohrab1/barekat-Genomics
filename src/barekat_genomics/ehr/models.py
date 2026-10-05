@@ -1,4 +1,4 @@
-"""مدل‌های داخلی برای خروجی EHR."""
+"""Internal models for EHR export."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from datetime import datetime
 
 @dataclass
 class EHRContext:
-    """داده‌های یکپارچه برای تولید FHIR، HL7 و ارسال به کانکتور."""
+    """Unified data for generating FHIR, HL7 and sending to a connector."""
 
     patient_ehr_id: str
     patient_external_id: str

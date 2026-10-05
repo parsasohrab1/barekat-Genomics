@@ -1,4 +1,4 @@
-"""سرویس احراز هویت."""
+"""Authentication service."""
 
 from sqlalchemy.orm import Session
 

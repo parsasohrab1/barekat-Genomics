@@ -32,7 +32,7 @@ export default function BillingPage() {
         setPlans(p);
         setUsage(u);
       })
-      .catch(() => setMessage("خطا در بارگذاری اشتراک"));
+      .catch(() => setMessage("Error loading subscription"))
   }, []);
 
   async function subscribe(code: string) {
@@ -42,10 +42,10 @@ export default function BillingPage() {
       body: JSON.stringify({ plan_code: code, trial_days: 14 }),
     });
     if (!res.ok) {
-      setMessage("فعال‌سازی پلن ناموفق بود");
+      setMessage("Plan activation failed");
       return;
     }
-    setMessage(`پلن ${code} فعال شد`);
+    setMessage(`Plan ${code} activated`);
     setUsage(await fetch(`${API}/billing/usage`, { headers: authHeaders() }).then((r) => r.json()));
   }
 
@@ -53,14 +53,14 @@ export default function BillingPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <CreditCard className="h-5 w-5 text-brand-600" />
-        <h1 className="text-lg font-semibold text-slate-800">پلن اشتراک (SaaS / On-prem)</h1>
+        <h1 className="text-lg font-semibold text-slate-800">Subscription plan (SaaS / On-prem)</h1>
       </div>
       {message && <p className="text-sm text-brand-700">{message}</p>}
       {usage && (
         <div className="stat-card text-sm text-slate-600">
-          وضعیت: {String(usage.subscription_status)} · پلن: {String(usage.plan_code ?? "—")} ·
-          نمونه: {String(usage.samples_used)}/{String(usage.samples_limit ?? "∞")} ·
-          صندلی: {String(usage.seats_used)}/{String(usage.seats_limit ?? "∞")}
+          Status: {String(usage.subscription_status)} · Plan: {String(usage.plan_code ?? "—")} ·
+          Samples: {String(usage.samples_used)}/{String(usage.samples_limit ?? "∞")} ·
+          Seats: {String(usage.seats_used)}/{String(usage.seats_limit ?? "∞")}
         </div>
       )}
       <div className="grid gap-4 md:grid-cols-3">
@@ -69,16 +69,16 @@ export default function BillingPage() {
             <h3 className="font-semibold text-slate-800">{p.name_fa || p.name}</h3>
             <p className="text-xs text-slate-500">{p.deployment_mode}</p>
             <p className="text-2xl font-bold text-brand-700">
-              {p.price_monthly_usd > 0 ? `$${p.price_monthly_usd}` : "سفارشی"}
+              {p.price_monthly_usd > 0 ? `$${p.price_monthly_usd}` : "Custom"}
             </p>
             <p className="text-xs text-slate-600">
-              تا {p.max_users} کاربر · {p.max_samples_month} نمونه/ماه
+              Up to {p.max_users} users · {p.max_samples_month} samples/month
             </p>
             <button
               onClick={() => subscribe(p.code)}
               className="rounded-lg bg-brand-600 px-3 py-2 text-sm text-white"
             >
-              فعال‌سازی
+              Activate
             </button>
           </div>
         ))}

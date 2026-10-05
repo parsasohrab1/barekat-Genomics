@@ -1,4 +1,4 @@
-"""سرویس دستیار پشتیبان تصمیم."""
+"""Decision-support assistant service."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ class AIAssistService:
     def plain_summary_for_report(self, report_id: uuid.UUID) -> dict:
         report = self.reports.get_report(report_id)
         if not report:
-            raise ValueError("گزارش یافت نشد")
+            raise ValueError("Report not found")
 
         patient = self.db.query(Patient).filter(Patient.id == report.patient_id).first()
         clinical = self.reports.get_clinical_content(report)
@@ -55,7 +55,7 @@ class AIAssistService:
                 .first()
             )
             if not row:
-                raise ValueError("واریانت یافت نشد")
+                raise ValueError("Variant not found")
             v, ann = row
             variant = CalledVariant(
                 chromosome=v.chromosome,

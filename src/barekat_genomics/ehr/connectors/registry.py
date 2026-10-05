@@ -1,4 +1,4 @@
-"""ثبت کانکتورهای EHR."""
+"""EHR connector registry."""
 
 from __future__ import annotations
 

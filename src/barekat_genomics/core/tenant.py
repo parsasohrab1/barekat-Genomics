@@ -1,4 +1,4 @@
-"""حالت tenant جاری (contextvars) و ایزولاسیون داده."""
+"""Current tenant state (contextvars) and data isolation."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ def get_current_org_id() -> uuid.UUID | None:
 
 
 def filter_by_organization(query: Query, model, org_id: uuid.UUID | None) -> Query:
-    """اعمال فیلتر organization_id در صورت وجود ستون و شناسه."""
+    """Apply the organization_id filter if the column and ID exist."""
     if org_id is None or not hasattr(model, "organization_id"):
         return query
     return query.filter(model.organization_id == org_id)

@@ -1,4 +1,4 @@
-"""شبیه‌سازی LD با Gaussian Copula — بدون وابستگی خارجی."""
+"""LD simulation with a Gaussian Copula — no external dependencies."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ _erf_vec = np.vectorize(erf, otypes=[float])
 
 
 def _norm_cdf(x: np.ndarray) -> np.ndarray:
-    """CDF نرمال استاندارد — برداری."""
+    """Standard normal CDF — vectorized."""
     return 0.5 * (1.0 + _erf_vec(x / _sqrt2))
 
 
@@ -27,8 +27,8 @@ def build_ld_correlation_matrix(
     min_r: float = 0.05,
 ) -> np.ndarray:
     """
-    ماتریس همبستگی با بلوک‌های LD:
-    SNPهای مجاور در یک بلوک همبستگی بالاتر دارند (شبیه LD واقعی).
+    Correlation matrix with LD blocks:
+    Adjacent SNPs in a block have higher correlation (similar to real LD).
     """
     corr = np.eye(n_snps)
     for block_start in range(0, n_snps, block_size):
@@ -39,7 +39,7 @@ def build_ld_correlation_matrix(
                 r = float(np.clip(r, min_r, 0.95))
                 corr[i, j] = corr[j, i] = r
 
-    # اطمینان از مثبت‌تعریف بودن برای Cholesky
+    # Ensure positive definiteness for Cholesky
     eig_min = float(np.linalg.eigvalsh(corr).min())
     if eig_min < 1e-6:
         corr += (1e-4 - eig_min) * np.eye(n_snps)
@@ -47,7 +47,7 @@ def build_ld_correlation_matrix(
 
 
 def build_pgx_ld_matrix() -> tuple[np.ndarray, list[str], list[float]]:
-    """ماتریس LD برای SNPهای PharmGKB شناخته‌شده."""
+    """LD matrix for the known PharmGKB SNPs."""
     rsids = [s["rsid"] for s in PGX_SNPS_ORDERED]
     mafs = [s["maf"] for s in PGX_SNPS_ORDERED]
     n = len(rsids)
@@ -70,7 +70,7 @@ def build_pgx_ld_matrix() -> tuple[np.ndarray, list[str], list[float]]:
 
 
 def _uniform_to_genotype(u: np.ndarray, maf: float) -> np.ndarray:
-    """تبدیل uniform [0,1] به ژنوتیپ {0,1,2} تحت HWE."""
+    """Convert uniform [0,1] to genotype {0,1,2} under HWE."""
     q0 = (1.0 - maf) ** 2
     q1 = q0 + 2.0 * maf * (1.0 - maf)
     return np.where(u <= q0, 0, np.where(u <= q1, 1, 2)).astype(int)
@@ -84,14 +84,14 @@ def simulate_genotypes_gaussian_copula(
     seed: int | None = 42,
 ) -> np.ndarray:
     """
-    Gaussian Copula → uniform → ژنوتیپ گسسته.
+    Gaussian Copula → uniform → discrete genotype.
 
-    بازگشت: آرایه (n_samples, n_snps) با مقادیر 0/1/2
+    Returns: array (n_samples, n_snps) with values 0/1/2
     """
     mafs_arr = np.asarray(mafs, dtype=float)
     n_snps = len(mafs_arr)
     if correlation.shape != (n_snps, n_snps):
-        raise ValueError(f"ابعاد correlation باید ({n_snps}, {n_snps}) باشد")
+        raise ValueError(f"The correlation dimensions must be ({n_snps}, {n_snps})")
 
     rng = np.random.default_rng(seed)
     chol = np.linalg.cholesky(correlation)
@@ -105,7 +105,7 @@ def simulate_genotypes_gaussian_copula(
 
 
 def pairwise_ld_r2(genotypes: np.ndarray) -> np.ndarray:
-    """محاسبه r² بین جفت SNPها — برای اعتبارسنجی LD."""
+    """Compute r² between SNP pairs — for LD validation."""
     n_snps = genotypes.shape[1]
     r2 = np.eye(n_snps)
     for i in range(n_snps):

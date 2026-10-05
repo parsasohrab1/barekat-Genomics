@@ -1,4 +1,4 @@
-"""کلید API شرکای آزمایشگاهی (B2B)."""
+"""API key for laboratory partners (B2B)."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""EHR integration endpoints — FHIR R4، HL7 v2، کانکتورهای بیمارستانی."""
+"""EHR integration endpoints — FHIR R4, HL7 v2, hospital connectors."""
 
 import uuid
 
@@ -35,20 +35,20 @@ def _check_ehr_permission(user: CurrentUser) -> None:
         has_permission(user.role, Permission.EHR_EXPORT)
         or has_permission(user.role, Permission.EHR_EXPORT_OWN)
     ):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
 
 
 def _load_export(db: Session, patient_id: uuid.UUID, user: CurrentUser) -> tuple:
     _check_ehr_permission(user)
     patient = PatientService(db).get_by_id(patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detail="بیمار یافت نشد")
+        raise HTTPException(status_code=404, detail="Patient not found")
     assert_patient_access(user, patient)
 
     report_service = ReportService(db)
     export = report_service.export_for_ehr(patient_id)
     if not export:
-        raise HTTPException(status_code=404, detail="داده‌ای برای خروجی یافت نشد")
+        raise HTTPException(status_code=404, detail="No data found for export")
 
     latest_report = None
     if export.report_id:
@@ -177,7 +177,7 @@ def import_fhir(
     user: CurrentUser = Depends(get_current_user),
 ) -> dict:
     if not has_permission(user.role, Permission.EHR_IMPORT):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
     try:
         parsed = parse_fhir_patient_bundle(bundle)
     except ValueError as exc:
@@ -216,7 +216,7 @@ def import_hl7(
     user: CurrentUser = Depends(get_current_user),
 ) -> dict:
     if not has_permission(user.role, Permission.EHR_IMPORT):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
     try:
         parsed = parse_hl7_message(body.message)
     except ValueError as exc:

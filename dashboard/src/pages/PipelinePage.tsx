@@ -7,17 +7,17 @@ import type { GenomicsModule, PipelineJob, Sample } from "../lib/types";
 import Modal from "../components/ui/Modal";
 
 const MODULE_LABELS: Record<string, string> = {
-  pharmacogenomics: "فارماکوژنومیک",
-  pgx_panel: "پنل CPIC",
-  cgp: "پروفایل سرطان",
-  carrier_screening: "غربالگری ناقل",
-  tumor_normal: "تومور/نرمال",
+  pharmacogenomics: "Pharmacogenomics",
+  pgx_panel: "CPIC panel",
+  cgp: "Cancer profile",
+  carrier_screening: "Carrier screening",
+  tumor_normal: "Tumor/normal",
   prs: "PRS",
 };
 
 function pct(value: unknown): string {
   if (typeof value !== "number" || Number.isNaN(value)) return "—";
-  return `${(value * 100).toFixed(1)}٪`;
+  return `${(value * 100).toFixed(1)}%`;
 }
 
 function num(value: unknown, digits = 1): string {
@@ -32,7 +32,7 @@ function QcPanel({ job }: { job: PipelineJob }) {
   return (
     <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs font-medium text-slate-600">متریک‌های QC</p>
+        <p className="text-xs font-medium text-slate-600">QC metrics</p>
         <span className={passed ? "badge-success" : "badge-warning"}>
           {passed ? "Pass" : "Warn/Fail"}
         </span>
@@ -93,7 +93,7 @@ export default function PipelinePage() {
   const load = () =>
     getPipelineJobs()
       .then(setJobs)
-      .catch(() => setError("خطا در بارگذاری پایپ‌لاین"));
+      .catch(() => setError("Error loading pipeline"));
 
   usePolling(getPipelineJobs, setJobs, 4000);
 
@@ -107,20 +107,20 @@ export default function PipelinePage() {
       setModules(m);
       setRunModal(true);
     } catch {
-      setError("خطا در بارگذاری نمونه‌ها");
+      setError("Error loading samples");
     }
   };
 
   const handleRun = async () => {
     if (!selectedSample) return;
     if (selectedMod?.requires_paired_sample && !pairedSample) {
-      setError("این ماژول نیاز به نمونه جفت دارد");
+      setError("This module requires a paired sample");
       return;
     }
     setRunning(true);
     setError("");
     try {
-      // asyncMode=true → Celery (sync=false)؛ برای مانیتورینگ واقعی Job
+      // asyncMode=true → Celery (sync=false); for real Job monitoring
       await startPipeline(selectedSample, !asyncMode, {
         module: selectedModule,
         paired_sample_id: pairedSample || undefined,
@@ -130,7 +130,7 @@ export default function PipelinePage() {
       setPairedSample("");
       await load();
     } catch {
-      setError("خطا در اجرای پایپ‌لاین");
+      setError("Error running pipeline");
     } finally {
       setRunning(false);
     }
@@ -141,16 +141,16 @@ export default function PipelinePage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-slate-400">
           <span className={`h-2 w-2 rounded-full ${hasActive ? "animate-pulse bg-brand-500" : "bg-slate-300"}`} />
-          {hasActive ? "بروزرسانی خودکار هر ۴ ثانیه — وضعیت واقعی Job" : "بدون وظیفه فعال"}
+          {hasActive ? "Auto-refresh every 4 seconds — real Job status" : "No active job"}
         </div>
         <div className="flex gap-2">
           <button onClick={load} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-50">
             <RefreshCw className="h-4 w-4" />
-            بروزرسانی
+            Refresh
           </button>
           <button onClick={openRunModal} className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
             <Play className="h-4 w-4" />
-            اجرای پایپ‌لاین
+            Run pipeline
           </button>
         </div>
       </div>
@@ -159,7 +159,7 @@ export default function PipelinePage() {
 
       <div className="grid gap-4">
         {jobs.length === 0 ? (
-          <p className="stat-card text-center text-sm text-slate-400">وظیفه‌ای ثبت نشده</p>
+          <p className="stat-card text-center text-sm text-slate-400">No jobs recorded</p>
         ) : (
           jobs.map((job) => (
             <div key={job.id} className="stat-card">
@@ -167,7 +167,7 @@ export default function PipelinePage() {
                 <div>
                   <p className="font-medium text-slate-700">{job.id.slice(0, 8)}...</p>
                   <p className="text-xs text-slate-400">
-                    نمونه: {job.sample_label ?? job.sample_id.slice(0, 8)}
+                    Sample: {job.sample_label ?? job.sample_id.slice(0, 8)}
                     {job.module && ` — ${MODULE_LABELS[job.module] ?? job.module}`}
                     {job.created_at && ` — ${formatDateTime(job.created_at)}`}
                   </p>
@@ -181,7 +181,7 @@ export default function PipelinePage() {
               </div>
               <div className="mt-3">
                 <div className="flex justify-between text-xs text-slate-400">
-                  <span>پیشرفت</span>
+                  <span>Progress</span>
                   <span>{job.progress ?? 0}%</span>
                 </div>
                 <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100">
@@ -202,10 +202,10 @@ export default function PipelinePage() {
         )}
       </div>
 
-      <Modal open={runModal} onClose={() => setRunModal(false)} title="اجرای پایپ‌لاین">
+      <Modal open={runModal} onClose={() => setRunModal(false)} title="Run pipeline">
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm text-slate-600">ماژول تشخیصی</label>
+            <label className="mb-1 block text-sm text-slate-600">Diagnostic module</label>
             <select
               value={selectedModule}
               onChange={(e) => {
@@ -216,7 +216,7 @@ export default function PipelinePage() {
             >
               {modules.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.name_fa} ({m.gene_count > 0 ? `${m.gene_count} ژن` : "PRS"})
+                  {m.name_fa} ({m.gene_count > 0 ? `${m.gene_count} genes` : "PRS"})
                 </option>
               ))}
             </select>
@@ -225,7 +225,7 @@ export default function PipelinePage() {
             )}
           </div>
           <div>
-            <label className="mb-1 block text-sm text-slate-600">انتخاب نمونه (آپلود شده)</label>
+            <label className="mb-1 block text-sm text-slate-600">Select sample (uploaded)</label>
             <select
               value={selectedSample}
               onChange={(e) => setSelectedSample(e.target.value)}
@@ -241,7 +241,7 @@ export default function PipelinePage() {
           </div>
           {selectedMod?.requires_paired_sample && (
             <div>
-              <label className="mb-1 block text-sm text-slate-600">نمونه نرمال (جفت)</label>
+              <label className="mb-1 block text-sm text-slate-600">Normal sample (pair)</label>
               <select
                 value={pairedSample}
                 onChange={(e) => setPairedSample(e.target.value)}
@@ -264,19 +264,19 @@ export default function PipelinePage() {
               checked={asyncMode}
               onChange={(e) => setAsyncMode(e.target.checked)}
             />
-            اجرا از طریق صف Celery (مانیتورینگ زنده + retry)
+            Run through the Celery queue (live monitoring + retry)
           </label>
           {samples.length === 0 && (
-            <p className="text-sm text-amber-600">نمونه آپلود‌شده‌ای وجود ندارد</p>
+            <p className="text-sm text-amber-600">No uploaded sample exists</p>
           )}
           <div className="flex justify-end gap-2">
-            <button onClick={() => setRunModal(false)} className="rounded-lg border px-4 py-2 text-sm">انصراف</button>
+            <button onClick={() => setRunModal(false)} className="rounded-lg border px-4 py-2 text-sm">Cancel</button>
             <button
               onClick={handleRun}
               disabled={!selectedSample || running}
               className="rounded-lg bg-brand-600 px-4 py-2 text-sm text-white disabled:opacity-50"
             >
-              {running ? "در حال اجرا..." : "شروع پردازش"}
+              {running ? "Running..." : "Start processing"}
             </button>
           </div>
         </div>

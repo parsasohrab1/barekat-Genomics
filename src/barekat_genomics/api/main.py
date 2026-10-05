@@ -57,7 +57,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="barekat-Genomics",
-        description="پلتفرم تحلیل داده‌های ژنومی و فارماکوژنومیک",
+        description="Genomic and pharmacogenomic data analysis platform",
         version=__version__,
         lifespan=lifespan,
         docs_url="/docs" if settings.debug else None,

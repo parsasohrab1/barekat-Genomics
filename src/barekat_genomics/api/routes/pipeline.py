@@ -103,7 +103,7 @@ def reference_status(
 def pipeline_benchmark_metrics(
     user: CurrentUser = Depends(require_permission(Permission.PIPELINE_READ)),
 ) -> PipelineBenchmarkMetrics:
-    """حساسیت/ویژگی اولیه روی ground truth شبیه‌سازی‌شده."""
+    """Initial sensitivity/specificity on simulated ground truth."""
     metrics = evaluate_simulated_benchmark()
     return PipelineBenchmarkMetrics(**metrics)
 
@@ -133,7 +133,7 @@ def list_pipeline_jobs(
 def start_pipeline(
     data: PipelineJobCreate,
     request: Request,
-    sync: bool = Query(False, description="اجرای همزمان بدون Celery"),
+    sync: bool = Query(False, description="Synchronous run without Celery"),
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(require_permission(Permission.PIPELINE_RUN)),
 ) -> PipelineJobResponse:
@@ -170,7 +170,7 @@ def get_pipeline_job(
     service = PipelineService(db)
     job = service.get_job(job_id)
     if not job:
-        raise HTTPException(status_code=404, detail="وظیفه یافت نشد")
+        raise HTTPException(status_code=404, detail="Job not found")
     return _job_response(job)  # type: ignore[return-value]
 
 
@@ -182,7 +182,7 @@ def get_job_qc(
 ) -> QcMetricsResponse:
     job = PipelineService(db).get_job(job_id)
     if not job:
-        raise HTTPException(status_code=404, detail="وظیفه یافت نشد")
+        raise HTTPException(status_code=404, detail="Job not found")
     qc = job.qc_metrics or {}
     return QcMetricsResponse(
         sample_id=job.sample_id,

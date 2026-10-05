@@ -16,7 +16,7 @@ export default function PatientsPage() {
     setLoading(true);
     getPatients()
       .then(setPatients)
-      .catch(() => setError("خطا در بارگذاری بیماران — API در دسترس نیست"))
+      .catch(() => setError("Error loading patients — API unavailable"))
       .finally(() => setLoading(false));
   };
 
@@ -35,7 +35,7 @@ export default function PatientsPage() {
           <Search className="h-4 w-4 text-slate-400" />
           <input
             type="text"
-            placeholder="جستجوی بیمار..."
+            placeholder="Search patient..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-transparent text-sm outline-none sm:w-64"
@@ -46,7 +46,7 @@ export default function PatientsPage() {
           className="flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
         >
           <Plus className="h-4 w-4" />
-          بیمار جدید
+          New patient
         </button>
       </div>
 
@@ -54,19 +54,19 @@ export default function PatientsPage() {
 
       <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-card">
         {loading ? (
-          <p className="p-8 text-center text-sm text-slate-400">در حال بارگذاری...</p>
+          <p className="p-8 text-center text-sm text-slate-400">Loading...</p>
         ) : filtered.length === 0 ? (
-          <p className="p-8 text-center text-sm text-slate-400">بیماری یافت نشد</p>
+          <p className="p-8 text-center text-sm text-slate-400">No patients found</p>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>شناسه</th>
-                <th>سن</th>
-                <th>جنسیت</th>
-                <th>شناسه EHR</th>
-                <th>تاریخ ثبت</th>
-                <th>وضعیت</th>
+                <th>ID</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>EHR ID</th>
+                <th>Registration date</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -74,10 +74,10 @@ export default function PatientsPage() {
                 <tr key={p.id}>
                   <td className="font-medium text-brand-700">{p.external_id}</td>
                   <td>{p.age ?? "—"}</td>
-                  <td>{p.gender === "Male" ? "مرد" : p.gender === "Female" ? "زن" : "—"}</td>
+                  <td>{p.gender === "Male" ? "Male" : p.gender === "Female" ? "Female" : "—"}</td>
                   <td>{p.ehr_patient_id ?? "—"}</td>
                   <td>{formatDate(p.created_at)}</td>
-                  <td><span className="badge-success">فعال</span></td>
+                  <td><span className="badge-success">Active</span></td>
                 </tr>
               ))}
             </tbody>

@@ -1,49 +1,49 @@
-"""Checklist انطباق رگولاتوری (GDPR-like / وزارت بهداشت / HIPAA).
+"""Regulatory compliance checklist (GDPR-like / Ministry of Health / HIPAA).
 
-این سند وضعیت نسبی آمادگی پلتفرم barekat Genomics را توصیف می‌کند.
-وضعیت زنده از API نیز در دسترس است:
+This document describes the relative readiness of the barekat Genomics platform.
+The live status is also available from the API:
 
   GET /api/v1/compliance/checklist
 
-## نقش‌های محصولی RBAC
+## Product RBAC roles
 
-| نقش محصول | نقش داخلی (سازگار) | دسترسی کلیدی |
+| Product role | Internal role (compatible) | Key access |
 |-----------|---------------------|---------------|
-| Admin | admin | همه مجوزها، کاربران، سازمان، صورتحساب |
-| Analyst | analyst / geneticist | تفسیر واریانت، تأیید گزارش، EHR |
-| Physician | physician / clinician | بیماران خود، گزارش‌های تأییدشده |
-| Lab Tech | lab_tech | نمونه و پایپ‌لاین |
+| Admin | admin | All permissions, users, organization, billing |
+| Analyst | analyst / geneticist | Variant interpretation, report approval, EHR |
+| Physician | physician / clinician | Own patients, approved reports |
+| Lab Tech | lab_tech | Samples and pipeline |
 
-## کنترل‌های پیاده‌سازی‌شده
+## Implemented controls
 
-1. احراز هویت JWT و ماتریس مجوزها
-2. رمزنگاری فیلد نام بیمار (PHI)
-3. لاگ ممیزی دسترسی و خروجی EHR
-4. ایزولاسیون چندسازمانی (`organization_id`)
-5. Export/Import استاندارد FHIR R4 و HL7 v2
-6. حق دسترسی سوژه (`/compliance/subjects/{id}/export`)
-7. ناشناس‌سازی نسبی PHI (`/erase`)
+1. JWT authentication and permission matrix
+2. Patient name field encryption (PHI)
+3. Access audit log and EHR export
+4. Multi-organization isolation (`organization_id`)
+5. Standard FHIR R4 and HL7 v2 Export/Import
+6. Data subject access right (`/compliance/subjects/{id}/export`)
+7. Partial PHI anonymization (`/erase`)
 
-## موارد جزئی / در برنامه
+## Partial items / planned
 
-- رضایت آگاهانه ساختاریافته (Consent entity)
-- Job پاک‌سازی بر اساس `phi_retention_days`
-- رویه نقض داده و اطلاع‌رسانی
-- DPIA رسمی برای استقرار بیمارستانی
+- Structured informed consent (Consent entity)
+- Cleanup job based on `phi_retention_days`
+- Data breach procedure and notification
+- Formal DPIA for hospital deployment
 
-## وزارت بهداشت / تبادلات ملی
+## Ministry of Health / national exchanges
 
-- کانکتورهای `sepas` و `tajhiz` برای push خروجی
-- شناسه‌های Organization در FHIR قابل پیکربندی‌اند
-- استقرار On-prem از طریق پلن `enterprise_onprem`
+- `sepas` and `tajhiz` connectors for output push
+- FHIR Organization identifiers are configurable
+- On-prem deployment through the `enterprise_onprem` plan
 
-## مدل درآمد
+## Revenue model
 
-| پلن | حالت | محدودیت نمونه/ماه |
+| Plan | Mode | Sample limit/month |
 |-----|------|---------------------|
 | starter | SaaS | 50 |
 | professional | SaaS | 500 |
-| enterprise_onprem | On-prem | بسیار بالا |
+| enterprise_onprem | On-prem | Very high |
 
 API: `/api/v1/billing/plans`, `/subscribe`, `/usage`
 """

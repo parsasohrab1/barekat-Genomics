@@ -1,4 +1,4 @@
-"""هماهنگ‌کننده پایپ‌لاین کامل پردازش."""
+"""Complete processing pipeline orchestrator."""
 
 from __future__ import annotations
 
@@ -53,12 +53,12 @@ def run_full_pipeline(
     on_stage: StageCallback | None = None,
 ) -> PipelineResult:
     """
-    اجرای کامل پایپ‌لاین (WGS / WES / Panel):
+    Complete pipeline run (WGS / WES / Panel):
 
-    FASTQ → QC → BWA → MarkDuplicates → GATK HC (-L برای WES/Panel) → SnpEff → Interpretation
+    FASTQ → QC → BWA → MarkDuplicates → GATK HC (-L for WES/Panel) → SnpEff → Interpretation
     BAM   → QC → MarkDuplicates → GATK HC → SnpEff → Interpretation
-    VCF   → QC سبک → annotate/parse → Interpretation  (بدون alignment)
-    CRAM  → مشابه BAM در production
+    VCF   → light QC → annotate/parse → Interpretation  (without alignment)
+    CRAM  → similar to BAM in production
     """
     from barekat_genomics.pipeline.assay_config import get_assay_profile, normalize_file_type
 
@@ -84,7 +84,7 @@ def run_full_pipeline(
                 interpretations=[],
                 drug_recommendations={},
                 clinical_content={},
-                report_summary="نمونه در کنترل کیفیت رد شد.",
+                report_summary="Sample was rejected in quality control.",
                 success=False,
                 error=f"QC failed: {', '.join(qc.warnings)}",
                 work_dir=str(work),
@@ -163,7 +163,7 @@ def run_full_pipeline(
             interpretations=[],
             drug_recommendations={},
             clinical_content={},
-            report_summary="خطا در پردازش.",
+            report_summary="Error during processing.",
             success=False,
             error=str(e),
             work_dir=str(work),

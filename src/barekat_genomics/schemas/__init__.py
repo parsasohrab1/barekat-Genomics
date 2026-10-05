@@ -1,4 +1,4 @@
-"""Pydantic schemas برای API."""
+"""Pydantic schemas for the API."""
 
 from datetime import datetime
 from uuid import UUID

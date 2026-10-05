@@ -1,4 +1,4 @@
-# یک‌کلیکی Staging برای Windows (PowerShell)
+# One-click Staging for Windows (PowerShell)
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root

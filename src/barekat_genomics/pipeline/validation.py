@@ -1,4 +1,4 @@
-"""اعتبارسنجی پایپ‌لاین با ground truth benchmark."""
+"""Pipeline validation with benchmark ground truth."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ def evaluate_variant_concordance(
     *,
     mode: str = "simulated",
 ) -> dict:
-    """محاسبه precision / recall / F1 و تقریب sensitivity."""
+    """Compute precision / recall / F1 and approximate sensitivity."""
     truth_keys = {_variant_key(t) for t in truth if t.get("expected_in_simulated", True)}
     called_keys = {_variant_key(v) for v in called}
 
@@ -56,7 +56,7 @@ def evaluate_variant_concordance(
 
 
 def evaluate_simulated_benchmark() -> dict:
-    """اجرای پایپ‌لاین simulated و مقایسه با PIPELINE_BENCHMARK_TRUTH."""
+    """Run the simulated pipeline and compare with PIPELINE_BENCHMARK_TRUTH."""
     from barekat_genomics.pipeline.variant_calling import call_variants, filter_variants
 
     try:

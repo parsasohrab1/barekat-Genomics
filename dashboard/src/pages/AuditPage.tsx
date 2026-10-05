@@ -11,25 +11,25 @@ export default function AuditPage() {
   useEffect(() => {
     getAuditLogs()
       .then(setLogs)
-      .catch(() => setError("دسترسی به لاگ ممیزی مجاز نیست"))
+      .catch(() => setError("Access to the audit log is not allowed"))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-sm text-slate-400">در حال بارگذاری...</p>;
+  if (loading) return <p className="text-sm text-slate-400">Loading...</p>;
   if (error) return <p className="text-sm text-rose-600">{error}</p>;
 
   return (
     <div className="stat-card">
-      <h2 className="mb-4 text-sm font-semibold text-slate-700">لاگ ممیزی (Audit)</h2>
+      <h2 className="mb-4 text-sm font-semibold text-slate-700">Audit log</h2>
       <div className="overflow-x-auto">
         <table className="data-table">
           <thead>
             <tr>
-              <th>زمان</th>
-              <th>عملیات</th>
-              <th>منبع</th>
-              <th>شناسه</th>
-              <th>کاربر</th>
+              <th>Time</th>
+              <th>Action</th>
+              <th>Resource</th>
+              <th>ID</th>
+              <th>User</th>
               <th>IP</th>
             </tr>
           </thead>

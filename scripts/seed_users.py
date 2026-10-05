@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ایجاد کاربران پیش‌فرض برای هر نقش RBAC."""
+"""Create default users for each RBAC role."""
 
 import sys
 import uuid
@@ -12,25 +12,25 @@ DEFAULT_USERS = [
     {
         "email": "clinician@barekat.local",
         "password": "clinician123",
-        "full_name": "دکتر احمدی",
+        "full_name": "Dr. Ahmadi",
         "role": "clinician",
     },
     {
         "email": "geneticist@barekat.local",
         "password": "geneticist123",
-        "full_name": "دکتر رضایی",
+        "full_name": "Dr. Rezaei",
         "role": "geneticist",
     },
     {
         "email": "lab@barekat.local",
         "password": "labtech123",
-        "full_name": "تکنسین کریمی",
+        "full_name": "Technician Karimi",
         "role": "lab_tech",
     },
     {
         "email": "admin@barekat.local",
         "password": "admin123",
-        "full_name": "مدیر سیستم",
+        "full_name": "System Administrator",
         "role": "admin",
     },
 ]

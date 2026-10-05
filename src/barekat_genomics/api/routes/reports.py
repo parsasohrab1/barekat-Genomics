@@ -47,7 +47,7 @@ def list_reports(
     user: CurrentUser = Depends(get_current_user),
 ) -> list[ReportResponse]:
     if not _can_read_reports(user):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
     service = ReportService(db)
     reports = service.list_for_user(user.id, user.role, skip=skip, limit=limit)
     return [ReportResponse.model_validate(r) for r in reports]
@@ -60,10 +60,10 @@ def list_patient_reports(
     user: CurrentUser = Depends(get_current_user),
 ) -> list[ReportResponse]:
     if not _can_read_reports(user):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
     patient = PatientService(db).get_by_id(patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detail="بیمار یافت نشد")
+        raise HTTPException(status_code=404, detail="Patient not found")
     assert_patient_access(user, patient)
     service = ReportService(db)
     reports = service.list_by_patient(patient_id, role=user.role)
@@ -96,7 +96,7 @@ def list_pending_variants(
     review = ReviewService(db)
     report = ReportService(db).get_report(report_id)
     if not report:
-        raise HTTPException(status_code=404, detail="گزارش یافت نشد")
+        raise HTTPException(status_code=404, detail="Report not found")
     rows = review.get_pending_variants(report_id)
     return [
         PendingVariantItem(
@@ -126,10 +126,10 @@ def review_variant(
     review = ReviewService(db)
     ann = review.review_variant(report_id, annotation_id, user.id, body.action, body.notes)
     if not ann:
-        raise HTTPException(status_code=400, detail="واریانت قابل بررسی نیست")
+        raise HTTPException(status_code=400, detail="The variant cannot be reviewed")
     variant = db.query(Variant).filter(Variant.id == ann.variant_id).first()
     if not variant:
-        raise HTTPException(status_code=404, detail="واریانت یافت نشد")
+        raise HTTPException(status_code=404, detail="Variant not found")
     log_audit_event(
         db,
         user_id=str(user.id),
@@ -161,10 +161,10 @@ def get_patient_variants(
     from barekat_genomics.core.rbac import has_permission as hp
 
     if not (hp(user.role, Permission.VARIANTS_READ) or hp(user.role, Permission.VARIANTS_READ_OWN)):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
     patient = PatientService(db).get_by_id(patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detail="بیمار یافت نشد")
+        raise HTTPException(status_code=404, detail="Patient not found")
     assert_patient_access(user, patient)
     service = ReportService(db)
     return service.get_patient_variants(patient_id, role=user.role)
@@ -181,7 +181,7 @@ def approve_report(
     service = ReportService(db)
     report = service.approve_report(report_id, user.id, body.clinician_notes)
     if not report:
-        raise HTTPException(status_code=404, detail="گزارش یافت نشد یا قابل تأیید نیست")
+        raise HTTPException(status_code=404, detail="Report not found or cannot be approved")
     log_audit_event(
         db,
         user_id=str(user.id),
@@ -201,16 +201,16 @@ def download_report_pdf(
     user: CurrentUser = Depends(get_current_user),
 ) -> Response:
     if not _can_read_reports(user):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
     service = ReportService(db)
     report = service.get_report(report_id)
     if not report:
-        raise HTTPException(status_code=404, detail="گزارش یافت نشد")
+        raise HTTPException(status_code=404, detail="Report not found")
     patient = db.query(Patient).filter(Patient.id == report.patient_id).first()
     if patient:
         assert_patient_access(user, patient)
     if is_physician_role(user.role) and not ReviewService(db).clinician_may_view_report(report):
-        raise HTTPException(status_code=403, detail="گزارش هنوز تأیید نشده است")
+        raise HTTPException(status_code=403, detail="The report has not been approved yet")
     try:
         pdf_bytes = service.generate_pdf(report_id)
     except RuntimeError as e:
@@ -239,16 +239,16 @@ def get_report(
     user: CurrentUser = Depends(get_current_user),
 ) -> ReportResponse:
     if not _can_read_reports(user):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="دسترسی مجاز نیست")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access not allowed")
     service = ReportService(db)
     report = service.get_report(report_id)
     if not report:
-        raise HTTPException(status_code=404, detail="گزارش یافت نشد")
+        raise HTTPException(status_code=404, detail="Report not found")
     patient = db.query(Patient).filter(Patient.id == report.patient_id).first()
     if patient:
         assert_patient_access(user, patient)
     if is_physician_role(user.role) and not ReviewService(db).clinician_may_view_report(report):
-        raise HTTPException(status_code=403, detail="گزارش هنوز تأیید نشده است")
+        raise HTTPException(status_code=403, detail="The report has not been approved yet")
     service.get_clinical_content(report)
     log_audit_event(
         db,

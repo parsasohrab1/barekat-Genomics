@@ -1,4 +1,4 @@
-"""API انطباق رگولاتوری و حقوق سوژه داده."""
+"""Regulatory compliance and data subject rights API."""
 
 import uuid
 
@@ -38,10 +38,10 @@ def export_subject_data(
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(require_permission(Permission.COMPLIANCE_MANAGE)),
 ) -> dict:
-    """حق دسترسی / حمل‌پذیری داده بیمار (GDPR-like Art.15/20)."""
+    """Patient data right of access / portability (GDPR-like Art.15/20)."""
     patient = PatientService(db).get_by_id(patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detail="بیمار یافت نشد")
+        raise HTTPException(status_code=404, detail="Patient not found")
     assert_patient_access(user, patient)
 
     name = None
@@ -90,10 +90,10 @@ def erase_subject_phi(
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(require_permission(Permission.COMPLIANCE_MANAGE)),
 ) -> dict:
-    """ناشناس‌سازی نسبی PHI (حق فراموشی نسبی — نگهداشت نتایج بالینی در صورت الزام قانونی)."""
+    """Partial PHI anonymization (partial right to be forgotten — clinical results retained where legally required)."""
     patient = PatientService(db).get_by_id(patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detail="بیمار یافت نشد")
+        raise HTTPException(status_code=404, detail="Patient not found")
     assert_patient_access(user, patient)
 
     patient.encrypted_name = None

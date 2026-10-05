@@ -1,4 +1,4 @@
-"""مدل‌های SQLAlchemy."""
+"""SQLAlchemy models."""
 
 from barekat_genomics.models.api_key import PartnerApiKey
 from barekat_genomics.models.audit import AuditLog

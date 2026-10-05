@@ -1,4 +1,4 @@
-"""سرویس اجرای پایپ‌لاین پردازش."""
+"""Processing pipeline execution service."""
 
 import uuid
 from datetime import datetime, timezone
@@ -66,16 +66,16 @@ class PipelineService:
     ) -> PipelineJob:
         sample = self.db.query(SequencingSample).filter(SequencingSample.id == sample_id).first()
         if not sample:
-            raise ValueError(f"نمونه یافت نشد: {sample_id}")
+            raise ValueError(f"Sample not found: {sample_id}")
 
         module_id = module or DEFAULT_MODULE
         mod = get_module(module_id)
         if mod.requires_paired_sample and not paired_sample_id:
-            raise ValueError(f"ماژول {mod.name_fa} نیاز به نمونه جفت (paired_sample_id) دارد")
+            raise ValueError(f"Module {mod.name_fa} requires a paired sample (paired_sample_id)")
         if paired_sample_id:
             paired = self.db.query(SequencingSample).filter(SequencingSample.id == paired_sample_id).first()
             if not paired:
-                raise ValueError(f"نمونه جفت یافت نشد: {paired_sample_id}")
+                raise ValueError(f"Paired sample not found: {paired_sample_id}")
 
         settings = get_settings()
         job_priority = resolve_priority(priority or sample.priority)

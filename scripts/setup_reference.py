@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""مدیریت مرجع ژنوم GRCh38/hg38 — محلی و MinIO.
+"""Management of the GRCh38/hg38 genome reference — local and MinIO.
 
 Usage:
   python scripts/setup_reference.py ensure-layout
@@ -8,7 +8,7 @@ Usage:
   python scripts/setup_reference.py validate
   python scripts/setup_reference.py upload-minio
   python scripts/setup_reference.py download-minio
-  python scripts/setup_reference.py create-demo   # فقط برای تست
+  python scripts/setup_reference.py create-demo   # for testing only
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ def _print(payload: dict) -> None:
 
 
 def _create_demo(dest: Path, build: str = "GRCh38") -> dict:
-    """ساختار مینی‌مرجع برای تست validation / MinIO (نه برای production واقعی)."""
+    """Mini-reference structure for validation / MinIO tests (not for real production)."""
     dest.mkdir(parents=True, exist_ok=True)
     (dest / "known-sites").mkdir(exist_ok=True)
 
@@ -51,14 +51,14 @@ def _create_demo(dest: Path, build: str = "GRCh38") -> dict:
         "ACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
         encoding="utf-8",
     )
-    # fai مینیمال
+    # minimal fai
     (dest / f"{build}.fa.fai").write_text("chr1\t128\t6\t64\t65\n", encoding="utf-8")
-    # dict مینیمال شبیه Picard
+    # minimal dict similar to Picard
     (dest / f"{build}.dict").write_text(
         f"@HD\tVN:1.6\tSO:unsorted\n@SQ\tSN:chr1\tLN:128\tAS:{build}\n",
         encoding="utf-8",
     )
-    # فایل‌های ایندکس BWA-MEM2 ساختگی
+    # fake BWA-MEM2 index files
     for sfx in (".amb", ".ann", ".bwt.2bit.64", ".pac", ".0123"):
         (dest / f"{build}{sfx}").write_bytes(b"DEMO_INDEX_" + sfx.encode())
 
@@ -66,7 +66,7 @@ def _create_demo(dest: Path, build: str = "GRCh38") -> dict:
 
     return {
         "demo_dir": str(dest),
-        "note": "فایل‌های دمو فقط برای تست validation/MinIO هستند",
+        "note": "The demo files are only for validation/MinIO testing",
     }
 
 
@@ -106,8 +106,8 @@ def main() -> int:
 
         dest = Path(args.dest) if args.dest else Path(os.environ.get("REFERENCE_DIR", "data/reference/GRCh38"))
         info = _create_demo(dest, build=args.genome_build or "GRCh38")
-        # موقت env را برای manifest روی همین مسیر تنظیم نمی‌کنیم؛
-        # کاربر باید REFERENCE_DIR را به dest اشاره دهد.
+        # we do not temporarily set the env for the manifest on this path;
+        # the user must point REFERENCE_DIR to dest.
         _print(info)
         return 0
 
